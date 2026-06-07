@@ -146,10 +146,27 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Görsel URL (opsiyonel)</label>
-            <input type="url" id="newsImage" class="form-input" placeholder="https://ornek.com/resim.jpg" />
+            <label class="form-label">Görsel</label>
+            <div class="image-upload-tabs">
+              <button type="button" class="img-tab active" id="tabFile" onclick="switchImgTab('file')">Bilgisayardan Yükle</button>
+              <button type="button" class="img-tab" id="tabUrl" onclick="switchImgTab('url')">URL ile Ekle</button>
+            </div>
+            <div id="imgTabFile">
+              <label class="file-drop-zone" id="fileDropZone">
+                <input type="file" id="newsImageFile" accept="image/*" style="display:none" />
+                <div class="file-drop-inner" id="fileDropInner">
+                  <div class="file-drop-icon">🖼️</div>
+                  <div class="file-drop-text">Tıkla veya görseli sürükle</div>
+                  <div class="file-drop-sub">JPG, PNG, WEBP · Maks 5 MB</div>
+                </div>
+              </label>
+            </div>
+            <div id="imgTabUrl" style="display:none">
+              <input type="url" id="newsImage" class="form-input" placeholder="https://ornek.com/resim.jpg" />
+            </div>
             <div class="image-preview" id="imagePreview" style="display:none">
               <img id="previewImg" src="" alt="Önizleme" />
+              <button type="button" class="img-remove-btn" id="imgRemoveBtn">× Görseli Kaldır</button>
             </div>
           </div>
 

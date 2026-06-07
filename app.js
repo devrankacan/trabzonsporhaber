@@ -415,12 +415,82 @@ function initAdmin() {
   initHeaderSearch();
 }
 
+let currentImageData = '';
+
+function switchImgTab(tab) {
+  const fileTab = document.getElementById('imgTabFile');
+  const urlTab = document.getElementById('imgTabUrl');
+  const btnFile = document.getElementById('tabFile');
+  const btnUrl = document.getElementById('tabUrl');
+  if (!fileTab) return;
+  if (tab === 'file') {
+    fileTab.style.display = 'block';
+    urlTab.style.display = 'none';
+    btnFile.classList.add('active');
+    btnUrl.classList.remove('active');
+  } else {
+    fileTab.style.display = 'none';
+    urlTab.style.display = 'block';
+    btnFile.classList.remove('active');
+    btnUrl.classList.add('active');
+  }
+}
+
+function compressImage(file, maxW, maxH, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function showImagePreview(src) {
+  const preview = document.getElementById('imagePreview');
+  const img = document.getElementById('previewImg');
+  if (preview && img) {
+    img.src = src;
+    preview.style.display = 'block';
+  }
+}
+
+function clearImagePreview() {
+  currentImageData = '';
+  const preview = document.getElementById('imagePreview');
+  if (preview) preview.style.display = 'none';
+  const fileInput = document.getElementById('newsImageFile');
+  if (fileInput) fileInput.value = '';
+  const urlInput = document.getElementById('newsImage');
+  if (urlInput) urlInput.value = '';
+  const dropInner = document.getElementById('fileDropInner');
+  if (dropInner) dropInner.innerHTML = `
+    <div class="file-drop-icon">🖼️</div>
+    <div class="file-drop-text">Tıkla veya görseli sürükle</div>
+    <div class="file-drop-sub">JPG, PNG, WEBP · Maks 5 MB</div>`;
+}
+
 function initAdminForm() {
   const titleInput = document.getElementById('newsTitle');
   const summaryInput = document.getElementById('newsSummary');
   const imageInput = document.getElementById('newsImage');
+  const fileInput = document.getElementById('newsImageFile');
+  const dropZone = document.getElementById('fileDropZone');
   const submitBtn = document.getElementById('submitBtn');
   const cancelBtn = document.getElementById('cancelEdit');
+  const removeBtn = document.getElementById('imgRemoveBtn');
 
   titleInput?.addEventListener('input', () => {
     document.getElementById('titleCount').textContent = titleInput.value.length;
@@ -432,17 +502,46 @@ function initAdminForm() {
 
   imageInput?.addEventListener('input', () => {
     const url = imageInput.value.trim();
-    const preview = document.getElementById('imagePreview');
-    const img = document.getElementById('previewImg');
-    if (url && preview && img) {
-      img.src = url;
-      preview.style.display = 'block';
-      img.onerror = () => { preview.style.display = 'none'; };
-    } else if (preview) {
-      preview.style.display = 'none';
+    if (url) {
+      currentImageData = url;
+      showImagePreview(url);
+      document.getElementById('previewImg').onerror = () => { clearImagePreview(); };
+    } else {
+      currentImageData = '';
+      document.getElementById('imagePreview').style.display = 'none';
     }
   });
 
+  async function handleFileSelect(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Görsel 5 MB\'dan büyük olamaz.'); return;
+    }
+    const dropInner = document.getElementById('fileDropInner');
+    if (dropInner) dropInner.innerHTML = '<div class="file-drop-text">Sıkıştırılıyor...</div>';
+    try {
+      const compressed = await compressImage(file, 1200, 800, 0.82);
+      currentImageData = compressed;
+      showImagePreview(compressed);
+      if (dropInner) dropInner.innerHTML = `<div class="file-drop-text" style="color:var(--ts-red);font-weight:700">✓ ${escHtml(file.name)}</div>`;
+    } catch(e) {
+      if (dropInner) dropInner.innerHTML = '<div class="file-drop-text" style="color:red">Hata oluştu, tekrar deneyin.</div>';
+    }
+  }
+
+  fileInput?.addEventListener('change', e => handleFileSelect(e.target.files[0]));
+
+  dropZone?.addEventListener('click', () => fileInput?.click());
+
+  dropZone?.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone?.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone?.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    handleFileSelect(e.dataTransfer.files[0]);
+  });
+
+  removeBtn?.addEventListener('click', clearImagePreview);
   submitBtn?.addEventListener('click', handleSubmit);
   cancelBtn?.addEventListener('click', resetForm);
 }
@@ -453,7 +552,7 @@ function handleSubmit() {
   const category = document.getElementById('newsCategory').value;
   const summary = document.getElementById('newsSummary').value.trim();
   const content = document.getElementById('newsContent').value.trim();
-  const image = document.getElementById('newsImage').value.trim();
+  const image = currentImageData || document.getElementById('newsImage')?.value.trim() || '';
   const author = document.getElementById('newsAuthor').value.trim();
   const slider = document.getElementById('newsSlider').checked;
 
@@ -504,6 +603,7 @@ function showMessage(type, text) {
 
 function resetForm() {
   editingId = null;
+  currentImageData = '';
   document.getElementById('newsTitle').value = '';
   const branchEl = document.getElementById('newsBranch');
   if (branchEl) branchEl.value = '';
@@ -576,8 +676,16 @@ function editNews(id) {
   document.getElementById('cancelEdit').style.display = 'inline-block';
 
   if (news.image) {
-    document.getElementById('previewImg').src = news.image;
-    document.getElementById('imagePreview').style.display = 'block';
+    currentImageData = news.image;
+    showImagePreview(news.image);
+    if (news.image.startsWith('data:')) {
+      const dropInner = document.getElementById('fileDropInner');
+      if (dropInner) dropInner.innerHTML = '<div class="file-drop-text" style="color:var(--ts-red);font-weight:700">✓ Mevcut görsel yüklü</div>';
+    } else {
+      switchImgTab('url');
+      const urlInput = document.getElementById('newsImage');
+      if (urlInput) urlInput.value = news.image;
+    }
   }
 
   document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
