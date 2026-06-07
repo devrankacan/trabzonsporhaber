@@ -23,11 +23,20 @@
           <a href="index.html" class="nav-link">Anasayfa</a>
           <a href="haberler.html" class="nav-link">Haberler</a>
         </nav>
+        <div class="header-search" id="headerSearch">
+          <input type="text" class="header-search-input" id="headerSearchInput" placeholder="Haber ara..." autocomplete="off" />
+          <span class="header-search-icon">&#9906;</span>
+          <div class="search-dropdown" id="searchDropdown"></div>
+        </div>
         <button class="hamburger" id="hamburger">&#9776;</button>
       </div>
       <nav class="mobile-nav" id="mobileNav">
         <a href="index.html" class="nav-link">Anasayfa</a>
         <a href="haberler.html" class="nav-link">Haberler</a>
+        <div class="mobile-search-wrap">
+          <input type="text" class="mobile-search-input" id="mobileSearchInput" placeholder="Haber ara..." autocomplete="off" />
+          <div class="search-dropdown" id="mobileSearchDropdown"></div>
+        </div>
         <div class="mobile-branch-divider">Branşlar</div>
         <a href="haberler.html?brans=futbol-a" class="nav-link">Futbol A Takım</a>
         <a href="haberler.html?brans=basketbol" class="nav-link">Basketbol</a>

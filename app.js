@@ -283,6 +283,7 @@ function renderHomePage() {
 
   renderPopularNews();
   initMobileNav();
+  initHeaderSearch();
 }
 
 function renderPopularNews() {
@@ -343,6 +344,7 @@ function renderAllNews() {
   }
 
   initMobileNav();
+  initHeaderSearch();
 }
 
 // ==================== ARTICLE PAGE ====================
@@ -386,6 +388,7 @@ function renderArticle() {
 
   renderRecentSidebar(Number(id));
   initMobileNav();
+  initHeaderSearch();
 }
 
 function renderRecentSidebar(excludeId) {
@@ -409,6 +412,7 @@ function initAdmin() {
   renderAdminList();
   initAdminForm();
   initMobileNav();
+  initHeaderSearch();
 }
 
 function initAdminForm() {
@@ -585,6 +589,59 @@ function deleteNews(id) {
   saveNews(list);
   if (editingId === id) resetForm();
   renderAdminList();
+}
+
+// ==================== HEADER SEARCH ====================
+
+function initHeaderSearch() {
+  setupSearch('headerSearchInput', 'searchDropdown');
+  setupSearch('mobileSearchInput', 'mobileSearchDropdown');
+}
+
+function setupSearch(inputId, dropdownId) {
+  const input = document.getElementById(inputId);
+  const dropdown = document.getElementById(dropdownId);
+  if (!input || !dropdown) return;
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (q.length < 2) { dropdown.classList.remove('open'); return; }
+
+    const results = getNews().filter(n =>
+      n.title.toLowerCase().includes(q) ||
+      n.summary.toLowerCase().includes(q)
+    ).slice(0, 5);
+
+    if (results.length === 0) {
+      dropdown.innerHTML = '<div class="search-no-result">Sonuç bulunamadı.</div>';
+    } else {
+      dropdown.innerHTML = results.map(n => `
+        <a class="search-result-item" href="${slugify(n.id)}">
+          <div class="search-result-thumb" style="${buildBgStyle(n.image)}"></div>
+          <div class="search-result-info">
+            <div class="search-result-title">${escHtml(n.title)}</div>
+            <div class="search-result-meta">${escHtml(categoryLabel(n.category))} · ${formatDateShort(n.date)}</div>
+          </div>
+        </a>
+      `).join('') + `<a class="search-see-all" href="haberler.html">Tüm sonuçları gör →</a>`;
+    }
+
+    dropdown.classList.add('open');
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const q = input.value.trim();
+      if (q) location.href = `haberler.html?q=${encodeURIComponent(q)}`;
+    }
+    if (e.key === 'Escape') { dropdown.classList.remove('open'); input.blur(); }
+  });
+
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
 }
 
 // ==================== MOBILE NAV ====================
