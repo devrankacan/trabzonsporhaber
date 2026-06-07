@@ -697,9 +697,7 @@ function renderTransfersSidebar() {
                 </div>
               </td>
               <td class="tr-fee-cell">
-                ${t.fee === 'Bedelsiz'
-                  ? `<span class="tr-fee-free">Bedelsiz</span>`
-                  : t.fee ? escHtml(t.fee) : '—'}
+                ${t.fee ? escHtml(t.fee) : '—'}
               </td>
             </tr>
           `;
