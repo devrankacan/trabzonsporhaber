@@ -41,6 +41,35 @@
     </div>
   </header>
 
+  <!-- TAKIM NAV -->
+  <nav class="branch-nav">
+    <div class="container">
+      <div class="branch-nav-inner">
+        <a href="#" class="branch-link" onclick="setTeamFilter('')">Tümü</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('galatasaray')">Galatasaray</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('fenerbahce')">Fenerbahçe</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('besiktas')">Beşiktaş</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('trabzonspor')">Trabzonspor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('basaksehir')">Başakşehir FK</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('samsunspor')">Samsunspor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('kasimpasa')">Kasımpaşa</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('sivasspor')">Sivasspor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('antalyaspor')">Antalyaspor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('alanyaspor')">Alanyaspor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('gaziantep')">Gaziantep FK</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('kayserispor')">Kayserispor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('hatayspor')">Hatayspor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('rizespor')">Çaykur Rizespor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('konyaspor')">Konyaspor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('ankaragucu')">Ankaragücü</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('adanademirspor')">Adana Demirspor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('eyupspor')">Eyüpspor</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('bodrumfk')">Bodrum FK</a>
+        <a href="#" class="branch-link" onclick="setTeamFilter('milli-takim')">Milli Takım</a>
+      </div>
+    </div>
+  </nav>
+
   <div class="page-hero">
     <div class="container">
       <h1>Tüm Haberler</h1>
@@ -139,6 +168,14 @@
 
   <script src="app.js"></script>
   <script>
+    function setTeamFilter(val) {
+      document.getElementById('teamFilter').value = val;
+      // Highlight active nav link
+      document.querySelectorAll('.branch-link').forEach(l => l.classList.remove('active'));
+      event.target.classList.add('active');
+      renderAllNews();
+      return false;
+    }
     trackPageView('haberler');
     renderAllNews();
     document.getElementById('searchInput').addEventListener('input', renderAllNews);
