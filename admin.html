@@ -69,6 +69,10 @@
       <button class="dash-nav-item" onclick="showTab('settings')" id="tab-settings">
         <span class="dash-nav-icon">⚙️</span> Ayarlar
       </button>
+      <button class="dash-nav-item" onclick="showTab('members')" id="tab-members">
+        <span class="dash-nav-icon">👥</span> Üyeler
+        <span class="dash-nav-badge" id="sidebarMemberBadge">0</span>
+      </button>
     </nav>
 
     <div class="dash-sidebar-footer">
@@ -438,6 +442,30 @@
       </div>
     </section>
 
+    <!-- TAB: ÜYELER -->
+    <section class="dash-tab" id="tabMembers">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">Üyeler</h2>
+        <span id="memberCountLabel" style="font-size:13px;color:var(--text-muted)"></span>
+      </div>
+      <div class="dash-form-card" style="padding:0;overflow:hidden">
+        <table class="members-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Kullanıcı Adı</th>
+              <th>E-posta</th>
+              <th>Kayıt Tarihi</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="membersTableBody">
+            <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">Henüz üye yok.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- TAB: AYARLAR -->
     <section class="dash-tab" id="tabSettings">
       <div class="dash-section-header">
@@ -499,11 +527,47 @@
     document.getElementById('loginOverlay').style.display = 'none';
     document.getElementById('adminContent').style.display = 'flex';
     document.title = 'Admin Paneli | Süper Lig Haber';
-    // Set date
     const d = new Date();
     document.getElementById('dashDate').textContent =
       d.toLocaleDateString('tr-TR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
     initAdmin();
+    renderMembers();
+  }
+
+  function renderMembers() {
+    const users = JSON.parse(localStorage.getItem('sl_users') || '[]');
+    const badge = document.getElementById('sidebarMemberBadge');
+    const label = document.getElementById('memberCountLabel');
+    const body = document.getElementById('membersTableBody');
+    if (badge) badge.textContent = users.length;
+    if (label) label.textContent = `Toplam ${users.length} üye`;
+    if (!body) return;
+    if (users.length === 0) {
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">Henüz üye yok.</td></tr>';
+      return;
+    }
+    body.innerHTML = users.map((u, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${escHtml(u.username)}</strong></td>
+        <td>${escHtml(u.email)}</td>
+        <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-'}</td>
+        <td>
+          <button class="btn-danger btn-sm" onclick="deleteMember(${u.id})">Sil</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function deleteMember(id) {
+    if (!confirm('Bu üyeyi silmek istediğinizden emin misiniz?')) return;
+    const users = JSON.parse(localStorage.getItem('sl_users') || '[]').filter(u => u.id !== id);
+    localStorage.setItem('sl_users', JSON.stringify(users));
+    renderMembers();
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   function attemptLogin() {
@@ -525,7 +589,7 @@
     location.reload();
   }
 
-  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu', settings: 'Ayarlar' };
+  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu', settings: 'Ayarlar', members: 'Üyeler' };
   function showTab(name) {
     document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dash-nav-item').forEach(b => b.classList.remove('active'));
