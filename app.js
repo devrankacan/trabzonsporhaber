@@ -602,21 +602,47 @@ function renderTransfersSidebar() {
   }
   el.innerHTML = transfers.slice(0, 8).map(t => {
     const status = TRANSFER_STATUS[t.status] || { label: t.status, color: '#888' };
+    const fromB = BRANCHES[t.fromTeam];
+    const toB   = BRANCHES[t.toTeam];
+    const fromLogo = t.fromTeam && t.fromTeam !== 'yabanci' ? getLogo(t.fromTeam) : '';
+    const toLogo   = t.toTeam   && t.toTeam   !== 'yabanci' ? getLogo(t.toTeam)   : '';
+
+    function teamBlock(key, b, logo, foreignName) {
+      if (!key || key === 'yabanci') {
+        return `<div class="tr-team-block">
+          <div class="tr-team-icon" style="background:#555;color:#fff;font-size:10px;font-weight:800">${escHtml((foreignName||'?').slice(0,3).toUpperCase())}</div>
+          <div class="tr-team-name">${escHtml(foreignName||'Yabancı')}</div>
+        </div>`;
+      }
+      const short = b ? b.label.split(' ')[0] : key;
+      const iconHtml = logo
+        ? `<img src="${escAttr(logo)}" class="tr-team-logo-img" alt="${escAttr(short)}" />`
+        : `<div class="tr-team-icon" style="background:${b?.color||'#555'};color:#fff;font-size:10px;font-weight:800">${escHtml(short.slice(0,3).toUpperCase())}</div>`;
+      return `<div class="tr-team-block">
+        ${iconHtml}
+        <div class="tr-team-name">${escHtml(short)}</div>
+      </div>`;
+    }
+
     return `
-      <div class="transfer-item">
-        ${t.playerImage
-          ? `<div class="transfer-thumb" style="background:url('${escAttr(t.playerImage)}') center/cover no-repeat"></div>`
-          : `<div class="transfer-thumb transfer-thumb-empty">⚽</div>`}
-        <div class="transfer-info">
-          <div class="transfer-player">${escHtml(t.player)}</div>
-          <div class="transfer-teams">
-            ${teamBadgeHtml(t.fromTeam, t.foreignTeam)}
-            <span class="transfer-arrow">→</span>
-            ${teamBadgeHtml(t.toTeam, t.foreignTeam)}
+      <div class="tr-card">
+        <div class="tr-card-status" style="background:${status.color}">${escHtml(status.label)}</div>
+        <div class="tr-card-body">
+          <div class="tr-player-col">
+            ${t.playerImage
+              ? `<img src="${escAttr(t.playerImage)}" class="tr-player-photo" alt="${escAttr(t.player)}" />`
+              : `<div class="tr-player-photo tr-player-empty">⚽</div>`}
           </div>
-          <div class="transfer-footer">
-            <span class="transfer-status-badge" style="background:${status.color}">${escHtml(status.label)}</span>
-            ${t.fee ? `<span class="transfer-fee">${escHtml(t.fee)}</span>` : ''}
+          <div class="tr-info-col">
+            <div class="tr-player-name">${escHtml(t.player)}</div>
+            <div class="tr-teams-row">
+              ${teamBlock(t.fromTeam, fromB, fromLogo, t.foreignTeam)}
+              <div class="tr-arrow-col">
+                <svg width="18" height="10" viewBox="0 0 18 10"><path d="M0 5h14M10 1l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              ${teamBlock(t.toTeam, toB, toLogo, t.foreignTeam)}
+            </div>
+            ${t.fee ? `<div class="tr-fee">💰 ${escHtml(t.fee)}</div>` : ''}
           </div>
         </div>
       </div>

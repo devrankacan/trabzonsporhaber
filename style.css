@@ -2079,74 +2079,116 @@ img { max-width: 100%; display: block; }
 }
 
 /* ==================== TRANSFER SIDEBAR ==================== */
-.transfer-item {
+.tr-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s;
+}
+.tr-card:last-child { margin-bottom: 0; }
+.tr-card:hover { box-shadow: var(--shadow-md); }
+
+.tr-card-status {
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.tr-card-body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+  padding: 10px;
 }
-.transfer-item:last-child { border-bottom: none; }
 
-.transfer-thumb {
-  width: 44px;
-  height: 44px;
+.tr-player-col { flex-shrink: 0; }
+.tr-player-photo {
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  flex-shrink: 0;
-  background: var(--border);
-  overflow: hidden;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  display: block;
 }
-.transfer-thumb-empty {
+.tr-player-empty {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  background: #f0f0f0;
 }
 
-.transfer-info { flex: 1; min-width: 0; }
-.transfer-player {
+.tr-info-col { flex: 1; min-width: 0; }
+.tr-player-name {
   font-weight: 700;
   font-size: 13px;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 6px;
 }
-.transfer-teams {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin: 4px 0 3px;
-}
-.transfer-team-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  max-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.transfer-arrow { color: var(--text-muted); font-size: 12px; }
-.transfer-footer {
+
+.tr-teams-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
 }
-.transfer-status-badge {
-  font-size: 10px;
+.tr-team-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+.tr-team-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.tr-team-logo-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+.tr-team-name {
+  font-size: 9px;
   font-weight: 700;
-  color: #fff;
-  padding: 2px 7px;
-  border-radius: 20px;
-}
-.transfer-fee {
-  font-size: 11px;
   color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 52px;
+}
+.tr-arrow-col {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.tr-fee {
+  font-size: 11px;
   font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 5px;
 }
 
 /* ==================== MULTI-SELECT BRANCH ==================== */
