@@ -908,8 +908,17 @@ const DEFAULT_STANDINGS = [
 function getStandings() {
   const stored = localStorage.getItem(STANDINGS_KEY);
   if (stored) {
-    const parsed = JSON.parse(stored);
-    if (parsed.length > 0) return parsed;
+    let parsed = JSON.parse(stored);
+    if (parsed.length > 0) {
+      const keyMap = { amed: 'diyarbakir', chorumfk: 'corum' };
+      let changed = false;
+      parsed = parsed.map(r => {
+        if (keyMap[r.team]) { changed = true; return { ...r, team: keyMap[r.team] }; }
+        return r;
+      });
+      if (changed) localStorage.setItem(STANDINGS_KEY, JSON.stringify(parsed));
+      return parsed;
+    }
   }
   localStorage.setItem(STANDINGS_KEY, JSON.stringify(DEFAULT_STANDINGS));
   return DEFAULT_STANDINGS;
