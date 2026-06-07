@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Haberler | Süper Lig Haber</title>
+  <meta name="description" content="Süper Lig'den tüm haberler. Takıma göre filtrele, son dakika gelişmeleri takip et." />
+  <meta property="og:title" content="Haberler | Süper Lig Haber" />
+  <meta property="og:description" content="Süper Lig'den tüm haberler. Takıma göre filtrele, son dakika gelişmeleri takip et." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="stylesheet" href="/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
@@ -109,6 +114,9 @@
         <p>Arama kriterlerinize uygun haber yok.</p>
       </div>
     </div>
+    <div id="loadMoreWrap" style="display:none;text-align:center;padding:2rem 0;">
+      <button id="loadMoreBtn" class="load-more-btn" onclick="loadMoreNews()">Daha Fazla Yükle</button>
+    </div>
   </main>
 
   <footer class="footer">
@@ -164,6 +172,7 @@
               <li><a href="/">Anasayfa</a></li>
               <li><a href="/haberler">Tüm Haberler</a></li>
               <li><a href="/hakkimizda.html">Hakkımızda</a></li>
+              <li><a href="/iletisim.html">İletişim</a></li>
               <li><a href="/gizlilik.html">Gizlilik Politikası</a></li>
             </ul>
           </div>

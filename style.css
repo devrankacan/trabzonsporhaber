@@ -996,6 +996,61 @@ img { max-width: 100%; display: block; }
 .article-loading { padding: 60px; text-align: center; color: var(--text-muted); }
 .article-views { color: var(--text-muted); font-size: 13px; }
 
+/* ==================== SHARE ==================== */
+.article-share {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 1.25rem 32px;
+  border-top: 1px solid var(--border);
+}
+.article-share-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.25rem;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity .2s, transform .15s;
+  font-family: inherit;
+}
+.share-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.share-twitter { background: #000; color: #fff; }
+.share-whatsapp { background: #25D366; color: #fff; }
+.share-copy { background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border); }
+
+/* ==================== LOAD MORE ==================== */
+.load-more-btn {
+  padding: 0.75rem 2.5rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.load-more-btn:hover {
+  border-color: var(--ts-red);
+  color: var(--ts-red);
+  background: var(--bg);
+}
+
 /* ==================== COMMENTS ==================== */
 .comments-section {
   padding: 32px;

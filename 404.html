@@ -3,11 +3,63 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hakkımızda | Süper Lig Haber</title>
-  <meta name="description" content="Süper Lig Haber hakkında. Bağımsız futbol haber platformu." />
+  <title>Sayfa Bulunamadı | Süper Lig Haber</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="stylesheet" href="/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    .error-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+      padding: 2rem;
+    }
+    .error-code {
+      font-size: 7rem;
+      font-weight: 800;
+      color: var(--ts-red);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .error-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+    .error-desc {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      max-width: 400px;
+    }
+    .error-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .error-btn {
+      padding: 0.65rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .error-btn:hover { opacity: 0.85; }
+    .error-btn-primary {
+      background: var(--ts-red);
+      color: #fff;
+    }
+    .error-btn-secondary {
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+  </style>
 </head>
 <body>
 
@@ -21,54 +73,22 @@
             <div class="logo-sub">HABER</div>
           </div>
         </a>
-        <div class="header-search" id="headerSearch">
-          <input type="text" class="header-search-input" id="headerSearchInput" placeholder="Haber ara..." autocomplete="off" />
-          <span class="header-search-icon">&#9906;</span>
-          <div class="search-dropdown" id="searchDropdown"></div>
-        </div>
         <div class="header-right">
           <button class="theme-toggle-btn" id="themeToggle" title="Gece/Gündüz"></button>
-          <div class="auth-btn-wrap"></div>
-          <button class="mobile-search-toggle" id="mobileSearchToggle" title="Ara">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </button>
         </div>
-      </div>
-      <div class="mobile-search-bar" id="mobileSearchBar">
-        <input type="text" class="mobile-search-bar-input" id="mobileSearchInput" placeholder="Haber ara..." autocomplete="off" />
-        <div class="search-dropdown" id="mobileSearchDropdown"></div>
       </div>
     </div>
   </header>
 
-  <div class="page-hero">
-    <div class="container">
-      <h1>Hakkımızda</h1>
-      <p>Süper Lig'in bağımsız haber kaynağı</p>
-    </div>
-  </div>
-
   <main class="main container">
-    <div class="static-page-content">
-
-      <h2>Biz Kimiz?</h2>
-      <p>Süper Lig Haber, futbolu seven birkaç kişinin bir araya gelerek kurduğu küçük ve bağımsız bir haber sitesidir. Süper Lig'deki gelişmeleri, transfer haberlerini ve maç sonuçlarını takipçilerimizle paylaşmak için bu platformu oluşturduk.</p>
-
-      <h2>Amacımız</h2>
-      <p>Büyük bir medya kuruluşu değiliz. Sadece futbola ilgi duyan, haberleri doğrudan ve sade bir şekilde aktarmak isteyen bir ekibiz. Herhangi bir kulüpten, sponsordan veya federasyondan bağımsız şekilde yayın yapıyoruz.</p>
-
-      <h2>Ne Sunuyoruz?</h2>
-      <ul>
-        <li>Süper Lig kulüplerine ait haberler</li>
-        <li>Transfer gelişmeleri</li>
-        <li>Puan tablosu takibi</li>
-        <li>Milli Takım haberleri</li>
-      </ul>
-
-      <h2>İletişim</h2>
-      <p>Hata gördüğünüzde veya iletişime geçmek istediğinizde sitemiz üzerinden bize ulaşabilirsiniz.</p>
-      <p><strong>Web:</strong> habersuperlig.com</p>
-
+    <div class="error-page">
+      <div class="error-code">404</div>
+      <div class="error-title">Sayfa Bulunamadı</div>
+      <p class="error-desc">Aradığınız sayfa kaldırılmış, taşınmış ya da hiç var olmamış olabilir.</p>
+      <div class="error-actions">
+        <a href="/" class="error-btn error-btn-primary">Anasayfaya Dön</a>
+        <a href="/haberler" class="error-btn error-btn-secondary">Tüm Haberler</a>
+      </div>
     </div>
   </main>
 
@@ -79,7 +99,7 @@
       <div class="container">
         <div class="footer-grid">
           <div class="footer-col footer-brand">
-            <div class="footer-logo-wrap" id="footerLogo">
+            <div class="footer-logo-wrap">
               <div class="footer-logo-icon">SL</div>
               <div>
                 <div class="footer-logo-title">Süper Lig</div>
@@ -113,6 +133,6 @@
   </footer>
 
   <script src="/app.js"></script>
-  <script>initAuth(); initDragScroll();</script>
+  <script>initTheme();</script>
 </body>
 </html>
