@@ -531,7 +531,8 @@ function renderHomePage() {
     if (empty) empty.style.display = 'none';
   }
 
-  renderPopularNews();
+  renderTransfersSidebar();
+  renderStandingsSidebar();
   initMobileNav();
   initHeaderSearch();
 }
