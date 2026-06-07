@@ -555,8 +555,9 @@ img { max-width: 100%; display: block; }
 }
 
 .ticker-label {
-  background: var(--ts-gold);
-  color: var(--ts-red-dark);
+  background: #fff;
+  color: var(--ts-red);
+  border: 2px solid var(--ts-red);
   padding: 0 16px;
   font-size: 10px;
   font-weight: 800;
