@@ -774,6 +774,9 @@ function toggleTransferForm(show) {
     document.getElementById('trFrom').value = '';
     document.getElementById('trTo').value = '';
     document.getElementById('trFee').value = '';
+    document.getElementById('trFee').disabled = false;
+    const freeBox = document.getElementById('trFeeFree');
+    if (freeBox) { freeBox.checked = false; }
     document.getElementById('trForeignTeam').value = '';
     currentTrImageData = '';
     const prev = document.getElementById('trImagePreview');
@@ -794,6 +797,8 @@ function editTransfer(id) {
   document.getElementById('trTo').value = t.toTeam || '';
   document.getElementById('trStatus').value = t.status || 'iddia';
   document.getElementById('trFee').value = t.fee || '';
+  const freeBox = document.getElementById('trFeeFree');
+  if (freeBox) { freeBox.checked = t.fee === 'Bedelsiz'; document.getElementById('trFee').disabled = t.fee === 'Bedelsiz'; }
   document.getElementById('trForeignTeam').value = t.foreignTeam || '';
   currentTrImageData = t.playerImage || '';
   if (t.playerImage) {
