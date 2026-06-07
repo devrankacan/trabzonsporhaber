@@ -1810,6 +1810,29 @@ img { max-width: 100%; display: block; }
 }
 
 
+/* ==================== STATIC PAGES ==================== */
+.static-page-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 0 60px;
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 15px;
+}
+.static-page-content h2 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 36px 0 12px;
+  color: var(--text);
+  border-left: 4px solid var(--ts-red);
+  padding-left: 12px;
+}
+.static-page-content h2:first-child { margin-top: 0; }
+.static-page-content p { margin-bottom: 14px; color: var(--text-muted); }
+.static-page-content ul { padding-left: 20px; margin-bottom: 14px; color: var(--text-muted); }
+.static-page-content ul li { margin-bottom: 6px; }
+.static-page-content a { color: var(--ts-red); text-decoration: underline; }
+
 /* ==================== BRANCH NAV ==================== */
 .branch-nav {
   background: var(--ts-blue);

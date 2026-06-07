@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hakkımızda | Süper Lig Haber</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="/" class="logo" id="headerLogo">
+          <div class="logo-icon">SL</div>
+          <div>
+            <div class="logo-title">Süper Lig</div>
+            <div class="logo-sub">HABER</div>
+          </div>
+        </a>
+        <div class="header-search" id="headerSearch">
+          <input type="text" class="header-search-input" id="headerSearchInput" placeholder="Haber ara..." autocomplete="off" />
+          <span class="header-search-icon">&#9906;</span>
+          <div class="search-dropdown" id="searchDropdown"></div>
+        </div>
+        <div class="header-right">
+          <button class="theme-toggle-btn" id="themeToggle" title="Gece/Gündüz"></button>
+          <div class="auth-btn-wrap"></div>
+          <button class="mobile-search-toggle" id="mobileSearchToggle" title="Ara">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="mobile-search-bar" id="mobileSearchBar">
+        <input type="text" class="mobile-search-bar-input" id="mobileSearchInput" placeholder="Haber ara..." autocomplete="off" />
+        <div class="search-dropdown" id="mobileSearchDropdown"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <div class="container">
+      <h1>Hakkımızda</h1>
+      <p>Süper Lig'in bağımsız haber kaynağı</p>
+    </div>
+  </div>
+
+  <main class="main container">
+    <div class="static-page-content">
+
+      <h2>Biz Kimiz?</h2>
+      <p>Süper Lig Haber, Türkiye'nin en büyük futbol ligi olan Süper Lig'i yakından takip eden bağımsız bir haber platformudur. Galatasaray, Fenerbahçe, Trabzonspor ve Beşiktaş başta olmak üzere tüm Süper Lig kulüplerinin son dakika haberlerini, transfer gelişmelerini ve maç analizlerini okuyucularımıza ulaştırmayı hedefliyoruz.</p>
+
+      <h2>Misyonumuz</h2>
+      <p>Tarafsız, hızlı ve güvenilir spor haberciliği anlayışıyla Türk futbolunu seven herkese doğru bilgiyi anında sunmak temel amacımızdır. Reklam geliri dışında herhangi bir kulüp, federasyon veya sponsorun etkisi altında değiliz.</p>
+
+      <h2>Ne Sunuyoruz?</h2>
+      <ul>
+        <li>Tüm Süper Lig takımlarına ait son dakika haberleri</li>
+        <li>Transfer haberleri ve bonservis bilgileri</li>
+        <li>Puan tablosu ve istatistikler</li>
+        <li>Maç sonuçları ve analizler</li>
+        <li>Milli Takım gelişmeleri</li>
+      </ul>
+
+      <h2>İletişim</h2>
+      <p>Haber ipuçları, düzeltme talepleri veya iş birliği için sitemiz üzerinden bize ulaşabilirsiniz.</p>
+      <p><strong>Web:</strong> habersuperlig.com</p>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-motif-left"></div>
+      <div class="footer-motif-center"></div>
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col footer-brand">
+            <div class="footer-logo-wrap" id="footerLogo">
+              <div class="footer-logo-icon">SL</div>
+              <div>
+                <div class="footer-logo-title">Süper Lig</div>
+                <div class="footer-logo-sub">HABER</div>
+              </div>
+            </div>
+            <p class="footer-desc">Türkiye Süper Lig'inden son dakika transfer haberleri, maç sonuçları ve kulüp gelişmeleri.</p>
+          </div>
+          <div class="footer-col">
+            <h4 class="footer-col-title">Sayfalar</h4>
+            <ul class="footer-links">
+              <li><a href="/">Anasayfa</a></li>
+              <li><a href="/haberler">Tüm Haberler</a></li>
+              <li><a href="/hakkimizda.html">Hakkımızda</a></li>
+              <li><a href="/gizlilik.html">Gizlilik Politikası</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="footer-divider" />
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="footer-bottom-inner">
+          <span>&copy; 2025 Süper Lig Haber. Tüm hakları saklıdır.</span>
+          <div class="footer-bottom-badge"><span></span> Canlı yayında</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+  <script>initAuth(); initDragScroll();</script>
+</body>
+</html>
