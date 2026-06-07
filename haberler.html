@@ -178,6 +178,7 @@
     }
     trackPageView('haberler');
     renderAllNews();
+    initDragScroll();
     document.getElementById('searchInput').addEventListener('input', renderAllNews);
     document.getElementById('teamFilter').addEventListener('change', renderAllNews);
   </script>

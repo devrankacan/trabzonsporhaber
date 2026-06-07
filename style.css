@@ -1524,6 +1524,8 @@ img { max-width: 100%; display: block; }
 }
 
 .branch-nav::-webkit-scrollbar { display: none; }
+.branch-nav { cursor: grab; }
+.branch-nav.dragging { cursor: grabbing; user-select: none; }
 
 .branch-nav .container {
   max-width: 100%;
