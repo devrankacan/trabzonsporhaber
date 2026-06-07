@@ -498,6 +498,13 @@
         <h2 class="dash-section-title">Site Ayarları</h2>
       </div>
 
+      <div class="dash-form-card" style="margin-bottom:24px">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px">Sunucu Yedekleme</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Tarayıcıdaki tüm verileri (haberler, transferler, puan tablosu, logolar vb.) sunucuya yükler. Farklı cihazlardan erişim için <strong>bir kez tıklamanız yeterli</strong>.</p>
+        <button class="btn-primary" id="syncToServerBtn" onclick="syncToServer()">Sunucuya Yedekle</button>
+        <span id="syncMsg" style="margin-left:12px;font-size:13px;display:none"></span>
+      </div>
+
       <div class="dash-form-card">
         <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">Site Logosu</h3>
         <div class="settings-logo-preview" id="settingsLogoPreview">
@@ -620,6 +627,26 @@
   function adminLogout() {
     sessionStorage.removeItem(SESSION_KEY);
     location.reload();
+  }
+
+  async function syncToServer() {
+    const btn = document.getElementById('syncToServerBtn');
+    const msg = document.getElementById('syncMsg');
+    btn.disabled = true;
+    btn.textContent = 'Yükleniyor...';
+    msg.style.display = 'none';
+    const ok = await _apiPushAll();
+    btn.disabled = false;
+    btn.textContent = 'Sunucuya Yedekle';
+    msg.style.display = 'inline';
+    if (ok) {
+      msg.style.color = 'var(--ts-green, #27ae60)';
+      msg.textContent = '✓ Tüm veriler sunucuya yüklendi!';
+    } else {
+      msg.style.color = 'var(--ts-red)';
+      msg.textContent = '✗ Bağlantı hatası, tekrar deneyin.';
+    }
+    setTimeout(() => { msg.style.display = 'none'; }, 4000);
   }
 
   const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu', settings: 'Ayarlar', members: 'Üyeler' };

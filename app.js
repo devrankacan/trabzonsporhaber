@@ -15,6 +15,51 @@ const SITE_LOGO_KEY = 'ts_site_logo';
 const TEAM_BANNERS_KEY = 'ts_team_banners';
 const FOREIGN_LOGOS_KEY = 'ts_foreign_logos';
 
+// ==================== API SYNC ====================
+
+const _API_KEY = 'ee098b74';
+const _SYNC_KEYS = [STORAGE_KEY, TRANSFERS_KEY, STANDINGS_KEY, LOGOS_KEY,
+  USERS_KEY, FOREIGN_LOGOS_KEY, SITE_LOGO_KEY, TEAM_BANNERS_KEY, COMMENTS_KEY, VIEWS_KEY];
+
+async function _apiSave(key, data) {
+  try {
+    await fetch('/api/' + key, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': _API_KEY },
+      body: JSON.stringify(data)
+    });
+  } catch {}
+}
+
+async function _apiSyncAll() {
+  try {
+    const res = await fetch('/api/all');
+    if (!res.ok) return;
+    const serverData = await res.json();
+    for (const [key, val] of Object.entries(serverData)) {
+      if (val !== null && val !== undefined) {
+        localStorage.setItem(key, JSON.stringify(val));
+      }
+    }
+  } catch {}
+}
+
+async function _apiPushAll() {
+  const payload = {};
+  for (const key of _SYNC_KEYS) {
+    const val = localStorage.getItem(key);
+    if (val) try { payload[key] = JSON.parse(val); } catch {}
+  }
+  try {
+    await fetch('/api/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': _API_KEY },
+      body: JSON.stringify(payload)
+    });
+    return true;
+  } catch { return false; }
+}
+
 // ==================== ANALYTICS ====================
 
 function trackPageView(page, newsId) {
@@ -369,6 +414,7 @@ function getNews() {
 
 function saveNews(list) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  _apiSave(STORAGE_KEY, list);
 }
 
 function getNewsById(id) {
@@ -562,6 +608,7 @@ function getTransfers() {
 
 function saveTransfers(list) {
   localStorage.setItem(TRANSFERS_KEY, JSON.stringify(list));
+  _apiSave(TRANSFERS_KEY, list);
 }
 
 function getLogos() {
@@ -570,6 +617,7 @@ function getLogos() {
 
 function saveLogos(obj) {
   localStorage.setItem(LOGOS_KEY, JSON.stringify(obj));
+  _apiSave(LOGOS_KEY, obj);
 }
 
 function getForeignLogos() {
@@ -585,6 +633,7 @@ function saveForeignLogo(name, src) {
   if (src) logos[key] = src;
   else delete logos[key];
   localStorage.setItem(FOREIGN_LOGOS_KEY, JSON.stringify(logos));
+  _apiSave(FOREIGN_LOGOS_KEY, logos);
 }
 
 function renderForeignLogosAdmin() {
@@ -992,6 +1041,7 @@ function getStandings() {
 
 function saveStandings(list) {
   localStorage.setItem(STANDINGS_KEY, JSON.stringify(list));
+  _apiSave(STANDINGS_KEY, list);
 }
 
 function sortedStandings() {
@@ -1884,7 +1934,7 @@ function hashPassword(str) {
 }
 
 function getUsers() { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
-function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); _apiSave(USERS_KEY, u); }
 
 function getCurrentUser() {
   const s = sessionStorage.getItem(USER_SESSION_KEY);
@@ -2083,6 +2133,7 @@ function initAuth() {
   initTheme();
   initSiteLogo();
   updateAuthUI();
+  _apiSyncAll();
 }
 
 // ==================== THEME ====================
@@ -2159,6 +2210,7 @@ async function handleSiteLogoFile(input) {
   try {
     const compressed = await compressImage(file, 600, 300, 0.95);
     localStorage.setItem(SITE_LOGO_KEY, compressed);
+    _apiSave(SITE_LOGO_KEY, compressed);
     applySiteLogo(compressed);
     renderSettingsLogoAdmin();
     if (inner) inner.innerHTML = `<div class="file-drop-text" style="color:var(--ts-red);font-weight:700">✓ ${escHtml(file.name)}</div>`;
@@ -2169,6 +2221,7 @@ function saveSiteLogoFromUrl() {
   const url = document.getElementById('siteLogoUrl')?.value.trim();
   if (!url) return;
   localStorage.setItem(SITE_LOGO_KEY, url);
+  _apiSave(SITE_LOGO_KEY, url);
   applySiteLogo(url);
   renderSettingsLogoAdmin();
 }
@@ -2199,6 +2252,7 @@ function saveTeamBanner(teamKey, src) {
   if (src) banners[teamKey] = src;
   else delete banners[teamKey];
   localStorage.setItem(TEAM_BANNERS_KEY, JSON.stringify(banners));
+  _apiSave(TEAM_BANNERS_KEY, banners);
 }
 
 function renderTeamBannersAdmin() {
