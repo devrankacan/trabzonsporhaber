@@ -1076,30 +1076,32 @@ function initMobileNav() {
 function initDragScroll() {
   const el = document.querySelector('.branch-nav .container');
   if (!el) return;
-  let startX, scrollLeft, dragging = false, hasDragged = false;
+  let startX, scrollLeft, hasDragged = false;
 
   el.addEventListener('mousedown', e => {
-    dragging = true;
     hasDragged = false;
     startX = e.pageX;
     scrollLeft = el.scrollLeft;
     el.classList.add('dragging');
-  });
 
-  window.addEventListener('mousemove', e => {
-    if (!dragging) return;
-    const dx = e.pageX - startX;
-    if (Math.abs(dx) > 5) hasDragged = true;
-    el.scrollLeft = scrollLeft - dx;
-  });
+    function onMove(e) {
+      if (!(e.buttons & 1)) { cleanup(); return; }
+      const dx = e.pageX - startX;
+      if (Math.abs(dx) > 5) hasDragged = true;
+      el.scrollLeft = scrollLeft - dx;
+    }
 
-  window.addEventListener('mouseup', () => {
-    dragging = false;
-    el.classList.remove('dragging');
-    setTimeout(() => { hasDragged = false; }, 0);
+    function cleanup() {
+      el.classList.remove('dragging');
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', cleanup);
+    }
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', cleanup);
   });
 
   el.addEventListener('click', e => {
-    if (hasDragged) e.preventDefault();
+    if (hasDragged) { e.preventDefault(); e.stopPropagation(); }
   }, true);
 }
