@@ -313,10 +313,10 @@ img { max-width: 100%; display: block; }
 
 .slider {
   position: relative;
-  height: 400px;
+  height: 420px;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  max-width: 860px;
+  max-width: 1000px;
   margin: 0 auto;
   box-shadow: var(--shadow-lg);
 }
@@ -493,12 +493,21 @@ img { max-width: 100%; display: block; }
 
 /* ==================== TICKER ==================== */
 .ticker {
-  background: var(--ts-red);
+  background: var(--bg);
   color: #fff;
+  overflow: hidden;
+  padding: 0 0 16px;
+}
+
+.ticker-inner {
+  background: var(--ts-red);
   display: flex;
   align-items: center;
   overflow: hidden;
   height: 36px;
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .ticker-label {
