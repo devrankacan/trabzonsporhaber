@@ -2281,6 +2281,7 @@ img { max-width: 100%; display: block; }
 .st-ucl2 td:first-child { border-left: 3px solid #42a5f5; }
 .st-uel  td:first-child { border-left: 3px solid #e65100; }
 .st-uecl td:first-child { border-left: 3px solid #2e7d32; }
+.st-rel  td:first-child { border-left: 3px solid #c62828; }
 
 .standings-legend {
   display: flex;

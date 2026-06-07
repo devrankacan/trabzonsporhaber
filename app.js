@@ -925,7 +925,7 @@ function renderStandingsSidebar() {
           const b = BRANCHES[r.team];
           const av = (r.goalsFor || 0) - (r.goalsAgainst || 0);
           return `
-            <tr class="${i === 0 ? 'st-ucl1' : i === 1 ? 'st-ucl2' : i === 2 ? 'st-uel' : i === 3 ? 'st-uecl' : ''}">
+            <tr class="${i === 0 ? 'st-ucl1' : i === 1 ? 'st-ucl2' : i === 2 ? 'st-uel' : i === 3 ? 'st-uecl' : i >= rows.length - 3 ? 'st-rel' : ''}">
               <td class="st-rank">${i + 1}</td>
               <td class="st-team">
                 ${getLogo(r.team)
@@ -951,6 +951,7 @@ function renderStandingsSidebar() {
       <div class="legend-row"><span class="legend-dot" style="background:#42a5f5"></span> <span>2. ŞL (2. Eleme)</span></div>
       <div class="legend-row"><span class="legend-dot" style="background:#e65100"></span> <span>3. AL (2. Eleme)</span></div>
       <div class="legend-row"><span class="legend-dot" style="background:#2e7d32"></span> <span>4. KL (2. Eleme)</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:#c62828"></span> <span>Küme Düşme</span></div>
     </div>
   `;
 }
