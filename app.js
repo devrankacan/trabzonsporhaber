@@ -45,19 +45,22 @@ async function _apiSyncAll() {
 }
 
 async function _apiPushAll() {
-  const payload = {};
+  let anyFail = false;
   for (const key of _SYNC_KEYS) {
-    const val = localStorage.getItem(key);
-    if (val) try { payload[key] = JSON.parse(val); } catch {}
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+    let val;
+    try { val = JSON.parse(raw); } catch { continue; }
+    try {
+      const res = await fetch('/api/' + key, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': _API_KEY },
+        body: JSON.stringify(val)
+      });
+      if (!res.ok) anyFail = true;
+    } catch { anyFail = true; }
   }
-  try {
-    await fetch('/api/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': _API_KEY },
-      body: JSON.stringify(payload)
-    });
-    return true;
-  } catch { return false; }
+  return !anyFail;
 }
 
 // ==================== ANALYTICS ====================
