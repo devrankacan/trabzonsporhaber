@@ -618,7 +618,10 @@ function renderTransfersSidebar() {
             : `<div class="tr2-photo tr2-photo-empty">⚽</div>`}
           <div class="tr2-player-info">
             <div class="tr2-player-name">${escHtml(t.player)}</div>
-            <div class="tr2-position">${escHtml(t.position||'')}</div>
+            <div class="tr2-meta">
+              ${t.position ? `<span class="tr2-position">${escHtml(t.position)}</span>` : ''}
+              <span class="tr2-status-badge" style="background:${status.color}">${escHtml(status.label)}</span>
+            </div>
           </div>
         </div>
         <div class="tr2-clubs-col">

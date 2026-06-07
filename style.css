@@ -2409,10 +2409,24 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.tr2-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
 .tr2-position {
   font-size: 11px;
   color: var(--text-muted);
-  margin-top: 1px;
+}
+.tr2-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
 }
 
 .tr2-clubs-col {
