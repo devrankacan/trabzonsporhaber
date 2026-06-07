@@ -242,12 +242,15 @@
 
   <script src="app.js"></script>
   <script>
-    const ADMIN_HASH = '61299a133ae5cb97acaae8ef2b62f078869e9090ae3c6f5a1061637267ccb5a3';
+    const ADMIN_HASH = 'ee098b74';
     const SESSION_KEY = 'ts_admin_auth';
 
-    async function sha256(str) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    function simpleHash(str) {
+      let h = 5381;
+      for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+      }
+      return h.toString(16).padStart(8, '0');
     }
 
     function showAdmin() {
@@ -257,10 +260,9 @@
       initAdmin();
     }
 
-    async function attemptLogin() {
+    function attemptLogin() {
       const pwd = document.getElementById('loginPassword').value;
-      const hash = await sha256(pwd);
-      if (hash === ADMIN_HASH) {
+      if (simpleHash(pwd) === ADMIN_HASH) {
         sessionStorage.setItem(SESSION_KEY, '1');
         showAdmin();
       } else {
