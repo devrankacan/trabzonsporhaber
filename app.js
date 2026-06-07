@@ -1716,11 +1716,21 @@ function setupSearch(inputId, dropdownId) {
 // ==================== MOBILE NAV ====================
 
 function initMobileNav() {
-  const btn = document.getElementById('hamburger');
-  const nav = document.getElementById('mobileNav');
-  if (btn && nav) {
-    btn.addEventListener('click', () => nav.classList.toggle('open'));
-  }
+  const btn = document.getElementById('mobileSearchToggle');
+  const bar = document.getElementById('mobileSearchBar');
+  if (!btn || !bar) return;
+  btn.addEventListener('click', () => {
+    const open = bar.classList.toggle('open');
+    if (open) {
+      const inp = document.getElementById('mobileSearchInput');
+      if (inp) inp.focus();
+    }
+  });
+  document.addEventListener('click', (e) => {
+    if (!btn.contains(e.target) && !bar.contains(e.target)) {
+      bar.classList.remove('open');
+    }
+  });
 }
 
 function initDragScroll() {
