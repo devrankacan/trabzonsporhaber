@@ -6,6 +6,7 @@ const STORAGE_KEY = 'ts_haberler';
 const COMMENTS_KEY = 'ts_comments';
 const VIEWS_KEY = 'ts_views';
 const ANALYTICS_KEY = 'ts_analytics';
+const TRANSFERS_KEY = 'ts_transfers';
 
 // ==================== ANALYTICS ====================
 
@@ -534,17 +535,217 @@ function renderHomePage() {
   initHeaderSearch();
 }
 
-function renderPopularNews() {
-  const el = document.getElementById('popularNews');
+// ==================== TRANSFERS ====================
+
+const TRANSFER_STATUS = {
+  iddia:       { label: 'İddia',       color: '#e67e22' },
+  kesinlesti:  { label: 'Kesinleşti',  color: '#27ae60' },
+  tamamlandi:  { label: 'Tamamlandı',  color: '#2980b9' },
+  kira:        { label: 'Kiralık',     color: '#8e44ad' },
+};
+
+function getTransfers() {
+  return JSON.parse(localStorage.getItem(TRANSFERS_KEY) || '[]');
+}
+
+function saveTransfers(list) {
+  localStorage.setItem(TRANSFERS_KEY, JSON.stringify(list));
+}
+
+function teamBadgeHtml(key, foreignName) {
+  if (!key || key === 'yabanci') {
+    return `<span class="transfer-team-badge" style="background:#555;color:#fff">${escHtml(foreignName || 'Yabancı')}</span>`;
+  }
+  const b = BRANCHES[key];
+  if (!b) return `<span class="transfer-team-badge" style="background:#555;color:#fff">${escHtml(key)}</span>`;
+  const shortName = b.label.split(' ')[0];
+  return `<span class="transfer-team-badge" style="background:${b.color};color:#fff">${escHtml(shortName)}</span>`;
+}
+
+function renderTransfersSidebar() {
+  const el = document.getElementById('transfersSidebar');
   if (!el) return;
-  const news = getNews().slice(0, 5);
-  if (news.length === 0) { el.innerHTML = '<p class="no-news-text">Henüz haber yok.</p>'; return; }
-  el.innerHTML = news.map((n, i) => `
-    <div class="popular-item" onclick="location.href='${slugify(n.id)}'">
-      <div class="popular-num">${i + 1}</div>
-      <div class="popular-title">${escHtml(n.title)}</div>
-    </div>
-  `).join('');
+  const transfers = getTransfers();
+  if (transfers.length === 0) {
+    el.innerHTML = '<p class="no-news-text">Henüz transfer yok.</p>';
+    return;
+  }
+  el.innerHTML = transfers.slice(0, 8).map(t => {
+    const status = TRANSFER_STATUS[t.status] || { label: t.status, color: '#888' };
+    return `
+      <div class="transfer-item">
+        ${t.playerImage
+          ? `<div class="transfer-thumb" style="background:url('${escAttr(t.playerImage)}') center/cover no-repeat"></div>`
+          : `<div class="transfer-thumb transfer-thumb-empty">⚽</div>`}
+        <div class="transfer-info">
+          <div class="transfer-player">${escHtml(t.player)}</div>
+          <div class="transfer-teams">
+            ${teamBadgeHtml(t.fromTeam, t.foreignTeam)}
+            <span class="transfer-arrow">→</span>
+            ${teamBadgeHtml(t.toTeam, t.foreignTeam)}
+          </div>
+          <div class="transfer-footer">
+            <span class="transfer-status-badge" style="background:${status.color}">${escHtml(status.label)}</span>
+            ${t.fee ? `<span class="transfer-fee">${escHtml(t.fee)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAdminTransfers() {
+  const el = document.getElementById('adminTransferList');
+  const badge = document.getElementById('sidebarTransferBadge');
+  const list = getTransfers();
+  if (badge) badge.textContent = list.length;
+  if (!el) return;
+  if (list.length === 0) {
+    el.innerHTML = '<p class="no-news-text">Henüz transfer eklenmedi.</p>';
+    return;
+  }
+  el.innerHTML = list.map(t => {
+    const status = TRANSFER_STATUS[t.status] || { label: t.status, color: '#888' };
+    const fromB = BRANCHES[t.fromTeam];
+    const toB = BRANCHES[t.toTeam];
+    return `
+      <div class="admin-news-item">
+        <div class="admin-news-thumb" style="${t.playerImage ? `background:url('${escAttr(t.playerImage)}') center/cover no-repeat` : 'background:#ddd'}"></div>
+        <div class="admin-news-body">
+          <div class="admin-news-title">${escHtml(t.player)}</div>
+          <div class="admin-news-meta">
+            <span class="branch-mini-badge" style="background:${fromB?.color||'#555'};color:#fff">${escHtml(fromB?.label || t.foreignTeam || 'Yabancı')}</span>
+            <span style="font-size:12px">→</span>
+            <span class="branch-mini-badge" style="background:${toB?.color||'#555'};color:#fff">${escHtml(toB?.label || t.foreignTeam || 'Yabancı')}</span>
+            <span class="transfer-status-badge" style="background:${status.color}">${escHtml(status.label)}</span>
+            ${t.fee ? `<span style="font-size:12px;color:#555">${escHtml(t.fee)}</span>` : ''}
+          </div>
+        </div>
+        <div class="admin-news-actions">
+          <button class="btn-icon btn-delete" onclick="deleteTransfer(${t.id})">Sil</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+let currentTrImageData = '';
+
+function switchTrImgTab(tab) {
+  const fileTab = document.getElementById('trImgTabFile');
+  const urlTab = document.getElementById('trImgTabUrl');
+  const btnFile = document.getElementById('trTabFile');
+  const btnUrl = document.getElementById('trTabUrl');
+  if (!fileTab) return;
+  if (tab === 'file') {
+    fileTab.style.display = 'block'; urlTab.style.display = 'none';
+    btnFile.classList.add('active'); btnUrl.classList.remove('active');
+  } else {
+    fileTab.style.display = 'none'; urlTab.style.display = 'block';
+    btnFile.classList.remove('active'); btnUrl.classList.add('active');
+  }
+}
+
+function toggleTransferForm(show) {
+  const card = document.getElementById('transferFormCard');
+  const btn = document.getElementById('showTransferFormBtn');
+  if (!card) return;
+  card.style.display = show ? 'block' : 'none';
+  if (btn) btn.style.display = show ? 'none' : 'inline-block';
+  if (show) card.scrollIntoView({ behavior: 'smooth' });
+}
+
+function initTransferForm() {
+  const fileInput = document.getElementById('trImageFile');
+  const dropZone = document.getElementById('trFileDropZone');
+  const urlInput = document.getElementById('trImageUrl');
+  const removeBtn = document.getElementById('trImgRemoveBtn');
+  const submitBtn = document.getElementById('trSubmitBtn');
+
+  async function handleTrFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Görsel 5 MB\'dan büyük olamaz.'); return; }
+    const inner = document.getElementById('trFileDropInner');
+    if (inner) inner.innerHTML = '<div class="file-drop-text">Sıkıştırılıyor...</div>';
+    try {
+      const compressed = await compressImage(file, 400, 400, 0.82);
+      currentTrImageData = compressed;
+      const prev = document.getElementById('trImagePreview');
+      const img = document.getElementById('trPreviewImg');
+      if (img) img.src = compressed;
+      if (prev) prev.style.display = 'block';
+      if (inner) inner.innerHTML = `<div class="file-drop-text" style="color:var(--ts-red);font-weight:700">✓ ${escHtml(file.name)}</div>`;
+    } catch(e) {}
+  }
+
+  fileInput?.addEventListener('change', e => handleTrFile(e.target.files[0]));
+  dropZone?.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone?.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone?.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleTrFile(e.dataTransfer.files[0]); });
+
+  urlInput?.addEventListener('input', () => {
+    const url = urlInput.value.trim();
+    currentTrImageData = url;
+    const prev = document.getElementById('trImagePreview');
+    const img = document.getElementById('trPreviewImg');
+    if (url && img) { img.src = url; if (prev) prev.style.display = 'block'; }
+    else if (prev) prev.style.display = 'none';
+  });
+
+  removeBtn?.addEventListener('click', () => {
+    currentTrImageData = '';
+    const prev = document.getElementById('trImagePreview');
+    if (prev) prev.style.display = 'none';
+    if (fileInput) fileInput.value = '';
+    if (urlInput) urlInput.value = '';
+    const inner = document.getElementById('trFileDropInner');
+    if (inner) inner.innerHTML = '<div class="file-drop-text">Tıkla veya fotoğrafı sürükle</div>';
+  });
+
+  submitBtn?.addEventListener('click', () => {
+    const player = document.getElementById('trPlayer')?.value.trim();
+    const fromTeam = document.getElementById('trFrom')?.value;
+    const toTeam = document.getElementById('trTo')?.value;
+    const status = document.getElementById('trStatus')?.value;
+    const fee = document.getElementById('trFee')?.value.trim();
+    const foreignTeam = document.getElementById('trForeignTeam')?.value.trim();
+
+    if (!player) { showTrMsg('error', 'Oyuncu adı zorunludur.'); return; }
+    if (!status) { showTrMsg('error', 'Durum seçin.'); return; }
+
+    const list = getTransfers();
+    list.unshift({ id: Date.now(), player, fromTeam, toTeam, status, fee, foreignTeam, playerImage: currentTrImageData, date: new Date().toISOString() });
+    saveTransfers(list);
+
+    // Reset form
+    document.getElementById('trPlayer').value = '';
+    document.getElementById('trFrom').value = '';
+    document.getElementById('trTo').value = '';
+    document.getElementById('trFee').value = '';
+    document.getElementById('trForeignTeam').value = '';
+    currentTrImageData = '';
+    const prev = document.getElementById('trImagePreview');
+    if (prev) prev.style.display = 'none';
+
+    showTrMsg('success', 'Transfer kaydedildi!');
+    renderAdminTransfers();
+    toggleTransferForm(false);
+  });
+}
+
+function showTrMsg(type, text) {
+  const el = document.getElementById('trFormMessage');
+  if (!el) return;
+  el.className = `form-message ${type}`;
+  el.textContent = text;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function deleteTransfer(id) {
+  if (!confirm('Bu transferi silmek istediğinizden emin misiniz?')) return;
+  saveTransfers(getTransfers().filter(t => t.id !== id));
+  renderAdminTransfers();
 }
 
 // ==================== ALL NEWS PAGE ====================
@@ -716,6 +917,8 @@ function initAdmin() {
   renderAdminList();
   initAdminForm();
   renderAnalytics();
+  renderAdminTransfers();
+  initTransferForm();
 }
 
 function updateSidebarBadge() {
