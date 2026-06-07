@@ -537,51 +537,66 @@ img { max-width: 100%; display: block; }
 
 /* ==================== TICKER ==================== */
 .ticker {
-  background: var(--bg);
-  color: #fff;
+  background: #111;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
   overflow: hidden;
-  padding: 0 0 16px;
 }
 
 .ticker-inner {
-  background: var(--ts-red);
   display: flex;
   align-items: center;
-  overflow: hidden;
-  height: 36px;
+  height: 38px;
   max-width: 1100px;
   margin: 0 auto;
-  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 0 16px;
+  gap: 0;
 }
 
 .ticker-label {
-  background: #fff;
-  color: var(--ts-red);
-  border: 2px solid var(--ts-red);
-  padding: 0 16px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  white-space: nowrap;
-  height: 100%;
   display: flex;
   align-items: center;
+  gap: 7px;
+  padding-right: 16px;
+  border-right: 1px solid rgba(255,255,255,0.12);
+  margin-right: 16px;
   flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ticker-label::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ts-red);
+  flex-shrink: 0;
+  animation: pulse-dot 1.5s ease-in-out infinite;
 }
 
 .ticker-wrap {
   flex: 1;
   overflow: hidden;
   position: relative;
+  mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
 }
 
 .ticker-text {
   display: inline-block;
   white-space: nowrap;
   font-size: 13px;
-  animation: ticker 30s linear infinite;
+  color: rgba(255,255,255,0.75);
+  animation: ticker 35s linear infinite;
   padding-left: 100%;
 }
+
+.ticker-text:hover { animation-play-state: paused; }
 
 @keyframes ticker {
   0% { transform: translateX(0); }
