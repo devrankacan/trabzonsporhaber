@@ -247,11 +247,11 @@ function incrementViews(newsId) {
 }
 
 const BRANCHES = {
-  'amed':         { label: 'Amed Sportif',        color: '#C8102E', color2: '#2ecc71' },
+  'diyarbakir':         { label: 'Amed Sportif',        color: '#C8102E', color2: '#2ecc71' },
   'besiktas':     { label: 'Beşiktaş',            color: '#111111', color2: '#ffffff' },
   'alanyaspor':   { label: 'Corendon Alanyaspor', color: '#e67e22', color2: '#111111' },
   'rizespor':     { label: 'Çaykur Rizespor',     color: '#1a7a3f', color2: '#ffffff' },
-  'chorumfk':     { label: 'Çorum FK',            color: '#C8102E', color2: '#ffffff' },
+  'corum':     { label: 'Çorum FK',            color: '#C8102E', color2: '#ffffff' },
   'erzurumspor':  { label: 'Erzurumspor FK',      color: '#1a56db', color2: '#ffffff' },
   'eyupspor':     { label: 'Eyüpspor',            color: '#6c3483', color2: '#ffffff' },
   'fenerbahce':   { label: 'Fenerbahçe',          color: '#003D7C', color2: '#FFCE00' },
@@ -901,8 +901,8 @@ const DEFAULT_STANDINGS = [
   'galatasaray','fenerbahce','trabzonspor','besiktas',
   'alanyaspor','basaksehir','eyupspor','gaziantep',
   'genclerbirligi','goztepe','kasimpasa','kocaelispor',
-  'konyaspor','rizespor','samsunspor','chorumfk',
-  'erzurumspor','amed'
+  'konyaspor','rizespor','samsunspor','corum',
+  'erzurumspor','diyarbakir'
 ].map((team, i) => ({ id: i + 1, team, played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 }));
 
 function getStandings() {
@@ -921,8 +921,8 @@ function saveStandings(list) {
 
 function sortedStandings() {
   return getStandings().slice().sort((a, b) => {
-    if (a.team === 'amed' && b.team !== 'amed') return 1;
-    if (b.team === 'amed' && a.team !== 'amed') return -1;
+    if (a.team === 'diyarbakir' && b.team !== 'diyarbakir') return 1;
+    if (b.team === 'diyarbakir' && a.team !== 'diyarbakir') return -1;
     const labelA = BRANCHES[a.team]?.label || a.team;
     const labelB = BRANCHES[b.team]?.label || b.team;
     return labelA.localeCompare(labelB, 'tr');
@@ -1303,7 +1303,7 @@ function initBranchMultiSelect() {
   const trigger = document.getElementById('branchTrigger');
   if (!dropdown || !trigger) return;
 
-  const order = ['galatasaray','fenerbahce','trabzonspor','besiktas','amed','alanyaspor','rizespor','chorumfk','erzurumspor','eyupspor','gaziantep','genclerbirligi','goztepe','basaksehir','kasimpasa','kocaelispor','konyaspor','samsunspor','milli-takim'];
+  const order = ['galatasaray','fenerbahce','trabzonspor','besiktas','diyarbakir','alanyaspor','rizespor','corum','erzurumspor','eyupspor','gaziantep','genclerbirligi','goztepe','basaksehir','kasimpasa','kocaelispor','konyaspor','samsunspor','milli-takim'];
   dropdown.innerHTML = order.map(key => {
     const b = BRANCHES[key];
     if (!b) return '';
