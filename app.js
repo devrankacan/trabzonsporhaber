@@ -1074,7 +1074,7 @@ function initMobileNav() {
 }
 
 function initDragScroll() {
-  const el = document.querySelector('.branch-nav');
+  const el = document.querySelector('.branch-nav .container');
   if (!el) return;
   let startX, scrollLeft, dragging = false, hasDragged = false;
 

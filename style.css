@@ -1519,18 +1519,16 @@ img { max-width: 100%; display: block; }
   position: sticky;
   top: 70px;
   z-index: 90;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
-
-.branch-nav::-webkit-scrollbar { display: none; }
-.branch-nav { cursor: grab; }
-.branch-nav.dragging { cursor: grabbing; user-select: none; }
 
 .branch-nav .container {
-  max-width: 100%;
-  padding: 0;
+  max-width: 1100px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  cursor: grab;
 }
+.branch-nav .container::-webkit-scrollbar { display: none; }
+.branch-nav .container.dragging { cursor: grabbing; user-select: none; }
 
 .branch-nav-inner {
   display: flex;
@@ -1538,7 +1536,7 @@ img { max-width: 100%; display: block; }
   gap: 0;
   height: 46px;
   white-space: nowrap;
-  padding: 0 16px;
+  padding: 0;
 }
 
 .branch-link {
