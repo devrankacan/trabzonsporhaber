@@ -2411,12 +2411,14 @@ img { max-width: 100%; display: block; }
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 6px 8px 8px;
+  padding: 6px 4px 8px;
   border-bottom: 2px solid var(--border);
   text-align: left;
   white-space: nowrap;
 }
-.tr-table thead th:last-child { text-align: right; }
+.tr-table thead th:nth-child(1) { width: auto; }
+.tr-table thead th:nth-child(2) { width: 76px; text-align: center; }
+.tr-table thead th:nth-child(3) { width: 62px; text-align: right; }
 
 .tr-table tbody tr {
   border-bottom: 1px solid var(--border);
@@ -2426,9 +2428,10 @@ img { max-width: 100%; display: block; }
 .tr-table tbody tr:hover { background: var(--bg); }
 
 .tr-table td {
-  padding: 10px 8px;
+  padding: 10px 4px;
   vertical-align: middle;
 }
+.tr-table td:nth-child(2) { text-align: center; }
 
 .tr-player-cell {
   display: flex;
@@ -2460,7 +2463,7 @@ img { max-width: 100%; display: block; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
+  max-width: 100px;
 }
 .tr-pmeta {
   display: flex;
@@ -2507,11 +2510,10 @@ img { max-width: 100%; display: block; }
 
 .tr-fee-cell {
   text-align: right;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   color: var(--text);
   white-space: nowrap;
-  width: 64px;
 }
 
 /* ==================== MULTI-SELECT BRANCH ==================== */
