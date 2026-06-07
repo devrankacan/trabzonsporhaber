@@ -3,111 +3,110 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Girişi | Trabzonspor Haber</title>
+  <title>Admin Paneli | Trabzonspor Haber</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
-<body>
+<body class="admin-body">
 
-  <!-- LOGIN OVERLAY -->
-  <div class="admin-login-overlay" id="loginOverlay">
-    <div class="admin-login-box">
-      <div class="admin-login-logo">
-        <div class="logo-icon">TS</div>
-        <div>
-          <div class="logo-title" style="color:var(--ts-red)">Trabzonspor</div>
-          <div class="logo-sub" style="color:var(--ts-blue)">HABER · ADMİN</div>
+<!-- ===== LOGIN SCREEN ===== -->
+<div class="admin-login-overlay" id="loginOverlay">
+  <div class="admin-login-box">
+    <div class="admin-login-logo">
+      <div class="logo-icon">TS</div>
+      <div>
+        <div class="logo-title" style="color:var(--ts-red)">Trabzonspor</div>
+        <div class="logo-sub" style="color:var(--ts-blue)">HABER · ADMİN</div>
+      </div>
+    </div>
+    <h2 class="admin-login-title">Giriş Yap</h2>
+    <p class="admin-login-sub">Admin paneline erişmek için şifrenizi girin.</p>
+    <div class="admin-login-form">
+      <div class="form-group">
+        <label class="form-label">Şifre</label>
+        <div class="login-input-wrap">
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••••••" autocomplete="current-password" />
+          <button class="login-eye" id="loginEye" type="button" title="Göster/Gizle">👁</button>
         </div>
       </div>
-      <h2 class="admin-login-title">Giriş Yap</h2>
-      <p class="admin-login-sub">Admin paneline erişmek için şifrenizi girin.</p>
-      <div class="admin-login-form">
+      <div class="login-error" id="loginError" style="display:none">Hatalı şifre. Lütfen tekrar deneyin.</div>
+      <button class="btn-primary full-width" id="loginBtn">Giriş Yap</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="adminContent" style="display:none" class="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="dash-sidebar" id="dashSidebar">
+    <div class="dash-brand">
+      <div class="dash-brand-icon">TS</div>
+      <div>
+        <div class="dash-brand-title">Trabzonspor</div>
+        <div class="dash-brand-sub">Admin Panel</div>
+      </div>
+    </div>
+
+    <nav class="dash-nav">
+      <button class="dash-nav-item active" onclick="showTab('stats')" id="tab-stats">
+        <span class="dash-nav-icon">📊</span> İstatistikler
+      </button>
+      <button class="dash-nav-item" onclick="showTab('add')" id="tab-add">
+        <span class="dash-nav-icon">✏️</span> Haber Ekle
+      </button>
+      <button class="dash-nav-item" onclick="showTab('list')" id="tab-list">
+        <span class="dash-nav-icon">📰</span> Haberler
+        <span class="dash-nav-badge" id="sidebarNewsBadge">0</span>
+      </button>
+    </nav>
+
+    <div class="dash-sidebar-footer">
+      <a href="index.html" class="dash-site-link" target="_blank">
+        <span>🌐</span> Siteye Git
+      </a>
+      <button class="dash-logout" onclick="adminLogout()">
+        <span>🚪</span> Çıkış
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="dash-main">
+
+    <!-- TOP BAR -->
+    <header class="dash-topbar">
+      <button class="dash-hamburger" id="dashHamburger">☰</button>
+      <div class="dash-topbar-title" id="dashTopbarTitle">İstatistikler</div>
+      <div class="dash-topbar-right">
+        <span class="dash-topbar-date" id="dashDate"></span>
+      </div>
+    </header>
+
+    <!-- TAB: İSTATİSTİKLER -->
+    <section class="dash-tab active" id="tabStats">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">Site İstatistikleri</h2>
+        <button class="dash-refresh-btn" onclick="renderAnalytics()">↻ Yenile</button>
+      </div>
+      <div id="analyticsPanel"></div>
+    </section>
+
+    <!-- TAB: HABER EKLE -->
+    <section class="dash-tab" id="tabAdd">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title" id="formTitle">Yeni Haber Ekle</h2>
+        <button class="btn-secondary btn-sm" id="cancelEdit" style="display:none" onclick="resetForm()">✕ İptal</button>
+      </div>
+
+      <div class="dash-form-card" id="formCard">
         <div class="form-group">
-          <label class="form-label">Şifre</label>
-          <div class="login-input-wrap">
-            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••••••" autocomplete="current-password" />
-            <button class="login-eye" id="loginEye" type="button" title="Göster/Gizle">👁</button>
-          </div>
+          <label class="form-label">Başlık *</label>
+          <input type="text" id="newsTitle" class="form-input" placeholder="Haber başlığı girin..." maxlength="120" />
+          <div class="char-count"><span id="titleCount">0</span>/120</div>
         </div>
-        <div class="login-error" id="loginError" style="display:none">Hatalı şifre. Lütfen tekrar deneyin.</div>
-        <button class="btn-primary full-width" id="loginBtn">Giriş Yap</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- ADMIN CONTENT (hidden until login) -->
-  <div id="adminContent" style="display:none">
-
-  <header class="header">
-    <div class="container">
-      <div class="header-inner">
-        <a href="index.html" class="logo">
-          <div class="logo-icon">TS</div>
-          <div>
-            <div class="logo-title">Trabzonspor</div>
-            <div class="logo-sub">HABER</div>
-          </div>
-        </a>
-        <nav class="nav">
-          <a href="index.html" class="nav-link">Anasayfa</a>
-          <a href="haberler.html" class="nav-link">Haberler</a>
-          <a href="admin.html" class="nav-link active admin-link">+ Haber Ekle</a>
-        </nav>
-      </div>
-    </div>
-  </header>
-
-  <!-- BRANCH NAV -->
-  <nav class="branch-nav">
-    <div class="container">
-      <div class="branch-nav-inner">
-        <a href="haberler.html" class="branch-link">Tümü</a>
-        <a href="haberler.html?brans=futbol-a" class="branch-link">
-          Futbol A Takım
-        </a>
-        <a href="haberler.html?brans=basketbol" class="branch-link">
-          Basketbol
-        </a>
-        <a href="haberler.html?brans=kadin-futbol" class="branch-link">
-          Kadın Futbol A Takım
-        </a>
-        <a href="haberler.html?brans=akademi" class="branch-link">
-          Akademi
-        </a>
-      </div>
-    </div>
-  </nav>
-
-  <div class="page-hero admin-hero">
-    <div class="container">
-      <h1>Admin Paneli</h1>
-      <p>Yeni haber ekle ve mevcut haberleri yönet</p>
-    </div>
-  </div>
-
-  <!-- ANALYTICS -->
-  <div class="analytics-section container">
-    <div class="analytics-header">
-      <h2 class="form-title">Site İstatistikleri</h2>
-      <button class="btn-secondary btn-sm" onclick="renderAnalytics()">↻ Yenile</button>
-    </div>
-    <div id="analyticsPanel"></div>
-  </div>
-
-  <main class="main container">
-    <div class="admin-grid">
-
-      <!-- FORM -->
-      <section class="admin-form-section">
-        <div class="form-card" id="formCard">
-          <h2 class="form-title" id="formTitle">Yeni Haber Ekle</h2>
-
-          <div class="form-group">
-            <label class="form-label">Başlık *</label>
-            <input type="text" id="newsTitle" class="form-input" placeholder="Haber başlığı girin..." maxlength="120" />
-            <div class="char-count"><span id="titleCount">0</span>/120</div>
-          </div>
-
+        <div class="dash-form-row">
           <div class="form-group">
             <label class="form-label">Branş *</label>
             <select id="newsBranch" class="form-input">
@@ -118,221 +117,170 @@
               <option value="akademi">Akademi</option>
             </select>
           </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Kategori *</label>
-              <select id="newsCategory" class="form-input">
-                <option value="">Seçin...</option>
-                <option value="transfer">Transfer</option>
-                <option value="mac">Maç</option>
-                <option value="taraftar">Taraftar</option>
-                <option value="yonetim">Yönetim</option>
-                <option value="diger">Diğer</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Slider'da Göster</label>
-              <div class="toggle-wrap">
-                <label class="toggle">
-                  <input type="checkbox" id="newsSlider" />
-                  <span class="toggle-track"></span>
-                  <span class="toggle-label">Slider'a ekle</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
           <div class="form-group">
-            <label class="form-label">Özet *</label>
-            <textarea id="newsSummary" class="form-input form-textarea" placeholder="Kısa haber özeti (slider ve kart önizlemesinde görünür)..." maxlength="200" rows="3"></textarea>
-            <div class="char-count"><span id="summaryCount">0</span>/200</div>
+            <label class="form-label">Kategori *</label>
+            <select id="newsCategory" class="form-input">
+              <option value="">Seçin...</option>
+              <option value="transfer">Transfer</option>
+              <option value="mac">Maç</option>
+              <option value="taraftar">Taraftar</option>
+              <option value="yonetim">Yönetim</option>
+              <option value="diger">Diğer</option>
+            </select>
           </div>
-
           <div class="form-group">
-            <label class="form-label">Haber İçeriği *</label>
-            <textarea id="newsContent" class="form-input form-textarea" placeholder="Haber içeriği..." rows="10"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Görsel</label>
-            <div class="image-upload-tabs">
-              <button type="button" class="img-tab active" id="tabFile" onclick="switchImgTab('file')">Bilgisayardan Yükle</button>
-              <button type="button" class="img-tab" id="tabUrl" onclick="switchImgTab('url')">URL ile Ekle</button>
-            </div>
-            <div id="imgTabFile">
-              <label class="file-drop-zone" id="fileDropZone">
-                <input type="file" id="newsImageFile" accept="image/*" style="display:none" />
-                <div class="file-drop-inner" id="fileDropInner">
-                  <div class="file-drop-icon">🖼️</div>
-                  <div class="file-drop-text">Tıkla veya görseli sürükle</div>
-                  <div class="file-drop-sub">JPG, PNG, WEBP · Maks 10 MB</div>
-                </div>
+            <label class="form-label">Slider'da Göster</label>
+            <div class="toggle-wrap">
+              <label class="toggle">
+                <input type="checkbox" id="newsSlider" />
+                <span class="toggle-track"></span>
+                <span class="toggle-label">Slider'a ekle</span>
               </label>
-              <div class="image-size-hint">
-                <div class="hint-row">
-                  <span class="hint-icon">🖥️</span>
-                  <div>
-                    <strong>Slider (PC):</strong> 1100 × 460 px önerilir — yatay, geniş format
-                  </div>
-                </div>
-                <div class="hint-row">
-                  <span class="hint-icon">📰</span>
-                  <div>
-                    <strong>Haber Kartı (PC):</strong> 600 × 400 px önerilir — 3:2 oran
-                  </div>
-                </div>
-                <div class="hint-row">
-                  <span class="hint-icon">📱</span>
-                  <div>
-                    <strong>Mobil:</strong> 800 × 450 px yeterli — sistem otomatik küçültür
-                  </div>
-                </div>
-                <div class="hint-note">Yüklediğiniz görsel sistem tarafından otomatik sıkıştırılır.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Özet *</label>
+          <textarea id="newsSummary" class="form-input form-textarea" placeholder="Kısa haber özeti (slider ve kart önizlemesinde görünür)..." maxlength="200" rows="3"></textarea>
+          <div class="char-count"><span id="summaryCount">0</span>/200</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Haber İçeriği *</label>
+          <textarea id="newsContent" class="form-input form-textarea" placeholder="Haber içeriği..." rows="10"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Görsel</label>
+          <div class="image-upload-tabs">
+            <button type="button" class="img-tab active" id="tabFile" onclick="switchImgTab('file')">Bilgisayardan Yükle</button>
+            <button type="button" class="img-tab" id="tabUrl" onclick="switchImgTab('url')">URL ile Ekle</button>
+          </div>
+          <div id="imgTabFile">
+            <label class="file-drop-zone" id="fileDropZone">
+              <input type="file" id="newsImageFile" accept="image/*" style="display:none" />
+              <div class="file-drop-inner" id="fileDropInner">
+                <div class="file-drop-icon">🖼️</div>
+                <div class="file-drop-text">Tıkla veya görseli sürükle</div>
+                <div class="file-drop-sub">JPG, PNG, WEBP · Maks 10 MB</div>
               </div>
+            </label>
+            <div class="image-size-hint">
+              <div class="hint-row"><span class="hint-icon">🖥️</span><div><strong>Slider (PC):</strong> 1100 × 460 px önerilir</div></div>
+              <div class="hint-row"><span class="hint-icon">📰</span><div><strong>Haber Kartı (PC):</strong> 600 × 400 px önerilir — 3:2 oran</div></div>
+              <div class="hint-row"><span class="hint-icon">📱</span><div><strong>Mobil:</strong> 800 × 450 px yeterli</div></div>
+              <div class="hint-note">Yüklediğiniz görsel sistem tarafından otomatik sıkıştırılır.</div>
             </div>
-            <div id="imgTabUrl" style="display:none">
-              <input type="url" id="newsImage" class="form-input" placeholder="https://ornek.com/resim.jpg" />
-            </div>
-            <div class="image-preview" id="imagePreview" style="display:none">
-              <img id="previewImg" src="" alt="Önizleme" />
-              <button type="button" class="img-remove-btn" id="imgRemoveBtn">× Görseli Kaldır</button>
-            </div>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">Yazar</label>
-            <input type="text" id="newsAuthor" class="form-input" placeholder="Yazar adı (opsiyonel)" />
+          <div id="imgTabUrl" style="display:none">
+            <input type="url" id="newsImage" class="form-input" placeholder="https://ornek.com/resim.jpg" />
           </div>
-
-          <div class="form-actions">
-            <button class="btn-secondary" id="cancelEdit" style="display:none">İptal</button>
-            <button class="btn-primary" id="submitBtn">Haberi Yayınla</button>
+          <div class="image-preview" id="imagePreview" style="display:none">
+            <img id="previewImg" src="" alt="Önizleme" />
+            <button type="button" class="img-remove-btn" id="imgRemoveBtn">× Görseli Kaldır</button>
           </div>
-
-          <div class="form-message" id="formMessage" style="display:none"></div>
         </div>
-      </section>
 
-      <!-- NEWS LIST -->
-      <section class="admin-list-section">
-        <div class="admin-list-header">
-          <h2 class="form-title">Mevcut Haberler</h2>
-          <span class="news-count" id="newsCountBadge">0 haber</span>
+        <div class="form-group">
+          <label class="form-label">Yazar</label>
+          <input type="text" id="newsAuthor" class="form-input" placeholder="Yazar adı (opsiyonel)" />
         </div>
-        <div id="adminNewsList" class="admin-news-list">
-          <p class="no-news-text">Henüz haber eklenmedi.</p>
+
+        <div class="form-actions">
+          <button class="btn-primary" id="submitBtn">Haberi Yayınla</button>
         </div>
-      </section>
 
-    </div>
-  </main>
-
-<!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer-top">
-      <div class="container">
-        <div class="footer-grid">
-
-          <div class="footer-col footer-brand">
-            <div class="footer-logo-wrap">
-              <div class="footer-logo-icon">TS</div>
-              <div>
-                <div class="footer-logo-title">Trabzonspor</div>
-                <div class="footer-logo-sub">HABER</div>
-              </div>
-            </div>
-            <p class="footer-desc">Trabzonspor haberleri için bağımsız haber kaynağı.</p>
-          </div>
-
-          <div class="footer-col">
-            <h4 class="footer-col-title">Branşlar</h4>
-            <ul class="footer-links">
-              <li><a href="haberler.html?brans=futbol-a">Futbol A Takım</a></li>
-              <li><a href="haberler.html?brans=basketbol">Basketbol</a></li>
-              <li><a href="haberler.html?brans=kadin-futbol">Kadın Futbol A Takım</a></li>
-              <li><a href="haberler.html?brans=akademi">Akademi</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h4 class="footer-col-title">Kategoriler</h4>
-            <ul class="footer-links">
-              <li><a href="haberler.html">Transfer</a></li>
-              <li><a href="haberler.html">Maç Haberleri</a></li>
-              <li><a href="haberler.html">Taraftar</a></li>
-              <li><a href="haberler.html">Yönetim</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h4 class="footer-col-title">Sayfalar</h4>
-            <ul class="footer-links">
-              <li><a href="index.html">Anasayfa</a></li>
-              <li><a href="haberler.html">Tüm Haberler</a></li>
-            </ul>
-          </div>
-
-        </div>
+        <div class="form-message" id="formMessage" style="display:none"></div>
       </div>
-    </div>
-    <div class="footer-bottom">
-      <div class="container">
-        <div class="footer-bottom-inner">
-          <span>&copy; 2024 Trabzonspor Haber. Tüm hakları saklıdır.</span>
-        </div>
+    </section>
+
+    <!-- TAB: HABERLER LİSTESİ -->
+    <section class="dash-tab" id="tabList">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">Mevcut Haberler</h2>
+        <span class="news-count" id="newsCountBadge">0 haber</span>
       </div>
-    </div>
-  </footer>
+      <div id="adminNewsList" class="admin-news-list">
+        <p class="no-news-text">Henüz haber eklenmedi.</p>
+      </div>
+    </section>
 
-  </div><!-- /adminContent -->
+  </div><!-- /dash-main -->
+</div><!-- /dashboard -->
 
-  <script src="app.js"></script>
-  <script>
-    const ADMIN_HASH = 'ee098b74';
-    const SESSION_KEY = 'ts_admin_auth';
+<script src="app.js"></script>
+<script>
+  const ADMIN_HASH = 'ee098b74';
+  const SESSION_KEY = 'ts_admin_auth';
 
-    function simpleHash(str) {
-      let h = 5381;
-      for (let i = 0; i < str.length; i++) {
-        h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
-      }
-      return h.toString(16).padStart(8, '0');
+  function simpleHash(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) {
+      h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
     }
+    return h.toString(16).padStart(8, '0');
+  }
 
-    function showAdmin() {
-      document.getElementById('loginOverlay').style.display = 'none';
-      document.getElementById('adminContent').style.display = 'block';
-      document.title = 'Admin Paneli | Trabzonspor Haber';
-      initAdmin();
-    }
+  function showAdmin() {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'flex';
+    document.title = 'Admin Paneli | Trabzonspor Haber';
+    // Set date
+    const d = new Date();
+    document.getElementById('dashDate').textContent =
+      d.toLocaleDateString('tr-TR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    initAdmin();
+  }
 
-    function attemptLogin() {
-      const pwd = document.getElementById('loginPassword').value;
-      if (simpleHash(pwd) === ADMIN_HASH) {
-        sessionStorage.setItem(SESSION_KEY, '1');
-        showAdmin();
-      } else {
-        const err = document.getElementById('loginError');
-        err.style.display = 'block';
-        document.getElementById('loginPassword').value = '';
-        document.getElementById('loginPassword').focus();
-        setTimeout(() => { err.style.display = 'none'; }, 3000);
-      }
-    }
-
-    document.getElementById('loginBtn').addEventListener('click', attemptLogin);
-    document.getElementById('loginPassword').addEventListener('keydown', e => {
-      if (e.key === 'Enter') attemptLogin();
-    });
-    document.getElementById('loginEye').addEventListener('click', () => {
-      const inp = document.getElementById('loginPassword');
-      inp.type = inp.type === 'password' ? 'text' : 'password';
-    });
-
-    if (sessionStorage.getItem(SESSION_KEY) === '1') {
+  function attemptLogin() {
+    const pwd = document.getElementById('loginPassword').value;
+    if (simpleHash(pwd) === ADMIN_HASH) {
+      sessionStorage.setItem(SESSION_KEY, '1');
       showAdmin();
+    } else {
+      const err = document.getElementById('loginError');
+      err.style.display = 'block';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginPassword').focus();
+      setTimeout(() => { err.style.display = 'none'; }, 3000);
     }
-  </script>
+  }
+
+  function adminLogout() {
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  }
+
+  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler' };
+  function showTab(name) {
+    document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.dash-nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('tabStats') && (document.getElementById('tabStats').classList.remove('active'));
+    const tabEl = document.getElementById('tab' + name.charAt(0).toUpperCase() + name.slice(1));
+    if (tabEl) tabEl.classList.add('active');
+    const navEl = document.getElementById('tab-' + name);
+    if (navEl) navEl.classList.add('active');
+    document.getElementById('dashTopbarTitle').textContent = TAB_TITLES[name] || '';
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) document.getElementById('dashSidebar').classList.remove('open');
+  }
+
+  // Hamburger for mobile
+  document.getElementById('dashHamburger').addEventListener('click', () => {
+    document.getElementById('dashSidebar').classList.toggle('open');
+  });
+
+  document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+  document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') attemptLogin();
+  });
+  document.getElementById('loginEye').addEventListener('click', () => {
+    const inp = document.getElementById('loginPassword');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+
+  if (sessionStorage.getItem(SESSION_KEY) === '1') showAdmin();
+</script>
 </body>
 </html>

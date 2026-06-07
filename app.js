@@ -703,8 +703,11 @@ function initAdmin() {
   renderAdminList();
   initAdminForm();
   renderAnalytics();
-  initMobileNav();
-  initHeaderSearch();
+}
+
+function updateSidebarBadge() {
+  const el = document.getElementById('sidebarNewsBadge');
+  if (el) el.textContent = getNews().length;
 }
 
 let currentImageData = '';
@@ -881,6 +884,7 @@ function handleSubmit() {
   saveNews(list);
   resetForm();
   renderAdminList();
+  if (typeof showTab === 'function') showTab('list');
 }
 
 function showMessage(type, text) {
@@ -919,6 +923,7 @@ function renderAdminList() {
   const countEl = document.getElementById('newsCountBadge');
 
   if (countEl) countEl.textContent = `${list.length} haber`;
+  updateSidebarBadge();
   if (!el) return;
 
   if (list.length === 0) {
@@ -979,7 +984,8 @@ function editNews(id) {
     }
   }
 
-  document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+  if (typeof showTab === 'function') showTab('add');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function deleteNews(id) {
