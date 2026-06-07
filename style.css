@@ -537,10 +537,9 @@ img { max-width: 100%; display: block; }
 
 /* ==================== TICKER ==================== */
 .ticker {
-  background: #111;
-  border-top: 1px solid rgba(255,255,255,0.07);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: var(--bg);
   overflow: hidden;
+  padding: 0 0 16px;
 }
 
 .ticker-inner {
@@ -551,6 +550,9 @@ img { max-width: 100%; display: block; }
   margin: 0 auto;
   padding: 0 16px;
   gap: 0;
+  background: #111;
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
 .ticker-label {
