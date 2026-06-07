@@ -2,14 +2,14 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --ts-red: #7A1219;
-  --ts-red-light: #9b1720;
-  --ts-red-dark: #5c0d13;
-  --ts-blue: #4A9BC4;
-  --ts-blue-dark: #2d7fa8;
-  --ts-blue-light: #6ab5d8;
-  --ts-gold: #C9A84C;
-  --ts-gold-light: #dbbe72;
+  --ts-red: #C8102E;
+  --ts-red-light: #e01535;
+  --ts-red-dark: #a00d24;
+  --ts-blue: #111111;
+  --ts-blue-dark: #000000;
+  --ts-blue-light: #333333;
+  --ts-gold: #888888;
+  --ts-gold-light: #aaaaaa;
   --ts-white: #ffffff;
   --bg: #f5f5f5;
   --bg-card: #ffffff;

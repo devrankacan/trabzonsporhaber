@@ -164,7 +164,7 @@ function renderAnalytics() {
 
       <!-- Branch Breakdown -->
       <div class="analytics-card">
-        <h4 class="analytics-card-title">Branş Dağılımı (Haber)</h4>
+        <h4 class="analytics-card-title">Takım Dağılımı (Haber)</h4>
         ${Object.keys(branchBreak).length === 0
           ? '<p class="no-news-text">Henüz haber yok.</p>'
           : Object.entries(branchBreak).sort((a,b) => b[1]-a[1]).map(([br, cnt]) => `
@@ -241,10 +241,11 @@ function incrementViews(newsId) {
 }
 
 const BRANCHES = {
-  'futbol-a':    { label: 'Futbol A Takım',      icon: '', color: '#7A1219' },
-  'basketbol':   { label: 'Basketbol',            icon: '', color: '#2d7fa8' },
-  'kadin-futbol':{ label: 'Kadın Futbol A Takım', icon: '', color: '#5c0d13' },
-  'akademi':     { label: 'Akademi',              icon: '', color: '#C9A84C' },
+  'galatasaray':  { label: 'Galatasaray',      color: '#C8102E' },
+  'fenerbahce':   { label: 'Fenerbahçe',        color: '#003D7C' },
+  'besiktas':     { label: 'Beşiktaş',          color: '#1a1a1a' },
+  'trabzonspor':  { label: 'Trabzonspor',       color: '#7A1219' },
+  'diger':        { label: 'Diğer Takımlar',    color: '#555' },
 };
 
 function branchLabel(key) {
@@ -258,11 +259,11 @@ function branchShortLabel(key) {
 const SAMPLE_NEWS = [
   {
     id: 1,
-    title: "Trabzonspor, Yeni Sezon Transferlerini Açıkladı",
-    summary: "Bordo-mavili kulüp, yeni sezon öncesinde 3 önemli transferi kadroya kattığını duyurdu.",
-    content: "Trabzonspor Kulübü, yeni sezon hazırlıkları kapsamında gerçekleştirilen transfer çalışmalarını basın toplantısıyla kamuoyuyla paylaştı.\n\nKulüp yönetimi, teknik direktörün talepleri doğrultusunda kadro güçlendirme çalışmalarını sürdürdüklerini belirtti.\n\nYeni transferlerin takıma büyük katkı sağlayacağı öngörülmekte, taraftarlar bu haberle büyük sevinç yaşadı.",
+    title: "Galatasaray Yıldız İsmi Kadrosuna Kattı",
+    summary: "Sarı-kırmızılılar, yeni sezon öncesinde sürpriz bir transferi açıkladı.",
+    content: "Galatasaray, yeni sezon hazırlıkları kapsamında gerçekleştirdiği transfer çalışmalarının meyvesini topladı.\n\nKulüp yönetimi, teknik direktörün talepleri doğrultusunda kadro güçlendirme çalışmalarını sürdürdüklerini belirtti.\n\nYeni transferin takıma büyük katkı sağlayacağı öngörülmekte, taraftarlar bu haberle büyük sevinç yaşadı.",
     category: "transfer",
-    branch: "futbol-a",
+    branch: "galatasaray",
     image: "",
     author: "Spor Editörü",
     date: new Date(Date.now() - 86400000).toISOString(),
@@ -270,11 +271,11 @@ const SAMPLE_NEWS = [
   },
   {
     id: 2,
-    title: "Trabzonspor 3-1 Galibiyetle Döndü",
-    summary: "Deplasmanda oynanan kritik maçta Trabzonspor rakibini 3-1 mağlup etti.",
-    content: "Süper Lig'in kritik haftasında Trabzonspor, deplasmanda oynadığı müsabakada rakibini 3-1 mağlup etmeyi başardı.\n\nMaçın ilk yarısında 2-0 öne geçen bordo-mavililerin gollerini Yusuf Yazıcı, Enis Destan ve Berat Özdemir attı.\n\nGalibiyet sonrası takım ikinci sıraya yükselirken teknik direktör maç sonrası değerlendirmelerini paylaştı.",
+    title: "Fenerbahçe Derbide Rakibini 2-0 Geçti",
+    summary: "Süper Lig'in kritik derbisinde Fenerbahçe üstün oyunuyla 2-0 galip geldi.",
+    content: "Süper Lig'in en çok beklenen derbisinde Fenerbahçe, rakibini 2-0 mağlup ederek zirveye ortak oldu.\n\nMaçın ilk yarısında 1-0 öne geçen sarı-lacivertlilerin gollerini Dusan Tadic ve Edin Dzeko attı.\n\nGalibiyet sonrası teknik direktör maç sonrası değerlendirmelerini paylaştı.",
     category: "mac",
-    branch: "futbol-a",
+    branch: "fenerbahce",
     image: "",
     author: "Maç Muhabiri",
     date: new Date(Date.now() - 172800000).toISOString(),
@@ -282,49 +283,49 @@ const SAMPLE_NEWS = [
   },
   {
     id: 3,
-    title: "Papara Park'ta Şampiyonluk Kutlaması",
-    summary: "Trabzonspor taraftarları Papara Park'ta muhteşem bir kutlama organizasyonu düzenledi.",
-    content: "Trabzonspor taraftarları, takımın son galibiyetinin ardından Papara Park önünde büyük bir kutlama organizasyonu gerçekleştirdi.\n\nBinlerce taraftar bordo-mavi atkılar ve flamalarıyla bir araya gelirken havai fişek gösterisi de düzenlendi.\n\nTaraftar dernekleri bu kutlamayı sezonun en önemli anlarından biri olarak nitelendirdi.",
-    category: "taraftar",
-    branch: "futbol-a",
+    title: "Beşiktaş Taraftarından Muhteşem Koreografi",
+    summary: "Siyah-beyazlı taraftarlar Vodafone Park'ta nefes kesen bir koreografi sergiledi.",
+    content: "Beşiktaş taraftarları, takımın son galibiyetinin ardından Vodafone Park'ta büyük bir koreografi organizasyonu gerçekleştirdi.\n\nBinlerce taraftar siyah-beyaz atkılar ve flamalarıyla bir araya gelirken havai fişek gösterisi de düzenlendi.\n\nTaraftar dernekleri bu koreografiyi sezonun en önemli anlarından biri olarak nitelendirdi.",
+    category: "kulup",
+    branch: "besiktas",
     image: "",
-    author: "Taraftar Muhabiri",
+    author: "Kulüp Muhabiri",
     date: new Date(Date.now() - 259200000).toISOString(),
     slider: false
   },
   {
     id: 4,
-    title: "Basketbol Takımı Şampiyonlar Ligi'nde Sahne Alıyor",
-    summary: "Trabzonspor Basketbol, Şampiyonlar Ligi'nde ilk maçına çıkıyor.",
-    content: "Trabzonspor Basketbol takımı, EuroLeague Basketball Şampiyonlar Ligi'ndeki ilk maçına ev sahipliği yapacak.\n\nTaraftarların yoğun ilgi göstermesi beklenen maç öncesinde teknik direktör, kadronun hazır olduğunu vurguladı.",
+    title: "Trabzonspor Avrupa Kupası'nda Sahne Alıyor",
+    summary: "Bordo-mavililerin Avrupa macerası başlıyor, ilk rakip belli oldu.",
+    content: "Trabzonspor, UEFA Konferans Ligi'ndeki ilk maçına ev sahipliği yapacak.\n\nTaraftarların yoğun ilgi göstermesi beklenen maç öncesinde teknik direktör, kadronun hazır olduğunu vurguladı.",
     category: "mac",
-    branch: "basketbol",
+    branch: "trabzonspor",
     image: "",
-    author: "Basketbol Muhabiri",
+    author: "Avrupa Muhabiri",
     date: new Date(Date.now() - 43200000).toISOString(),
     slider: false
   },
   {
     id: 5,
-    title: "Kadın Futbol Takımı Ligi Liderliğini Sürdürüyor",
-    summary: "Trabzonspor Kadın Futbol A Takımı, sezonun beşinci galibiyetini aldı.",
-    content: "Trabzonspor Kadın Futbol A Takımı, lig maçında rakibini 2-0 mağlup ederek liderliğini pekiştirdi.\n\nKaptan, maç sonrası takımın sezon hedeflerini paylaştı.",
-    category: "mac",
-    branch: "kadin-futbol",
+    title: "Milli Takım Aday Kadrosu Açıklandı",
+    summary: "Teknik direktör, yaklaşan dünya kupası elemelerinin aday kadrosunu belirledi.",
+    content: "Türkiye Milli Futbol Takımı teknik direktörü, dünya kupası elemeleri için aday kadroyu açıkladı.\n\nKadroda Süper Lig'den 14 oyuncu yer alırken yurt dışı liglerinden de seçilen isimler dikkat çekiyor.\n\nMilli takım, ilk maçını üç hafta sonra kendi sahasında oynayacak.",
+    category: "milli-takim",
+    branch: "diger",
     image: "",
-    author: "Kadın Futbol Muhabiri",
+    author: "Milli Takım Muhabiri",
     date: new Date(Date.now() - 108000000).toISOString(),
     slider: false
   },
   {
     id: 6,
-    title: "Akademi Oyuncusu A Takıma Yükseltildi",
-    summary: "Genç yetenek Trabzonspor altyapısından A takım kadrosuna dahil edildi.",
-    content: "Trabzonspor Akademisi'nin yetiştirdiği genç yetenek, teknik direktörün kararıyla A takım kadrosuna alındı.\n\n18 yaşındaki oyuncu, altyapıda geçirdiği 5 yılın ardından bu başarıya ulaştı.",
-    category: "transfer",
-    branch: "akademi",
+    title: "Süper Lig'de Yabancı Kuralı Değişiyor",
+    summary: "TFF'nin açıkladığı yeni düzenlemeyle yabancı oyuncu limitine ilişkin kurallar güncellendi.",
+    content: "Türkiye Futbol Federasyonu, yabancı oyuncu kuralında yapılan değişiklikleri açıkladı.\n\nYeni sezondan itibaren geçerli olacak düzenleme kulüplerin transfer stratejilerini doğrudan etkileyecek.\n\nKulüp başkanları bu karara ilişkin değerlendirmelerini paylaştı.",
+    category: "yonetim",
+    branch: "diger",
     image: "",
-    author: "Akademi Muhabiri",
+    author: "Spor Editörü",
     date: new Date(Date.now() - 216000000).toISOString(),
     slider: false
   }
@@ -333,7 +334,18 @@ const SAMPLE_NEWS = [
 function getNews() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Migrate old Trabzonspor branches to new Süper Lig branches
+      const oldBranches = { 'futbol-a': 'trabzonspor', 'basketbol': 'diger', 'kadin-futbol': 'diger', 'akademi': 'diger' };
+      const oldCats = { 'taraftar': 'kulup' };
+      const migrated = parsed.map(n => ({
+        ...n,
+        branch: oldBranches[n.branch] !== undefined ? oldBranches[n.branch] : n.branch,
+        category: oldCats[n.category] !== undefined ? oldCats[n.category] : n.category,
+      }));
+      return migrated;
+    }
   } catch (e) {}
   localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE_NEWS));
   return SAMPLE_NEWS;
@@ -360,7 +372,7 @@ function formatDateShort(iso) {
 }
 
 function categoryLabel(cat) {
-  const map = { transfer: 'Transfer', mac: 'Maç', taraftar: 'Taraftar', yonetim: 'Yönetim', diger: 'Diğer' };
+  const map = { transfer: 'Transfer', mac: 'Maç', 'milli-takim': 'Milli Takım', kulup: 'Kulüp', yonetim: 'Yönetim', diger: 'Diğer' };
   return map[cat] || cat || 'Genel';
 }
 
@@ -371,10 +383,10 @@ function slugify(id) {
 function buildBgStyle(image) {
   if (image) return `background: url('${escAttr(image)}') center / cover no-repeat;`;
   const colors = [
-    'linear-gradient(135deg, #5c0d13, #2d7fa8)',
-    'linear-gradient(135deg, #7A1219, #4A9BC4)',
-    'linear-gradient(135deg, #5c0d13, #7A1219)',
-    'linear-gradient(135deg, #2d7fa8, #5c0d13)',
+    'linear-gradient(135deg, #C8102E, #111)',
+    'linear-gradient(135deg, #111, #C8102E)',
+    'linear-gradient(135deg, #8b0000, #222)',
+    'linear-gradient(135deg, #333, #C8102E)',
   ];
   return `background: ${colors[Math.floor(Math.random() * colors.length)]};`;
 }

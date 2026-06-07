@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Paneli | Trabzonspor Haber</title>
+  <title>Admin Paneli | Süper Lig Haber</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
@@ -15,8 +15,8 @@
     <div class="admin-login-logo">
       <div class="logo-icon">TS</div>
       <div>
-        <div class="logo-title" style="color:var(--ts-red)">Trabzonspor</div>
-        <div class="logo-sub" style="color:var(--ts-blue)">HABER · ADMİN</div>
+        <div class="logo-title" style="color:var(--ts-red)">Süper Lig</div>
+        <div class="logo-sub" style="color:#555">HABER · ADMİN</div>
       </div>
     </div>
     <h2 class="admin-login-title">Giriş Yap</h2>
@@ -43,7 +43,7 @@
     <div class="dash-brand">
       <div class="dash-brand-icon">TS</div>
       <div>
-        <div class="dash-brand-title">Trabzonspor</div>
+        <div class="dash-brand-title">Süper Lig</div>
         <div class="dash-brand-sub">Admin Panel</div>
       </div>
     </div>
@@ -111,10 +111,11 @@
             <label class="form-label">Branş *</label>
             <select id="newsBranch" class="form-input">
               <option value="">Seçin...</option>
-              <option value="futbol-a">Futbol A Takım</option>
-              <option value="basketbol">Basketbol</option>
-              <option value="kadin-futbol">Kadın Futbol A Takım</option>
-              <option value="akademi">Akademi</option>
+              <option value="galatasaray">Galatasaray</option>
+              <option value="fenerbahce">Fenerbahçe</option>
+              <option value="besiktas">Beşiktaş</option>
+              <option value="trabzonspor">Trabzonspor</option>
+              <option value="diger">Diğer Takımlar</option>
             </select>
           </div>
           <div class="form-group">
@@ -123,7 +124,8 @@
               <option value="">Seçin...</option>
               <option value="transfer">Transfer</option>
               <option value="mac">Maç</option>
-              <option value="taraftar">Taraftar</option>
+              <option value="milli-takim">Milli Takım</option>
+              <option value="kulup">Kulüp</option>
               <option value="yonetim">Yönetim</option>
               <option value="diger">Diğer</option>
             </select>
@@ -225,7 +227,7 @@
   function showAdmin() {
     document.getElementById('loginOverlay').style.display = 'none';
     document.getElementById('adminContent').style.display = 'flex';
-    document.title = 'Admin Paneli | Trabzonspor Haber';
+    document.title = 'Admin Paneli | Süper Lig Haber';
     // Set date
     const d = new Date();
     document.getElementById('dashDate').textContent =
