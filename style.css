@@ -1089,18 +1089,6 @@ img { max-width: 100%; display: block; }
   max-width: 280px;
 }
 
-.footer-badge-row { display: flex; gap: 8px; flex-wrap: wrap; }
-
-.footer-badge {
-  background: rgba(201,168,76,0.15);
-  border: 1px solid rgba(201,168,76,0.3);
-  color: var(--ts-gold);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
-  letter-spacing: 0.3px;
-}
 
 /* Links */
 .footer-links {
@@ -1130,19 +1118,6 @@ img { max-width: 100%; display: block; }
 
 .footer-links a:hover { color: #fff; }
 
-.footer-divider {
-  border: none;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  margin: 20px 0 16px;
-}
-
-.footer-stadium {
-  font-size: 13px;
-  color: rgba(255,255,255,0.55);
-  line-height: 1.6;
-}
-
-.footer-stadium span { color: rgba(255,255,255,0.3); font-size: 12px; }
 
 /* Bottom bar */
 .footer-bottom {
@@ -1161,7 +1136,6 @@ img { max-width: 100%; display: block; }
   gap: 8px;
 }
 
-.footer-bottom-right { color: var(--ts-gold); opacity: 0.6; }
 
 /* ==================== BRANCH NAV ==================== */
 .branch-nav {
