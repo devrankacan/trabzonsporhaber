@@ -1076,29 +1076,30 @@ function initMobileNav() {
 function initDragScroll() {
   const el = document.querySelector('.branch-nav');
   if (!el) return;
-  let startX, scrollLeft, moved = false;
+  let startX, scrollLeft, dragging = false, hasDragged = false;
 
-  el.addEventListener('pointerdown', e => {
-    el.setPointerCapture(e.pointerId);
-    startX = e.clientX;
+  el.addEventListener('mousedown', e => {
+    dragging = true;
+    hasDragged = false;
+    startX = e.pageX;
     scrollLeft = el.scrollLeft;
-    moved = false;
     el.classList.add('dragging');
   });
 
-  el.addEventListener('pointermove', e => {
-    if (!el.hasPointerCapture(e.pointerId)) return;
-    const dx = e.clientX - startX;
-    if (Math.abs(dx) > 4) moved = true;
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const dx = e.pageX - startX;
+    if (Math.abs(dx) > 5) hasDragged = true;
     el.scrollLeft = scrollLeft - dx;
   });
 
-  el.addEventListener('pointerup', () => {
+  window.addEventListener('mouseup', () => {
+    dragging = false;
     el.classList.remove('dragging');
+    setTimeout(() => { hasDragged = false; }, 0);
   });
 
-  // Block link clicks when drag happened
   el.addEventListener('click', e => {
-    if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+    if (hasDragged) e.preventDefault();
   }, true);
 }
