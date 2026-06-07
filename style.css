@@ -2511,6 +2511,18 @@ img { max-width: 100%; display: block; }
   font-weight: 800;
   color: var(--text);
   white-space: nowrap;
+  width: 70px;
+}
+
+.tr-fee-free {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  background: #27ae60;
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
 }
 
 /* ==================== MULTI-SELECT BRANCH ==================== */
