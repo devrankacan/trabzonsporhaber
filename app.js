@@ -515,8 +515,8 @@ function initAdminForm() {
 
   async function handleFileSelect(file) {
     if (!file || !file.type.startsWith('image/')) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Görsel 5 MB\'dan büyük olamaz.'); return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Görsel 10 MB\'dan büyük olamaz.'); return;
     }
     const dropInner = document.getElementById('fileDropInner');
     if (dropInner) dropInner.innerHTML = '<div class="file-drop-text">Sıkıştırılıyor...</div>';
