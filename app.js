@@ -5,14 +5,14 @@
 const STORAGE_KEY = 'ts_haberler';
 
 const BRANCHES = {
-  'futbol-a':    { label: 'Futbol A Takım',      icon: '⚽', color: '#059669' },
-  'basketbol':   { label: 'Basketbol',            icon: '🏀', color: '#7c3aed' },
-  'kadin-futbol':{ label: 'Kadın Futbol A Takım', icon: '👟', color: '#db2777' },
-  'akademi':     { label: 'Akademi',              icon: '🌱', color: '#d97706' },
+  'futbol-a':    { label: 'Futbol A Takım',      icon: '', color: '#7A1219' },
+  'basketbol':   { label: 'Basketbol',            icon: '', color: '#2d7fa8' },
+  'kadin-futbol':{ label: 'Kadın Futbol A Takım', icon: '', color: '#5c0d13' },
+  'akademi':     { label: 'Akademi',              icon: '', color: '#C9A84C' },
 };
 
 function branchLabel(key) {
-  return BRANCHES[key] ? `${BRANCHES[key].icon} ${BRANCHES[key].label}` : 'Genel';
+  return BRANCHES[key] ? BRANCHES[key].label : 'Genel';
 }
 
 function branchShortLabel(key) {
@@ -133,12 +133,12 @@ function slugify(id) {
 }
 
 function buildBgStyle(image) {
-  if (image) return `background-image: url('${escAttr(image)}');`;
+  if (image) return `background-image: url('${escAttr(image)}'); background-size: cover; background-position: center;`;
   const colors = [
-    'linear-gradient(135deg, #6b0000, #003478)',
-    'linear-gradient(135deg, #003478, #6b0000)',
-    'linear-gradient(135deg, #8B0000, #004aaa)',
-    'linear-gradient(135deg, #4a0000, #002050)',
+    'linear-gradient(135deg, #5c0d13, #2d7fa8)',
+    'linear-gradient(135deg, #7A1219, #4A9BC4)',
+    'linear-gradient(135deg, #5c0d13, #7A1219)',
+    'linear-gradient(135deg, #2d7fa8, #5c0d13)',
   ];
   return `background: ${colors[Math.floor(Math.random() * colors.length)]};`;
 }

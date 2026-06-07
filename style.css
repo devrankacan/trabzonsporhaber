@@ -2,24 +2,27 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --ts-red: #8B0000;
-  --ts-red-light: #a80000;
-  --ts-red-dark: #6b0000;
-  --ts-blue: #003478;
-  --ts-blue-light: #004aaa;
-  --ts-gold: #c8a84b;
-  --bg: #f4f4f6;
+  --ts-red: #7A1219;
+  --ts-red-light: #9b1720;
+  --ts-red-dark: #5c0d13;
+  --ts-blue: #4A9BC4;
+  --ts-blue-dark: #2d7fa8;
+  --ts-blue-light: #6ab5d8;
+  --ts-gold: #C9A84C;
+  --ts-gold-light: #dbbe72;
+  --ts-white: #ffffff;
+  --bg: #f5f5f5;
   --bg-card: #ffffff;
-  --text: #1a1a2e;
-  --text-muted: #6b7280;
+  --text: #1a1a1a;
+  --text-muted: #5a6270;
   --text-light: #9ca3af;
-  --border: #e5e7eb;
-  --shadow: 0 2px 8px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,0.16);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
+  --border: #e2e2e2;
+  --shadow: 0 2px 8px rgba(0,0,0,0.07);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.11);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.15);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 14px;
 }
 
 html { scroll-behavior: smooth; }
@@ -44,11 +47,11 @@ img { max-width: 100%; display: block; }
 
 /* ==================== HEADER ==================== */
 .header {
-  background: linear-gradient(135deg, var(--ts-red-dark) 0%, var(--ts-red) 50%, var(--ts-blue) 100%);
+  background: linear-gradient(135deg, var(--ts-red-dark) 0%, var(--ts-red) 55%, var(--ts-blue-dark) 100%);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.25);
 }
 
 .header-inner {
@@ -70,14 +73,15 @@ img { max-width: 100%; display: block; }
   height: 44px;
   background: var(--ts-gold);
   color: var(--ts-red-dark);
-  font-weight: 800;
-  font-size: 14px;
+  font-weight: 900;
+  font-size: 13px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  letter-spacing: 0.5px;
 }
 
 .logo-icon.small { width: 36px; height: 36px; font-size: 12px; }
@@ -345,20 +349,21 @@ img { max-width: 100%; display: block; }
 
 /* ==================== TICKER ==================== */
 .ticker {
-  background: var(--ts-blue);
+  background: var(--ts-red);
   color: #fff;
   display: flex;
   align-items: center;
   overflow: hidden;
-  height: 38px;
+  height: 36px;
 }
 
 .ticker-label {
-  background: var(--ts-red);
+  background: var(--ts-gold);
+  color: var(--ts-red-dark);
   padding: 0 16px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
   white-space: nowrap;
   height: 100%;
   display: flex;
@@ -529,17 +534,17 @@ img { max-width: 100%; display: block; }
   color: #fff;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 3px 9px;
+  border-radius: 3px;
 }
 
-.category-badge.transfer { background: #7c3aed; }
-.category-badge.mac { background: #059669; }
-.category-badge.taraftar { background: #d97706; }
-.category-badge.yonetim { background: #0284c7; }
-.category-badge.diger { background: #6b7280; }
+.category-badge.transfer { background: var(--ts-gold); color: #1a1a1a; }
+.category-badge.mac      { background: var(--ts-red); }
+.category-badge.taraftar { background: var(--ts-blue); }
+.category-badge.yonetim  { background: var(--ts-blue-dark); }
+.category-badge.diger    { background: #6b7280; }
 
 /* ==================== EMPTY STATE ==================== */
 .empty-box {
@@ -583,14 +588,15 @@ img { max-width: 100%; display: block; }
 .team-badge {
   width: 52px;
   height: 52px;
-  background: linear-gradient(135deg, var(--ts-red-dark), var(--ts-blue));
-  color: #fff;
-  font-weight: 800;
-  font-size: 16px;
+  background: linear-gradient(135deg, var(--ts-red-dark), var(--ts-red));
+  color: var(--ts-gold);
+  font-weight: 900;
+  font-size: 15px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  letter-spacing: 0.5px;
 }
 
 .team-name { font-weight: 700; font-size: 16px; }
@@ -611,7 +617,7 @@ img { max-width: 100%; display: block; }
 .stat-label { color: var(--text-muted); }
 .stat-value { font-weight: 700; color: var(--text); }
 
-.haber-ekle-card { background: linear-gradient(135deg, var(--ts-red-dark), var(--ts-blue)); color: #fff; }
+.haber-ekle-card { background: linear-gradient(135deg, var(--ts-red-dark) 0%, var(--ts-red) 60%, var(--ts-blue-dark) 100%); color: #fff; }
 .haber-ekle-card .sidebar-title { color: #fff; border-color: var(--ts-gold); }
 .haber-ekle-card p { color: rgba(255,255,255,0.8); margin-bottom: 16px; font-size: 13px; }
 
@@ -657,7 +663,7 @@ img { max-width: 100%; display: block; }
 
 /* ==================== PAGE HERO ==================== */
 .page-hero {
-  background: linear-gradient(135deg, var(--ts-red-dark), var(--ts-blue));
+  background: linear-gradient(135deg, var(--ts-red-dark) 0%, var(--ts-red) 60%, var(--ts-blue-dark) 100%);
   color: #fff;
   padding: 48px 0 40px;
 }
@@ -668,9 +674,9 @@ img { max-width: 100%; display: block; }
   margin-bottom: 8px;
 }
 
-.page-hero p { color: rgba(255,255,255,0.7); font-size: 16px; }
+.page-hero p { color: rgba(255,255,255,0.75); font-size: 16px; }
 
-.admin-hero { background: linear-gradient(135deg, var(--ts-blue), var(--ts-red-dark)); }
+.admin-hero { background: linear-gradient(135deg, var(--ts-blue-dark) 0%, var(--ts-blue) 50%, var(--ts-red) 100%); }
 
 /* ==================== FILTER BAR ==================== */
 .filter-bar {
@@ -1066,36 +1072,39 @@ img { max-width: 100%; display: block; }
 .branch-nav-inner {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   height: 46px;
   white-space: nowrap;
-  padding: 0 4px;
 }
 
 .branch-link {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 16px;
-  color: rgba(255,255,255,0.75);
+  padding: 0 20px;
+  height: 100%;
+  color: rgba(255,255,255,0.8);
   font-size: 13px;
   font-weight: 600;
-  border-radius: 6px;
+  letter-spacing: 0.2px;
+  border-right: 1px solid rgba(255,255,255,0.1);
   transition: all 0.2s;
   white-space: nowrap;
 }
 
+.branch-link:first-child { border-left: none; }
+
 .branch-link:hover {
   color: #fff;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.1);
 }
 
 .branch-link.active {
-  background: var(--ts-gold);
-  color: var(--ts-blue);
+  background: var(--ts-red);
+  color: #fff;
+  border-color: transparent;
 }
 
-.branch-icon { font-size: 15px; line-height: 1; }
+.branch-icon { display: none; }
 
 /* Branch badge on news cards */
 .news-card-image {
