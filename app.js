@@ -864,8 +864,19 @@ function removeLogo(teamKey) {
 
 // ==================== STANDINGS ====================
 
+const DEFAULT_STANDINGS = [
+  'galatasaray','fenerbahce','trabzonspor','besiktas',
+  'alanyaspor','basaksehir','eyupspor','gaziantep',
+  'genclerbirligi','goztepe','kasimpasa','kocaelispor',
+  'konyaspor','rizespor','samsunspor','chorumfk',
+  'erzurumspor','amed'
+].map((team, i) => ({ id: i + 1, team, played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 }));
+
 function getStandings() {
-  return JSON.parse(localStorage.getItem(STANDINGS_KEY) || '[]');
+  const stored = localStorage.getItem(STANDINGS_KEY);
+  if (stored) return JSON.parse(stored);
+  localStorage.setItem(STANDINGS_KEY, JSON.stringify(DEFAULT_STANDINGS));
+  return DEFAULT_STANDINGS;
 }
 
 function saveStandings(list) {
@@ -1021,6 +1032,12 @@ function editStanding(id) {
   const btn = document.getElementById('stSubmitBtn');
   if (btn) btn.textContent = 'Güncelle';
   toggleStandingsForm(true);
+}
+
+function resetAllStandings() {
+  if (!confirm('Tüm takım istatistikleri sıfırlanacak. Emin misiniz?')) return;
+  localStorage.removeItem(STANDINGS_KEY);
+  renderAdminStandings();
 }
 
 function deleteStanding(id) {
