@@ -66,6 +66,9 @@
       <button class="dash-nav-item" onclick="showTab('standings')" id="tab-standings">
         <span class="dash-nav-icon">🏆</span> Puan Tablosu
       </button>
+      <button class="dash-nav-item" onclick="showTab('settings')" id="tab-settings">
+        <span class="dash-nav-icon">⚙️</span> Ayarlar
+      </button>
     </nav>
 
     <div class="dash-sidebar-footer">
@@ -435,6 +438,47 @@
       </div>
     </section>
 
+    <!-- TAB: AYARLAR -->
+    <section class="dash-tab" id="tabSettings">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">Site Ayarları</h2>
+      </div>
+
+      <div class="dash-form-card">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">Site Logosu</h3>
+        <div class="settings-logo-preview" id="settingsLogoPreview">
+          <div class="settings-logo-placeholder" id="settingsLogoPlaceholder">
+            <span class="logo-icon" style="width:80px;height:80px;font-size:28px">SL</span>
+            <p style="margin-top:8px;color:var(--text-muted);font-size:13px">Henüz logo yüklenmedi</p>
+          </div>
+          <img id="settingsLogoImg" src="" alt="Site Logosu" style="display:none;max-height:120px;object-fit:contain;border-radius:8px" />
+        </div>
+
+        <div class="image-upload-tabs" style="margin-top:16px">
+          <button type="button" class="img-tab active" id="logoTabFile" onclick="switchLogoTab('file')">Bilgisayardan Yükle</button>
+          <button type="button" class="img-tab" id="logoTabUrl" onclick="switchLogoTab('url')">URL ile Ekle</button>
+        </div>
+        <div id="logoImgTabFile">
+          <label class="file-drop-zone" style="height:80px;margin-top:8px">
+            <input type="file" id="siteLogoFile" accept="image/*" style="display:none" onchange="handleSiteLogoFile(this)" />
+            <div class="file-drop-inner" id="siteLogoDropInner">
+              <div class="file-drop-text">Tıkla veya logoyu sürükle</div>
+              <div class="file-drop-sub">PNG, SVG, WEBP önerilir · Şeffaf arka plan ideal</div>
+            </div>
+          </label>
+        </div>
+        <div id="logoImgTabUrl" style="display:none;margin-top:8px">
+          <input type="url" id="siteLogoUrl" class="form-input" placeholder="https://ornek.com/logo.png" />
+          <button class="btn-secondary btn-sm" style="margin-top:8px" onclick="saveSiteLogoFromUrl()">Uygula</button>
+        </div>
+
+        ${'' /* remove button shown only if logo exists */}
+        <div id="siteLogoRemoveWrap" style="display:none;margin-top:12px">
+          <button class="btn-secondary btn-sm" onclick="removeSiteLogo()">× Logoyu Kaldır</button>
+        </div>
+      </div>
+    </section>
+
   </div><!-- /dash-main -->
 </div><!-- /dashboard -->
 
@@ -481,7 +525,7 @@
     location.reload();
   }
 
-  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu' };
+  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu', settings: 'Ayarlar' };
   function showTab(name) {
     document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dash-nav-item').forEach(b => b.classList.remove('active'));

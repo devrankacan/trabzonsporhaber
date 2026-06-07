@@ -11,6 +11,7 @@ const STANDINGS_KEY = 'ts_standings';
 const LOGOS_KEY = 'ts_logos';
 const USERS_KEY = 'ts_users';
 const USER_SESSION_KEY = 'ts_user_session';
+const SITE_LOGO_KEY = 'ts_site_logo';
 
 // ==================== ANALYTICS ====================
 
@@ -1362,6 +1363,7 @@ function initAdmin() {
   initAdminForm();
   initBranchMultiSelect();
   renderAnalytics();
+  renderSettingsLogoAdmin();
   renderAdminTransfers();
   initTransferForm();
   renderLogosAdmin();
@@ -1937,6 +1939,7 @@ function toggleUserMenu(btn) {
 
 function initAuth() {
   initTheme();
+  initSiteLogo();
   updateAuthUI();
 }
 
@@ -1957,4 +1960,88 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   const btn = document.getElementById('themeToggle');
   if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+// ==================== SITE LOGO ====================
+
+function getSiteLogo() { return localStorage.getItem(SITE_LOGO_KEY) || ''; }
+
+function applySiteLogo(src) {
+  const header = document.getElementById('headerLogo');
+  if (header) {
+    if (src) {
+      header.innerHTML = `<img src="${escAttr(src)}" class="site-logo-header" alt="Logo" />`;
+    } else {
+      header.innerHTML = `<div class="logo-icon">SL</div><div><div class="logo-title">Süper Lig</div><div class="logo-sub">HABER</div></div>`;
+    }
+  }
+  const footer = document.getElementById('footerLogo');
+  if (footer) {
+    if (src) {
+      footer.innerHTML = `<img src="${escAttr(src)}" class="site-logo-footer" alt="Logo" />`;
+    } else {
+      footer.innerHTML = `<div class="footer-logo-icon">SL</div><div><div class="footer-logo-title">Süper Lig</div><div class="footer-logo-sub">HABER</div></div>`;
+    }
+  }
+}
+
+function initSiteLogo() {
+  applySiteLogo(getSiteLogo());
+}
+
+// --- Admin logo settings ---
+function renderSettingsLogoAdmin() {
+  const logo = getSiteLogo();
+  const img = document.getElementById('settingsLogoImg');
+  const placeholder = document.getElementById('settingsLogoPlaceholder');
+  const removeWrap = document.getElementById('siteLogoRemoveWrap');
+  if (!img) return;
+  if (logo) {
+    img.src = logo;
+    img.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+    if (removeWrap) removeWrap.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+    if (placeholder) placeholder.style.display = 'flex';
+    if (removeWrap) removeWrap.style.display = 'none';
+  }
+}
+
+async function handleSiteLogoFile(input) {
+  const file = input.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  if (file.size > 5 * 1024 * 1024) { alert('Logo 5 MB\'dan büyük olamaz.'); return; }
+  const inner = document.getElementById('siteLogoDropInner');
+  if (inner) inner.innerHTML = '<div class="file-drop-text">Yükleniyor...</div>';
+  try {
+    const compressed = await compressImage(file, 600, 300, 0.95);
+    localStorage.setItem(SITE_LOGO_KEY, compressed);
+    applySiteLogo(compressed);
+    renderSettingsLogoAdmin();
+    if (inner) inner.innerHTML = `<div class="file-drop-text" style="color:var(--ts-red);font-weight:700">✓ ${escHtml(file.name)}</div>`;
+  } catch(e) { alert('Hata oluştu.'); }
+}
+
+function saveSiteLogoFromUrl() {
+  const url = document.getElementById('siteLogoUrl')?.value.trim();
+  if (!url) return;
+  localStorage.setItem(SITE_LOGO_KEY, url);
+  applySiteLogo(url);
+  renderSettingsLogoAdmin();
+}
+
+function removeSiteLogo() {
+  localStorage.removeItem(SITE_LOGO_KEY);
+  applySiteLogo('');
+  renderSettingsLogoAdmin();
+  const inner = document.getElementById('siteLogoDropInner');
+  if (inner) inner.innerHTML = '<div class="file-drop-text">Tıkla veya logoyu sürükle</div><div class="file-drop-sub">PNG, SVG, WEBP önerilir · Şeffaf arka plan ideal</div>';
+}
+
+function switchLogoTab(tab) {
+  document.getElementById('logoImgTabFile').style.display = tab === 'file' ? 'block' : 'none';
+  document.getElementById('logoImgTabUrl').style.display  = tab === 'url'  ? 'block' : 'none';
+  document.getElementById('logoTabFile').classList.toggle('active', tab === 'file');
+  document.getElementById('logoTabUrl').classList.toggle('active', tab === 'url');
 }
