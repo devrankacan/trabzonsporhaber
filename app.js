@@ -7,6 +7,7 @@ const COMMENTS_KEY = 'ts_comments';
 const VIEWS_KEY = 'ts_views';
 const ANALYTICS_KEY = 'ts_analytics';
 const TRANSFERS_KEY = 'ts_transfers';
+const STANDINGS_KEY = 'ts_standings';
 
 // ==================== ANALYTICS ====================
 
@@ -748,6 +749,208 @@ function deleteTransfer(id) {
   renderAdminTransfers();
 }
 
+// ==================== STANDINGS ====================
+
+function getStandings() {
+  return JSON.parse(localStorage.getItem(STANDINGS_KEY) || '[]');
+}
+
+function saveStandings(list) {
+  localStorage.setItem(STANDINGS_KEY, JSON.stringify(list));
+}
+
+function sortedStandings() {
+  return getStandings().slice().sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    const avA = a.goalsFor - a.goalsAgainst;
+    const avB = b.goalsFor - b.goalsAgainst;
+    if (avB !== avA) return avB - avA;
+    return b.goalsFor - a.goalsFor;
+  });
+}
+
+function renderStandingsSidebar() {
+  const el = document.getElementById('standingsSidebar');
+  if (!el) return;
+  const rows = sortedStandings();
+  if (rows.length === 0) {
+    el.innerHTML = '<p class="no-news-text">Henüz puan tablosu eklenmedi.</p>';
+    return;
+  }
+  el.innerHTML = `
+    <table class="standings-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Takım</th>
+          <th title="Oynanan">O</th>
+          <th title="Galibiyet">G</th>
+          <th title="Beraberlik">B</th>
+          <th title="Mağlubiyet">M</th>
+          <th title="Averaj">Av</th>
+          <th title="Puan">P</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((r, i) => {
+          const b = BRANCHES[r.team];
+          const av = (r.goalsFor || 0) - (r.goalsAgainst || 0);
+          return `
+            <tr class="${i < 4 ? 'st-ucl' : i < 6 ? 'st-uel' : ''}">
+              <td class="st-rank">${i + 1}</td>
+              <td class="st-team">
+                <span class="st-dot" style="background:${b?.color || '#888'}"></span>
+                <span class="st-name">${escHtml(b?.label || r.team)}</span>
+              </td>
+              <td>${r.played || 0}</td>
+              <td>${r.won || 0}</td>
+              <td>${r.drawn || 0}</td>
+              <td>${r.lost || 0}</td>
+              <td>${av > 0 ? '+' : ''}${av}</td>
+              <td class="st-points">${r.points || 0}</td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+    <div class="standings-legend">
+      <span class="legend-dot legend-ucl"></span> Şampiyonlar Ligi
+      <span class="legend-dot legend-uel" style="margin-left:8px"></span> Avrupa Ligi
+    </div>
+  `;
+}
+
+let editingStId = null;
+
+function toggleStandingsForm(show) {
+  const card = document.getElementById('standingsFormCard');
+  const btn = document.getElementById('showStandingsFormBtn');
+  if (!card) return;
+  card.style.display = show ? 'block' : 'none';
+  if (btn) btn.style.display = show ? 'none' : 'inline-block';
+  if (show) card.scrollIntoView({ behavior: 'smooth' });
+  if (!show) { editingStId = null; resetStForm(); }
+}
+
+function resetStForm() {
+  editingStId = null;
+  ['stTeam','stPlayed','stWon','stDrawn','stLost','stGF','stGA','stPoints'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.tagName === 'SELECT' ? '' : '0';
+  });
+  const title = document.getElementById('standingsFormTitle');
+  if (title) title.textContent = 'Takım Ekle';
+  const btn = document.getElementById('stSubmitBtn');
+  if (btn) btn.textContent = 'Kaydet';
+}
+
+function initStandingsForm() {
+  document.getElementById('stSubmitBtn')?.addEventListener('click', () => {
+    const team = document.getElementById('stTeam')?.value;
+    if (!team) { showStMsg('error', 'Takım seçin.'); return; }
+
+    const row = {
+      id: editingStId || Date.now(),
+      team,
+      played:     parseInt(document.getElementById('stPlayed')?.value) || 0,
+      won:        parseInt(document.getElementById('stWon')?.value)    || 0,
+      drawn:      parseInt(document.getElementById('stDrawn')?.value)  || 0,
+      lost:       parseInt(document.getElementById('stLost')?.value)   || 0,
+      goalsFor:   parseInt(document.getElementById('stGF')?.value)     || 0,
+      goalsAgainst: parseInt(document.getElementById('stGA')?.value)   || 0,
+      points:     parseInt(document.getElementById('stPoints')?.value) || 0,
+    };
+
+    let list = getStandings();
+    if (editingStId !== null) {
+      const idx = list.findIndex(r => r.id === editingStId);
+      if (idx !== -1) list[idx] = row; else list.push(row);
+    } else {
+      if (list.find(r => r.team === team)) { showStMsg('error', 'Bu takım zaten tabloda var.'); return; }
+      list.push(row);
+    }
+    saveStandings(list);
+    showStMsg('success', editingStId ? 'Güncellendi!' : 'Takım eklendi!');
+    toggleStandingsForm(false);
+    renderAdminStandings();
+  });
+}
+
+function showStMsg(type, text) {
+  const el = document.getElementById('stFormMessage');
+  if (!el) return;
+  el.className = `form-message ${type}`;
+  el.textContent = text;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function editStanding(id) {
+  const row = getStandings().find(r => r.id === id);
+  if (!row) return;
+  editingStId = id;
+  document.getElementById('stTeam').value       = row.team;
+  document.getElementById('stPlayed').value     = row.played;
+  document.getElementById('stWon').value        = row.won;
+  document.getElementById('stDrawn').value      = row.drawn;
+  document.getElementById('stLost').value       = row.lost;
+  document.getElementById('stGF').value         = row.goalsFor;
+  document.getElementById('stGA').value         = row.goalsAgainst;
+  document.getElementById('stPoints').value     = row.points;
+  const title = document.getElementById('standingsFormTitle');
+  if (title) title.textContent = 'Takımı Düzenle';
+  const btn = document.getElementById('stSubmitBtn');
+  if (btn) btn.textContent = 'Güncelle';
+  toggleStandingsForm(true);
+}
+
+function deleteStanding(id) {
+  if (!confirm('Bu takımı tablodan silmek istediğinizden emin misiniz?')) return;
+  saveStandings(getStandings().filter(r => r.id !== id));
+  renderAdminStandings();
+}
+
+function renderAdminStandings() {
+  const el = document.getElementById('adminStandingsTable');
+  if (!el) return;
+  const rows = sortedStandings();
+  if (rows.length === 0) {
+    el.innerHTML = '<p class="no-news-text" style="padding:20px">Henüz takım eklenmedi.</p>';
+    return;
+  }
+  el.innerHTML = `
+    <table class="admin-standings-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AG</th><th>YG</th><th>Av</th><th>P</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((r, i) => {
+          const b = BRANCHES[r.team];
+          const av = (r.goalsFor || 0) - (r.goalsAgainst || 0);
+          return `
+            <tr>
+              <td>${i + 1}</td>
+              <td>
+                <span class="branch-mini-badge" style="background:${b?.color||'#555'};color:#fff">${escHtml(b?.label || r.team)}</span>
+              </td>
+              <td>${r.played}</td><td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td>
+              <td>${r.goalsFor}</td><td>${r.goalsAgainst}</td>
+              <td>${av > 0 ? '+' : ''}${av}</td>
+              <td><strong>${r.points}</strong></td>
+              <td class="st-admin-actions">
+                <button class="btn-icon btn-edit" onclick="editStanding(${r.id})">Düzenle</button>
+                <button class="btn-icon btn-delete" onclick="deleteStanding(${r.id})">Sil</button>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
 // ==================== ALL NEWS PAGE ====================
 
 function getActiveBranch() {
@@ -919,6 +1122,8 @@ function initAdmin() {
   renderAnalytics();
   renderAdminTransfers();
   initTransferForm();
+  renderAdminStandings();
+  initStandingsForm();
 }
 
 function updateSidebarBadge() {

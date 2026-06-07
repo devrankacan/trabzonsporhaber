@@ -2149,6 +2149,99 @@ img { max-width: 100%; display: block; }
   font-weight: 600;
 }
 
+/* ==================== STANDINGS SIDEBAR ==================== */
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.standings-table thead th {
+  background: var(--bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 5px 4px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.standings-table thead th:nth-child(2) { text-align: left; }
+.standings-table tbody td {
+  padding: 5px 4px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.standings-table tbody tr:last-child td { border-bottom: none; }
+.standings-table tbody td:nth-child(2) { text-align: left; }
+
+.st-rank {
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 18px;
+}
+.st-team {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.st-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.st-name {
+  font-weight: 600;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+.st-points { font-weight: 800; color: var(--ts-red); }
+
+.st-ucl td:first-child { border-left: 3px solid #1565c0; }
+.st-uel td:first-child { border-left: 3px solid #e65100; }
+
+.standings-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.legend-ucl { background: #1565c0; }
+.legend-uel { background: #e65100; }
+
+/* Admin standings table */
+.admin-standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.admin-standings-table thead th {
+  background: var(--bg);
+  padding: 10px 8px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border);
+}
+.admin-standings-table tbody td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.admin-standings-table tbody tr:hover { background: var(--bg); }
+.st-admin-actions { display: flex; gap: 6px; justify-content: center; }
+
 /* Touch dostu — hover efektlerini kaldır */
 @media (hover: none) {
   .news-card:hover { transform: none; box-shadow: var(--shadow); }

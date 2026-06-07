@@ -63,6 +63,9 @@
         <span class="dash-nav-icon">🔄</span> Transferler
         <span class="dash-nav-badge" id="sidebarTransferBadge">0</span>
       </button>
+      <button class="dash-nav-item" onclick="showTab('standings')" id="tab-standings">
+        <span class="dash-nav-icon">🏆</span> Puan Tablosu
+      </button>
     </nav>
 
     <div class="dash-sidebar-footer">
@@ -355,6 +358,88 @@
       </div>
     </section>
 
+    <!-- TAB: PUAN TABLOSU -->
+    <section class="dash-tab" id="tabStandings">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">Puan Tablosu</h2>
+        <button class="btn-primary btn-sm" onclick="toggleStandingsForm(true)" id="showStandingsFormBtn">+ Takım Ekle</button>
+      </div>
+
+      <!-- Add/Edit Form -->
+      <div class="dash-form-card" id="standingsFormCard" style="display:none;margin-bottom:24px">
+        <div class="dash-section-header" style="margin-bottom:16px">
+          <h3 class="dash-section-title" id="standingsFormTitle" style="font-size:16px">Takım Ekle</h3>
+          <button class="btn-secondary btn-sm" onclick="toggleStandingsForm(false)">✕ İptal</button>
+        </div>
+        <div class="dash-form-row">
+          <div class="form-group">
+            <label class="form-label">Takım *</label>
+            <select id="stTeam" class="form-input">
+              <option value="">Seçin...</option>
+              <option value="galatasaray">Galatasaray</option>
+              <option value="fenerbahce">Fenerbahçe</option>
+              <option value="trabzonspor">Trabzonspor</option>
+              <option value="besiktas">Beşiktaş</option>
+              <option value="amed">Amed Sportif</option>
+              <option value="alanyaspor">Corendon Alanyaspor</option>
+              <option value="rizespor">Çaykur Rizespor</option>
+              <option value="chorumfk">Çorum FK</option>
+              <option value="erzurumspor">Erzurumspor FK</option>
+              <option value="eyupspor">Eyüpspor</option>
+              <option value="gaziantep">Gaziantep FK</option>
+              <option value="genclerbirligi">Gençlerbirliği</option>
+              <option value="goztepe">Göztepe</option>
+              <option value="basaksehir">İstanbul Başakşehir FK</option>
+              <option value="kasimpasa">Kasımpaşa</option>
+              <option value="kocaelispor">Kocaelispor</option>
+              <option value="konyaspor">Konyaspor</option>
+              <option value="samsunspor">Samsunspor</option>
+              <option value="milli-takim">Milli Takım</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">O (Oynanan)</label>
+            <input type="number" id="stPlayed" class="form-input" min="0" max="99" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">G (Galibiyet)</label>
+            <input type="number" id="stWon" class="form-input" min="0" max="99" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">B (Beraberlik)</label>
+            <input type="number" id="stDrawn" class="form-input" min="0" max="99" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">M (Mağlubiyet)</label>
+            <input type="number" id="stLost" class="form-input" min="0" max="99" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">AG (Attığı)</label>
+            <input type="number" id="stGF" class="form-input" min="0" max="999" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">YG (Yediği)</label>
+            <input type="number" id="stGA" class="form-input" min="0" max="999" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">P (Puan)</label>
+            <input type="number" id="stPoints" class="form-input" min="0" max="999" value="0" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" id="stSubmitBtn">Kaydet</button>
+        </div>
+        <div class="form-message" id="stFormMessage" style="display:none"></div>
+      </div>
+
+      <!-- Standings Table -->
+      <div class="dash-form-card" style="padding:0;overflow:hidden">
+        <div id="adminStandingsTable">
+          <p class="no-news-text" style="padding:20px">Henüz takım eklenmedi.</p>
+        </div>
+      </div>
+    </section>
+
   </div><!-- /dash-main -->
 </div><!-- /dashboard -->
 
@@ -401,7 +486,7 @@
     location.reload();
   }
 
-  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler' };
+  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu' };
   function showTab(name) {
     document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dash-nav-item').forEach(b => b.classList.remove('active'));
