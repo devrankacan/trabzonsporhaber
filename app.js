@@ -12,6 +12,7 @@ const LOGOS_KEY = 'ts_logos';
 const USERS_KEY = 'ts_users';
 const USER_SESSION_KEY = 'ts_user_session';
 const SITE_LOGO_KEY = 'ts_site_logo';
+const TEAM_BANNERS_KEY = 'ts_team_banners';
 
 // ==================== ANALYTICS ====================
 
@@ -1369,6 +1370,7 @@ function initAdmin() {
   initBranchMultiSelect();
   renderAnalytics();
   renderSettingsLogoAdmin();
+  renderTeamBannersAdmin();
   renderAdminTransfers();
   initTransferForm();
   renderLogosAdmin();
@@ -2086,4 +2088,79 @@ function switchLogoTab(tab) {
   document.getElementById('logoImgTabUrl').style.display  = tab === 'url'  ? 'block' : 'none';
   document.getElementById('logoTabFile').classList.toggle('active', tab === 'file');
   document.getElementById('logoTabUrl').classList.toggle('active', tab === 'url');
+}
+
+// ==================== TEAM BANNERS ====================
+
+function getTeamBanners() {
+  return JSON.parse(localStorage.getItem(TEAM_BANNERS_KEY) || '{}');
+}
+
+function saveTeamBanner(teamKey, src) {
+  const banners = getTeamBanners();
+  if (src) banners[teamKey] = src;
+  else delete banners[teamKey];
+  localStorage.setItem(TEAM_BANNERS_KEY, JSON.stringify(banners));
+}
+
+function renderTeamBannersAdmin() {
+  const grid = document.getElementById('teamBannersGrid');
+  if (!grid) return;
+  const banners = getTeamBanners();
+  const teamOrder = ['galatasaray','fenerbahce','trabzonspor','besiktas','diyarbakir','alanyaspor','rizespor','corum','erzurumspor','eyupspor','gaziantep','genclerbirligi','goztepe','basaksehir','kasimpasa','kocaelispor','konyaspor','samsunspor','milli-takim'];
+  grid.innerHTML = teamOrder.map(key => {
+    const b = BRANCHES[key];
+    if (!b) return '';
+    const hasBanner = !!banners[key];
+    return `
+      <div class="team-banner-card">
+        <div class="team-banner-preview" id="tbp-${key}" style="${hasBanner ? `background-image:url('${banners[key]}')` : ''}">
+          ${!hasBanner ? `<div class="team-banner-empty-label">Görsel yok</div>` : ''}
+          <div class="team-banner-overlay">
+            <span style="font-weight:700;font-size:13px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.7)">${escHtml(b.label)}</span>
+          </div>
+        </div>
+        <div class="team-banner-actions">
+          <label class="btn-secondary btn-sm" style="cursor:pointer;display:inline-block">
+            Görsel Yükle
+            <input type="file" accept="image/*" style="display:none" onchange="handleTeamBannerFile('${key}', this)" />
+          </label>
+          ${hasBanner ? `<button class="btn-danger btn-sm" onclick="removeTeamBanner('${key}')">Kaldır</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function handleTeamBannerFile(teamKey, input) {
+  if (!input.files[0]) return;
+  const src = await compressImage(input.files[0], 1200, 400, 0.85);
+  saveTeamBanner(teamKey, src);
+  renderTeamBannersAdmin();
+}
+
+function removeTeamBanner(teamKey) {
+  saveTeamBanner(teamKey, null);
+  renderTeamBannersAdmin();
+}
+
+function applyTeamBanner(teamKey) {
+  const hero = document.querySelector('.page-hero');
+  if (!hero) return;
+  if (!teamKey) {
+    hero.style.backgroundImage = '';
+    hero.style.backgroundSize = '';
+    hero.style.backgroundPosition = '';
+    return;
+  }
+  const banners = getTeamBanners();
+  if (banners[teamKey]) {
+    hero.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.7) 100%), url('${banners[teamKey]}')`;
+    hero.style.backgroundSize = 'cover';
+    hero.style.backgroundPosition = 'center';
+  } else {
+    hero.style.backgroundImage = '';
+    hero.style.backgroundSize = '';
+    hero.style.backgroundPosition = '';
+  }
 }

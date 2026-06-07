@@ -198,7 +198,7 @@
         const linkVal = href === '/haberler' ? '' : href.replace('/haberler/', '');
         l.classList.toggle('active', linkVal === val);
       });
-      // Update hero
+      // Update hero text
       const heroH1 = document.querySelector('.page-hero h1');
       const heroP  = document.querySelector('.page-hero p');
       if (val && typeof BRANCHES !== 'undefined' && BRANCHES[val]) {
@@ -209,6 +209,8 @@
         if (heroH1) heroH1.textContent = 'Tüm Haberler';
         if (heroP)  heroP.textContent  = "Süper Lig'den son dakika gelişmeleri";
       }
+      // Update hero background
+      if (typeof applyTeamBanner === 'function') applyTeamBanner(val);
       renderAllNews();
     }
 
