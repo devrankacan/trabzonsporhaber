@@ -171,7 +171,7 @@ function renderAnalytics() {
           <div class="breakdown-row">
             <span class="breakdown-label">${branchLabel(br)}</span>
             <div class="breakdown-bar-wrap">
-              <div class="breakdown-bar" style="width:${Math.round((cnt/news.length)*100)}%;background:${BRANCHES[br]?.color||'#7A1219'}"></div>
+              <div class="breakdown-bar" style="width:${Math.round((cnt/news.length)*100)}%;background:linear-gradient(90deg,${BRANCHES[br]?.color||'#C8102E'},${BRANCHES[br]?.color2||BRANCHES[br]?.color||'#C8102E'})"></div>
             </div>
             <span class="breakdown-count">${cnt}</span>
           </div>
@@ -241,26 +241,26 @@ function incrementViews(newsId) {
 }
 
 const BRANCHES = {
-  'galatasaray':    { label: 'Galatasaray',      color: '#C8102E' },
-  'fenerbahce':     { label: 'Fenerbahçe',        color: '#003D7C' },
-  'besiktas':       { label: 'Beşiktaş',          color: '#1a1a1a' },
-  'trabzonspor':    { label: 'Trabzonspor',       color: '#7A1219' },
-  'basaksehir':     { label: 'Başakşehir FK',     color: '#1a56db' },
-  'samsunspor':     { label: 'Samsunspor',        color: '#c0392b' },
-  'kasimpasa':      { label: 'Kasımpaşa',         color: '#117a3b' },
-  'sivasspor':      { label: 'Sivasspor',         color: '#d4001a' },
-  'antalyaspor':    { label: 'Antalyaspor',       color: '#e74c3c' },
-  'alanyaspor':     { label: 'Alanyaspor',        color: '#e67e22' },
-  'gaziantep':      { label: 'Gaziantep FK',      color: '#8e44ad' },
-  'kayserispor':    { label: 'Kayserispor',       color: '#c0392b' },
-  'hatayspor':      { label: 'Hatayspor',         color: '#27ae60' },
-  'rizespor':       { label: 'Çaykur Rizespor',   color: '#1a7a3f' },
-  'konyaspor':      { label: 'Konyaspor',         color: '#2ecc71' },
-  'ankaragucu':     { label: 'Ankaragücü',        color: '#f39c12' },
-  'adanademirspor': { label: 'Adana Demirspor',   color: '#2980b9' },
-  'eyupspor':       { label: 'Eyüpspor',          color: '#6c3483' },
-  'bodrumfk':       { label: 'Bodrum FK',         color: '#16a085' },
-  'milli-takim':    { label: 'Milli Takım',       color: '#C8102E' },
+  'galatasaray':    { label: 'Galatasaray',      color: '#C8102E', color2: '#F5A623' },
+  'fenerbahce':     { label: 'Fenerbahçe',       color: '#003D7C', color2: '#FFCE00' },
+  'besiktas':       { label: 'Beşiktaş',         color: '#111111', color2: '#ffffff' },
+  'trabzonspor':    { label: 'Trabzonspor',      color: '#7A1219', color2: '#003478' },
+  'basaksehir':     { label: 'Başakşehir FK',    color: '#1a3e6e', color2: '#f5a623' },
+  'samsunspor':     { label: 'Samsunspor',       color: '#C8102E', color2: '#ffffff' },
+  'kasimpasa':      { label: 'Kasımpaşa',        color: '#117a3b', color2: '#ffffff' },
+  'sivasspor':      { label: 'Sivasspor',        color: '#d4001a', color2: '#FFCE00' },
+  'antalyaspor':    { label: 'Antalyaspor',      color: '#C8102E', color2: '#ffffff' },
+  'alanyaspor':     { label: 'Alanyaspor',       color: '#e67e22', color2: '#111111' },
+  'gaziantep':      { label: 'Gaziantep FK',     color: '#8e44ad', color2: '#ffffff' },
+  'kayserispor':    { label: 'Kayserispor',      color: '#c0392b', color2: '#f5a623' },
+  'hatayspor':      { label: 'Hatayspor',        color: '#27ae60', color2: '#ffffff' },
+  'rizespor':       { label: 'Çaykur Rizespor',  color: '#1a7a3f', color2: '#ffffff' },
+  'konyaspor':      { label: 'Konyaspor',        color: '#2ecc71', color2: '#111111' },
+  'ankaragucu':     { label: 'Ankaragücü',       color: '#f39c12', color2: '#111111' },
+  'adanademirspor': { label: 'Adana Demirspor',  color: '#2980b9', color2: '#ffffff' },
+  'eyupspor':       { label: 'Eyüpspor',         color: '#6c3483', color2: '#ffffff' },
+  'bodrumfk':       { label: 'Bodrum FK',        color: '#16a085', color2: '#ffffff' },
+  'milli-takim':    { label: 'Milli Takım',      color: '#C8102E', color2: '#ffffff' },
 };
 
 function branchLabel(key) {
@@ -622,7 +622,7 @@ function renderArticle() {
     <div class="article-header">
       <div class="article-category">
         <span class="category-badge ${news.category}">${escHtml(categoryLabel(news.category))}</span>
-        ${branchData ? `<a class="branch-pill" href="haberler.html" style="background:${branchData.color}">${escHtml(branchData.label)}</a>` : ''}
+        ${branchData ? `<a class="branch-pill" href="haberler.html" style="background:linear-gradient(135deg,${branchData.color} 50%,${branchData.color2||branchData.color} 50%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.4)">${escHtml(branchData.label)}</a>` : ''}
       </div>
       <h1 class="article-title">${escHtml(news.title)}</h1>
       <div class="article-meta">
@@ -951,7 +951,7 @@ function renderAdminList() {
       <div class="admin-news-body">
         <div class="admin-news-title">${escHtml(n.title)}</div>
         <div class="admin-news-meta">
-          ${n.branch && BRANCHES[n.branch] ? `<span class="branch-mini-badge" style="background:${BRANCHES[n.branch].color}">${escHtml(BRANCHES[n.branch].label)}</span>` : ''}
+          ${n.branch && BRANCHES[n.branch] ? `<span class="branch-mini-badge" style="background:linear-gradient(135deg,${BRANCHES[n.branch].color} 50%,${BRANCHES[n.branch].color2||BRANCHES[n.branch].color} 50%)">${escHtml(BRANCHES[n.branch].label)}</span>` : ''}
           <span class="category-badge ${n.category}">${escHtml(categoryLabel(n.category))}</span>
           ${n.slider ? '<span class="slider-badge">SLIDER</span>' : ''}
           <span>${formatDateShort(n.date)}</span>
