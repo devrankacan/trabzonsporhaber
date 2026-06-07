@@ -1587,6 +1587,7 @@ function handleSubmit() {
   const content = document.getElementById('newsContent').value.trim();
   const image = currentImageData || document.getElementById('newsImage')?.value.trim() || '';
   const author = document.getElementById('newsAuthor').value.trim();
+  const dateInput = document.getElementById('newsDate').value;
   const slider = document.getElementById('newsSlider').checked;
 
   if (!title || !branch.length || !category || !summary || !content) {
@@ -1599,7 +1600,7 @@ function handleSubmit() {
   if (editingId !== null) {
     const idx = list.findIndex(n => n.id === editingId);
     if (idx !== -1) {
-      list[idx] = { ...list[idx], title, branch, category, summary, content, image, author, slider };
+      list[idx] = { ...list[idx], title, branch, category, summary, content, image, author, slider, date: dateInput ? new Date(dateInput).toISOString() : list[idx].date };
     }
     showMessage('success', 'Haber başarıyla güncellendi!');
     editingId = null;
@@ -1614,7 +1615,7 @@ function handleSubmit() {
       image,
       author,
       slider,
-      date: new Date().toISOString()
+      date: dateInput ? new Date(dateInput).toISOString() : new Date().toISOString()
     };
     list.unshift(newItem);
     showMessage('success', 'Haber başarıyla yayınlandı!');
@@ -1645,6 +1646,7 @@ function resetForm() {
   document.getElementById('newsContent').value = '';
   document.getElementById('newsImage').value = '';
   document.getElementById('newsAuthor').value = '';
+  document.getElementById('newsDate').value = '';
   document.getElementById('newsSlider').checked = false;
   document.getElementById('titleCount').textContent = '0';
   document.getElementById('summaryCount').textContent = '0';
@@ -1701,6 +1703,7 @@ function editNews(id) {
   document.getElementById('newsContent').value = news.content;
   document.getElementById('newsImage').value = news.image || '';
   document.getElementById('newsAuthor').value = news.author || '';
+  document.getElementById('newsDate').value = news.date ? new Date(news.date).toISOString().slice(0, 16) : '';
   document.getElementById('newsSlider').checked = !!news.slider;
   document.getElementById('titleCount').textContent = news.title.length;
   document.getElementById('summaryCount').textContent = news.summary.length;
