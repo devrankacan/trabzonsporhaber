@@ -3,11 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Paneli | Trabzonspor Haber</title>
+  <title>Admin Girişi | Trabzonspor Haber</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
+
+  <!-- LOGIN OVERLAY -->
+  <div class="admin-login-overlay" id="loginOverlay">
+    <div class="admin-login-box">
+      <div class="admin-login-logo">
+        <div class="logo-icon">TS</div>
+        <div>
+          <div class="logo-title" style="color:var(--ts-red)">Trabzonspor</div>
+          <div class="logo-sub" style="color:var(--ts-blue)">HABER · ADMİN</div>
+        </div>
+      </div>
+      <h2 class="admin-login-title">Giriş Yap</h2>
+      <p class="admin-login-sub">Admin paneline erişmek için şifrenizi girin.</p>
+      <div class="admin-login-form">
+        <div class="form-group">
+          <label class="form-label">Şifre</label>
+          <div class="login-input-wrap">
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••••••" autocomplete="current-password" />
+            <button class="login-eye" id="loginEye" type="button" title="Göster/Gizle">👁</button>
+          </div>
+        </div>
+        <div class="login-error" id="loginError" style="display:none">Hatalı şifre. Lütfen tekrar deneyin.</div>
+        <button class="btn-primary full-width" id="loginBtn">Giriş Yap</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN CONTENT (hidden until login) -->
+  <div id="adminContent" style="display:none">
 
   <header class="header">
     <div class="container">
@@ -209,9 +238,52 @@
     </div>
   </footer>
 
+  </div><!-- /adminContent -->
+
   <script src="app.js"></script>
   <script>
-    initAdmin();
+    const ADMIN_HASH = '61299a133ae5cb97acaae8ef2b62f078869e9090ae3c6f5a1061637267ccb5a3';
+    const SESSION_KEY = 'ts_admin_auth';
+
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function showAdmin() {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('adminContent').style.display = 'block';
+      document.title = 'Admin Paneli | Trabzonspor Haber';
+      initAdmin();
+    }
+
+    async function attemptLogin() {
+      const pwd = document.getElementById('loginPassword').value;
+      const hash = await sha256(pwd);
+      if (hash === ADMIN_HASH) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        showAdmin();
+      } else {
+        const err = document.getElementById('loginError');
+        err.style.display = 'block';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginPassword').focus();
+        setTimeout(() => { err.style.display = 'none'; }, 3000);
+      }
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+    document.getElementById('loginPassword').addEventListener('keydown', e => {
+      if (e.key === 'Enter') attemptLogin();
+    });
+    document.getElementById('loginEye').addEventListener('click', () => {
+      const inp = document.getElementById('loginPassword');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
+
+    if (sessionStorage.getItem(SESSION_KEY) === '1') {
+      showAdmin();
+    }
   </script>
 </body>
 </html>
