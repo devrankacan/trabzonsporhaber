@@ -23,6 +23,22 @@
   --radius: 10px;
   --radius-sm: 6px;
   --radius-lg: 14px;
+  --header-bg: #ffffff;
+  --footer-bg: #111111;
+}
+
+[data-theme="dark"] {
+  --bg: #0f0f0f;
+  --bg-card: #1a1a1a;
+  --text: #f0f0f0;
+  --text-muted: #a0a0a0;
+  --text-light: #666;
+  --border: #2a2a2a;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+  --header-bg: #141414;
+  --footer-bg: #0a0a0a;
 }
 
 html { scroll-behavior: smooth; }
@@ -47,12 +63,19 @@ img { max-width: 100%; display: block; }
 
 /* ==================== HEADER ==================== */
 .header {
-  background: #ffffff;
+  background: var(--header-bg);
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 12px rgba(0,0,0,0.10);
   border-bottom: 3px solid var(--ts-red);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .header-inner {
@@ -176,7 +199,7 @@ img { max-width: 100%; display: block; }
 .header-search-input:focus {
   border-color: var(--ts-red);
   box-shadow: 0 0 0 3px rgba(122,18,25,0.08);
-  background: #fff;
+  background: var(--bg-card);
 }
 
 .header-search-icon {
@@ -2429,6 +2452,24 @@ img { max-width: 100%; display: block; }
 }
 .admin-standings-table tbody tr:hover { background: var(--bg); }
 .st-admin-actions { display: flex; gap: 6px; justify-content: center; }
+
+/* ==================== THEME TOGGLE ==================== */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.theme-toggle-btn:hover { background: var(--bg); color: var(--ts-red); }
 
 /* ==================== AUTH ==================== */
 .auth-btn-wrap { position: relative; display: flex; align-items: center; }

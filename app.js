@@ -1936,5 +1936,25 @@ function toggleUserMenu(btn) {
 }
 
 function initAuth() {
+  initTheme();
   updateAuthUI();
+}
+
+// ==================== THEME ====================
+
+function initTheme() {
+  const saved = localStorage.getItem('ts_theme') || 'light';
+  applyTheme(saved);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem('ts_theme', next);
+  });
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
 }
