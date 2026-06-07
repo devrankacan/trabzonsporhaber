@@ -597,54 +597,41 @@ function renderTransfersSidebar() {
     el.innerHTML = '<p class="no-news-text">Henüz transfer yok.</p>';
     return;
   }
-  el.innerHTML = transfers.slice(0, 8).map(t => {
-    const status = TRANSFER_STATUS[t.status] || { label: t.status, color: '#888' };
-    const fromB = BRANCHES[t.fromTeam];
-    const toB   = BRANCHES[t.toTeam];
-    const fromLogo = t.fromTeam && t.fromTeam !== 'yabanci' ? getLogo(t.fromTeam) : '';
-    const toLogo   = t.toTeam   && t.toTeam   !== 'yabanci' ? getLogo(t.toTeam)   : '';
 
-    function teamBlock(key, b, logo, foreignName) {
-      if (!key || key === 'yabanci') {
-        return `<div class="tr-team-block">
-          <div class="tr-team-icon" style="background:#555;color:#fff;font-size:10px;font-weight:800">${escHtml((foreignName||'?').slice(0,3).toUpperCase())}</div>
-          <div class="tr-team-name">${escHtml(foreignName||'Yabancı')}</div>
-        </div>`;
-      }
-      const short = b ? b.label.split(' ')[0] : key;
-      const iconHtml = logo
-        ? `<img src="${escAttr(logo)}" class="tr-team-logo-img" alt="${escAttr(short)}" />`
-        : `<div class="tr-team-icon" style="background:${b?.color||'#555'};color:#fff;font-size:10px;font-weight:800">${escHtml(short.slice(0,3).toUpperCase())}</div>`;
-      return `<div class="tr-team-block">
-        ${iconHtml}
-        <div class="tr-team-name">${escHtml(short)}</div>
-      </div>`;
+  function clubLogoHtml(key, foreignName) {
+    if (!key || key === 'yabanci') {
+      return `<div class="tr2-club-icon" style="background:#666">${escHtml((foreignName||'?').slice(0,2).toUpperCase())}</div>`;
     }
+    const logo = getLogo(key);
+    const b = BRANCHES[key];
+    if (logo) return `<img src="${escAttr(logo)}" class="tr2-club-logo" alt="${escAttr(b?.label||key)}" title="${escAttr(b?.label||key)}" />`;
+    return `<div class="tr2-club-icon" style="background:${b?.color||'#555'};color:#fff">${escHtml((b?.label||key).slice(0,2).toUpperCase())}</div>`;
+  }
 
+  el.innerHTML = `<div class="tr2-list">` + transfers.slice(0, 8).map(t => {
+    const status = TRANSFER_STATUS[t.status] || { label: t.status, color: '#888' };
     return `
-      <div class="tr-card">
-        <div class="tr-card-status" style="background:${status.color}">${escHtml(status.label)}</div>
-        <div class="tr-card-body">
-          <div class="tr-player-col">
-            ${t.playerImage
-              ? `<img src="${escAttr(t.playerImage)}" class="tr-player-photo" alt="${escAttr(t.player)}" />`
-              : `<div class="tr-player-photo tr-player-empty">⚽</div>`}
+      <div class="tr2-row">
+        <div class="tr2-player-col">
+          ${t.playerImage
+            ? `<img src="${escAttr(t.playerImage)}" class="tr2-photo" alt="${escAttr(t.player)}" />`
+            : `<div class="tr2-photo tr2-photo-empty">⚽</div>`}
+          <div class="tr2-player-info">
+            <div class="tr2-player-name">${escHtml(t.player)}</div>
+            <div class="tr2-position">${escHtml(t.position||'')}</div>
           </div>
-          <div class="tr-info-col">
-            <div class="tr-player-name">${escHtml(t.player)}</div>
-            <div class="tr-teams-row">
-              ${teamBlock(t.fromTeam, fromB, fromLogo, t.foreignTeam)}
-              <div class="tr-arrow-col">
-                <svg width="18" height="10" viewBox="0 0 18 10"><path d="M0 5h14M10 1l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              ${teamBlock(t.toTeam, toB, toLogo, t.foreignTeam)}
-            </div>
-            ${t.fee ? `<div class="tr-fee">💰 ${escHtml(t.fee)}</div>` : ''}
-          </div>
+        </div>
+        <div class="tr2-clubs-col">
+          ${clubLogoHtml(t.fromTeam, t.foreignTeam)}
+          <svg class="tr2-arrow" viewBox="0 0 16 8" width="14" height="8"><path d="M0 4h12M9 1l3 3-3 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          ${clubLogoHtml(t.toTeam, t.foreignTeam)}
+        </div>
+        <div class="tr2-fee-col">
+          ${t.fee ? `<span class="tr2-fee">${escHtml(t.fee)}</span>` : `<span class="tr2-status-dot" style="background:${status.color}" title="${escHtml(status.label)}"></span>`}
         </div>
       </div>
     `;
-  }).join('');
+  }).join('') + `</div>`;
 }
 
 function renderAdminTransfers() {

@@ -2360,116 +2360,110 @@ img { max-width: 100%; display: block; }
 }
 
 /* ==================== TRANSFER SIDEBAR ==================== */
-.tr-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 10px;
-  background: var(--bg-card);
-  box-shadow: var(--shadow);
-  transition: box-shadow 0.2s;
-}
-.tr-card:last-child { margin-bottom: 0; }
-.tr-card:hover { box-shadow: var(--shadow-md); }
-
-.tr-card-status {
-  padding: 3px 10px;
-  font-size: 10px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.tr-card-body {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-}
-
-.tr-player-col { flex-shrink: 0; }
-.tr-player-photo {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--border);
-  display: block;
-}
-.tr-player-empty {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: var(--bg);
-  border: 2px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.tr-info-col { flex: 1; min-width: 0; }
-.tr-player-name {
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 6px;
-}
-
-.tr-teams-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.tr-team-block {
+.tr2-list {
   display: flex;
   flex-direction: column;
+}
+
+.tr2-row {
+  display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.tr2-row:last-child { border-bottom: none; }
+.tr2-row:hover { background: var(--bg); margin: 0 -4px; padding-left: 4px; padding-right: 4px; border-radius: 6px; }
+
+.tr2-player-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
   min-width: 0;
 }
-.tr-team-icon {
-  width: 28px;
-  height: 28px;
+
+.tr2-photo {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg);
+  display: block;
+}
+.tr2-photo-empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  font-size: 18px;
 }
-.tr-team-logo-img {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: contain;
-  border: 1px solid var(--border);
-  background: #fff;
-}
-.tr-team-name {
-  font-size: 9px;
+
+.tr2-player-info { min-width: 0; }
+.tr2-player-name {
+  font-size: 13px;
   font-weight: 700;
-  color: var(--text-muted);
-  text-align: center;
+  color: var(--ts-red);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 52px;
 }
-.tr-arrow-col {
+.tr2-position {
+  font-size: 11px;
   color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.tr2-clubs-col {
   display: flex;
   align-items: center;
+  gap: 4px;
   flex-shrink: 0;
 }
-.tr-fee {
-  font-size: 11px;
-  font-weight: 600;
+
+.tr2-club-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 2px;
+}
+.tr2-club-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.tr2-arrow {
   color: var(--text-muted);
-  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.tr2-fee-col {
+  flex-shrink: 0;
+  min-width: 60px;
+  text-align: right;
+}
+.tr2-fee {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+}
+.tr2-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
 
 /* ==================== MULTI-SELECT BRANCH ==================== */
