@@ -3,6 +3,32 @@
 // ==================== DATA LAYER ====================
 
 const STORAGE_KEY = 'ts_haberler';
+const COMMENTS_KEY = 'ts_comments';
+const VIEWS_KEY = 'ts_views';
+
+function getComments(newsId) {
+  const all = JSON.parse(localStorage.getItem(COMMENTS_KEY) || '{}');
+  return all[newsId] || [];
+}
+
+function saveComment(newsId, name, text) {
+  const all = JSON.parse(localStorage.getItem(COMMENTS_KEY) || '{}');
+  if (!all[newsId]) all[newsId] = [];
+  all[newsId].push({ name, text, date: new Date().toISOString() });
+  localStorage.setItem(COMMENTS_KEY, JSON.stringify(all));
+}
+
+function getViews(newsId) {
+  const all = JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}');
+  return all[newsId] || 0;
+}
+
+function incrementViews(newsId) {
+  const all = JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}');
+  all[newsId] = (all[newsId] || 0) + 1;
+  localStorage.setItem(VIEWS_KEY, JSON.stringify(all));
+  return all[newsId];
+}
 
 const BRANCHES = {
   'futbol-a':    { label: 'Futbol A Takım',      icon: '', color: '#7A1219' },
@@ -366,6 +392,7 @@ function renderArticle() {
 
   const contentHtml = news.content.split('\n').filter(p => p.trim()).map(p => `<p>${escHtml(p)}</p>`).join('');
 
+  const views = incrementViews(news.id);
   const branchData = BRANCHES[news.branch];
   articleEl.innerHTML = `
     <div class="article-header">
@@ -377,15 +404,72 @@ function renderArticle() {
       <div class="article-meta">
         <span>📅 ${formatDate(news.date)}</span>
         ${news.author ? `<span>✍️ ${escHtml(news.author)}</span>` : ''}
+        <span class="article-views">👁 ${views} görüntülenme</span>
       </div>
     </div>
     ${imageHtml}
     <div class="article-body">${contentHtml}</div>
+    <div class="comments-section" id="commentsSection">
+      <h3 class="comments-title">Yorumlar</h3>
+      <div class="comments-list" id="commentsList"></div>
+      <div class="comment-form">
+        <h4 class="comment-form-title">Yorum Yap</h4>
+        <div class="comment-form-row">
+          <input type="text" id="commentName" class="form-input" placeholder="Adınız Soyadınız" maxlength="60" />
+          <textarea id="commentText" class="form-input form-textarea" placeholder="Yorumunuz..." maxlength="500" rows="3"></textarea>
+        </div>
+        <button class="btn-primary" id="commentSubmit">Yorum Gönder</button>
+        <div class="comment-msg" id="commentMsg" style="display:none"></div>
+      </div>
+    </div>
   `;
+
+  renderComments(news.id);
+
+  document.getElementById('commentSubmit').addEventListener('click', () => {
+    const name = document.getElementById('commentName').value.trim();
+    const text = document.getElementById('commentText').value.trim();
+    const msg = document.getElementById('commentMsg');
+    if (!name) { showCommentMsg('Lütfen adınızı girin.', 'error'); return; }
+    if (!text) { showCommentMsg('Lütfen bir yorum yazın.', 'error'); return; }
+    saveComment(news.id, name, text);
+    document.getElementById('commentName').value = '';
+    document.getElementById('commentText').value = '';
+    renderComments(news.id);
+    showCommentMsg('Yorumunuz eklendi!', 'success');
+  });
 
   renderRecentSidebar(Number(id));
   initMobileNav();
   initHeaderSearch();
+}
+
+function showCommentMsg(text, type) {
+  const msg = document.getElementById('commentMsg');
+  if (!msg) return;
+  msg.textContent = text;
+  msg.className = `comment-msg comment-msg-${type}`;
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 3000);
+}
+
+function renderComments(newsId) {
+  const list = document.getElementById('commentsList');
+  if (!list) return;
+  const comments = getComments(newsId);
+  if (comments.length === 0) {
+    list.innerHTML = '<p class="no-comments-text">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>';
+    return;
+  }
+  list.innerHTML = comments.slice().reverse().map(c => `
+    <div class="comment-item">
+      <div class="comment-header">
+        <span class="comment-name">${escHtml(c.name)}</span>
+        <span class="comment-date">${formatDate(c.date)}</span>
+      </div>
+      <p class="comment-text">${escHtml(c.text)}</p>
+    </div>
+  `).join('');
 }
 
 function renderRecentSidebar(excludeId) {
