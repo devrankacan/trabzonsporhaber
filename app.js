@@ -608,33 +608,50 @@ function renderTransfersSidebar() {
     return `<div class="tr2-club-icon" style="background:${b?.color||'#555'};color:#fff">${escHtml((b?.label||key).slice(0,2).toUpperCase())}</div>`;
   }
 
-  el.innerHTML = `<div class="tr2-list">` + transfers.slice(0, 8).map(t => {
-    const status = TRANSFER_STATUS[t.status] || { label: t.status, color: '#888' };
-    return `
-      <div class="tr2-row">
-        <div class="tr2-player-col">
-          ${t.playerImage
-            ? `<img src="${escAttr(t.playerImage)}" class="tr2-photo" alt="${escAttr(t.player)}" />`
-            : `<div class="tr2-photo tr2-photo-empty">⚽</div>`}
-          <div class="tr2-player-info">
-            <div class="tr2-player-name">${escHtml(t.player)}</div>
-            <div class="tr2-meta">
-              ${t.position ? `<span class="tr2-position">${escHtml(t.position)}</span>` : ''}
-              <span class="tr2-status-badge" style="background:${status.color}">${escHtml(status.label)}</span>
-            </div>
-          </div>
-        </div>
-        <div class="tr2-clubs-col">
-          ${clubLogoHtml(t.fromTeam, t.foreignTeam)}
-          <svg class="tr2-arrow" viewBox="0 0 16 8" width="14" height="8"><path d="M0 4h12M9 1l3 3-3 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          ${clubLogoHtml(t.toTeam, t.foreignTeam)}
-        </div>
-        <div class="tr2-fee-col">
-          ${t.fee ? `<span class="tr2-fee">${escHtml(t.fee)}</span>` : `<span class="tr2-status-dot" style="background:${status.color}" title="${escHtml(status.label)}"></span>`}
-        </div>
-      </div>
-    `;
-  }).join('') + `</div>`;
+  el.innerHTML = `
+    <table class="tr-table">
+      <thead>
+        <tr>
+          <th>Oyuncu / Mevki</th>
+          <th>Kulüp</th>
+          <th>Bonservis</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${transfers.slice(0, 8).map(t => {
+          const status = TRANSFER_STATUS[t.status] || { label: t.status, color: '#888' };
+          return `
+            <tr>
+              <td>
+                <div class="tr-player-cell">
+                  ${t.playerImage
+                    ? `<img src="${escAttr(t.playerImage)}" class="tr-pimg" alt="${escAttr(t.player)}" />`
+                    : `<div class="tr-pimg tr-pimg-empty">⚽</div>`}
+                  <div>
+                    <div class="tr-pname">${escHtml(t.player)}</div>
+                    <div class="tr-pmeta">
+                      ${t.position ? `<span class="tr-ppos">${escHtml(t.position)}</span>` : ''}
+                      <span class="tr-pstatus" style="color:${status.color}">${escHtml(status.label)}</span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="tr-clubs-cell">
+                  ${clubLogoHtml(t.fromTeam, t.foreignTeam)}
+                  <svg viewBox="0 0 14 8" width="12" height="8" style="color:var(--text-muted);flex-shrink:0"><path d="M0 4h10M7 1l3 3-3 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  ${clubLogoHtml(t.toTeam, t.foreignTeam)}
+                </div>
+              </td>
+              <td class="tr-fee-cell">
+                ${t.fee ? escHtml(t.fee) : '—'}
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
 }
 
 function renderAdminTransfers() {
