@@ -4,6 +4,21 @@
 
 const STORAGE_KEY = 'ts_haberler';
 
+const BRANCHES = {
+  'futbol-a':    { label: 'Futbol A Takım',      icon: '⚽', color: '#059669' },
+  'basketbol':   { label: 'Basketbol',            icon: '🏀', color: '#7c3aed' },
+  'kadin-futbol':{ label: 'Kadın Futbol A Takım', icon: '👟', color: '#db2777' },
+  'akademi':     { label: 'Akademi',              icon: '🌱', color: '#d97706' },
+};
+
+function branchLabel(key) {
+  return BRANCHES[key] ? `${BRANCHES[key].icon} ${BRANCHES[key].label}` : 'Genel';
+}
+
+function branchShortLabel(key) {
+  return BRANCHES[key] ? BRANCHES[key].label : key || '';
+}
+
 const SAMPLE_NEWS = [
   {
     id: 1,
@@ -11,6 +26,7 @@ const SAMPLE_NEWS = [
     summary: "Bordo-mavili kulüp, yeni sezon öncesinde 3 önemli transferi kadroya kattığını duyurdu.",
     content: "Trabzonspor Kulübü, yeni sezon hazırlıkları kapsamında gerçekleştirilen transfer çalışmalarını basın toplantısıyla kamuoyuyla paylaştı.\n\nKulüp yönetimi, teknik direktörün talepleri doğrultusunda kadro güçlendirme çalışmalarını sürdürdüklerini belirtti.\n\nYeni transferlerin takıma büyük katkı sağlayacağı öngörülmekte, taraftarlar bu haberle büyük sevinç yaşadı.",
     category: "transfer",
+    branch: "futbol-a",
     image: "",
     author: "Spor Editörü",
     date: new Date(Date.now() - 86400000).toISOString(),
@@ -22,6 +38,7 @@ const SAMPLE_NEWS = [
     summary: "Deplasmanda oynanan kritik maçta Trabzonspor rakibini 3-1 mağlup etti.",
     content: "Süper Lig'in kritik haftasında Trabzonspor, deplasmanda oynadığı müsabakada rakibini 3-1 mağlup etmeyi başardı.\n\nMaçın ilk yarısında 2-0 öne geçen bordo-mavililerin gollerini Yusuf Yazıcı, Enis Destan ve Berat Özdemir attı.\n\nGalibiyet sonrası takım ikinci sıraya yükselirken teknik direktör maç sonrası değerlendirmelerini paylaştı.",
     category: "mac",
+    branch: "futbol-a",
     image: "",
     author: "Maç Muhabiri",
     date: new Date(Date.now() - 172800000).toISOString(),
@@ -33,9 +50,46 @@ const SAMPLE_NEWS = [
     summary: "Trabzonspor taraftarları Papara Park'ta muhteşem bir kutlama organizasyonu düzenledi.",
     content: "Trabzonspor taraftarları, takımın son galibiyetinin ardından Papara Park önünde büyük bir kutlama organizasyonu gerçekleştirdi.\n\nBinlerce taraftar bordo-mavi atkılar ve flamalarıyla bir araya gelirken havai fişek gösterisi de düzenlendi.\n\nTaraftar dernekleri bu kutlamayı sezonun en önemli anlarından biri olarak nitelendirdi.",
     category: "taraftar",
+    branch: "futbol-a",
     image: "",
     author: "Taraftar Muhabiri",
     date: new Date(Date.now() - 259200000).toISOString(),
+    slider: false
+  },
+  {
+    id: 4,
+    title: "Basketbol Takımı Şampiyonlar Ligi'nde Sahne Alıyor",
+    summary: "Trabzonspor Basketbol, Şampiyonlar Ligi'nde ilk maçına çıkıyor.",
+    content: "Trabzonspor Basketbol takımı, EuroLeague Basketball Şampiyonlar Ligi'ndeki ilk maçına ev sahipliği yapacak.\n\nTaraftarların yoğun ilgi göstermesi beklenen maç öncesinde teknik direktör, kadronun hazır olduğunu vurguladı.",
+    category: "mac",
+    branch: "basketbol",
+    image: "",
+    author: "Basketbol Muhabiri",
+    date: new Date(Date.now() - 43200000).toISOString(),
+    slider: false
+  },
+  {
+    id: 5,
+    title: "Kadın Futbol Takımı Ligi Liderliğini Sürdürüyor",
+    summary: "Trabzonspor Kadın Futbol A Takımı, sezonun beşinci galibiyetini aldı.",
+    content: "Trabzonspor Kadın Futbol A Takımı, lig maçında rakibini 2-0 mağlup ederek liderliğini pekiştirdi.\n\nKaptan, maç sonrası takımın sezon hedeflerini paylaştı.",
+    category: "mac",
+    branch: "kadin-futbol",
+    image: "",
+    author: "Kadın Futbol Muhabiri",
+    date: new Date(Date.now() - 108000000).toISOString(),
+    slider: false
+  },
+  {
+    id: 6,
+    title: "Akademi Oyuncusu A Takıma Yükseltildi",
+    summary: "Genç yetenek Trabzonspor altyapısından A takım kadrosuna dahil edildi.",
+    content: "Trabzonspor Akademisi'nin yetiştirdiği genç yetenek, teknik direktörün kararıyla A takım kadrosuna alındı.\n\n18 yaşındaki oyuncu, altyapıda geçirdiği 5 yılın ardından bu başarıya ulaştı.",
+    category: "transfer",
+    branch: "akademi",
+    image: "",
+    author: "Akademi Muhabiri",
+    date: new Date(Date.now() - 216000000).toISOString(),
     slider: false
   }
 ];
@@ -188,10 +242,12 @@ function buildTicker() {
 // ==================== NEWS GRID ====================
 
 function buildNewsCard(n) {
+  const branchData = BRANCHES[n.branch];
   return `
     <div class="news-card" onclick="location.href='${slugify(n.id)}'">
       <div class="news-card-image" style="${buildBgStyle(n.image)}">
         <span class="category-badge ${n.category}">${escHtml(categoryLabel(n.category))}</span>
+        ${branchData ? `<span class="branch-badge" style="background:${branchData.color}">${branchData.icon} ${escHtml(branchData.label)}</span>` : ''}
       </div>
       <div class="news-card-body">
         <h3 class="news-card-title">${escHtml(n.title)}</h3>
@@ -244,6 +300,26 @@ function renderPopularNews() {
 
 // ==================== ALL NEWS PAGE ====================
 
+function getActiveBranch() {
+  return new URLSearchParams(location.search).get('brans') || '';
+}
+
+function highlightActiveBranch() {
+  const active = getActiveBranch();
+  document.querySelectorAll('.branch-link').forEach(link => {
+    const url = new URL(link.href, location.href);
+    const linkBranch = url.searchParams.get('brans') || '';
+    link.classList.toggle('active', linkBranch === active);
+  });
+
+  const titleEl = document.getElementById('pageHeroTitle');
+  const subEl = document.getElementById('pageHeroSub');
+  if (active && BRANCHES[active] && titleEl) {
+    titleEl.textContent = `${BRANCHES[active].icon} ${BRANCHES[active].label}`;
+    if (subEl) subEl.textContent = `Trabzonspor ${BRANCHES[active].label} haberleri`;
+  }
+}
+
 function renderAllNews() {
   const grid = document.getElementById('allNewsGrid');
   const empty = document.getElementById('allNewsEmpty');
@@ -251,8 +327,10 @@ function renderAllNews() {
 
   const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
   const category = document.getElementById('categoryFilter')?.value || '';
+  const branch = getActiveBranch();
 
   let news = getNews();
+  if (branch) news = news.filter(n => n.branch === branch);
   if (query) news = news.filter(n => n.title.toLowerCase().includes(query) || n.summary.toLowerCase().includes(query));
   if (category) news = news.filter(n => n.category === category);
 
@@ -289,9 +367,13 @@ function renderArticle() {
 
   const contentHtml = news.content.split('\n').filter(p => p.trim()).map(p => `<p>${escHtml(p)}</p>`).join('');
 
+  const branchData = BRANCHES[news.branch];
   articleEl.innerHTML = `
     <div class="article-header">
-      <div class="article-category"><span class="category-badge ${news.category}">${escHtml(categoryLabel(news.category))}</span></div>
+      <div class="article-category">
+        <span class="category-badge ${news.category}">${escHtml(categoryLabel(news.category))}</span>
+        ${branchData ? `<a class="branch-pill" href="haberler.html?brans=${news.branch}" style="background:${branchData.color}">${branchData.icon} ${escHtml(branchData.label)}</a>` : ''}
+      </div>
       <h1 class="article-title">${escHtml(news.title)}</h1>
       <div class="article-meta">
         <span>📅 ${formatDate(news.date)}</span>
@@ -363,6 +445,7 @@ function initAdminForm() {
 
 function handleSubmit() {
   const title = document.getElementById('newsTitle').value.trim();
+  const branch = document.getElementById('newsBranch')?.value || '';
   const category = document.getElementById('newsCategory').value;
   const summary = document.getElementById('newsSummary').value.trim();
   const content = document.getElementById('newsContent').value.trim();
@@ -370,10 +453,8 @@ function handleSubmit() {
   const author = document.getElementById('newsAuthor').value.trim();
   const slider = document.getElementById('newsSlider').checked;
 
-  const msg = document.getElementById('formMessage');
-
-  if (!title || !category || !summary || !content) {
-    showMessage('error', 'Lütfen zorunlu alanları doldurun (Başlık, Kategori, Özet, İçerik).');
+  if (!title || !branch || !category || !summary || !content) {
+    showMessage('error', 'Lütfen zorunlu alanları doldurun (Başlık, Branş, Kategori, Özet, İçerik).');
     return;
   }
 
@@ -382,7 +463,7 @@ function handleSubmit() {
   if (editingId !== null) {
     const idx = list.findIndex(n => n.id === editingId);
     if (idx !== -1) {
-      list[idx] = { ...list[idx], title, category, summary, content, image, author, slider };
+      list[idx] = { ...list[idx], title, branch, category, summary, content, image, author, slider };
     }
     showMessage('success', 'Haber başarıyla güncellendi!');
     editingId = null;
@@ -390,6 +471,7 @@ function handleSubmit() {
     const newItem = {
       id: Date.now(),
       title,
+      branch,
       category,
       summary,
       content,
@@ -419,6 +501,8 @@ function showMessage(type, text) {
 function resetForm() {
   editingId = null;
   document.getElementById('newsTitle').value = '';
+  const branchEl = document.getElementById('newsBranch');
+  if (branchEl) branchEl.value = '';
   document.getElementById('newsCategory').value = '';
   document.getElementById('newsSummary').value = '';
   document.getElementById('newsContent').value = '';
@@ -453,6 +537,7 @@ function renderAdminList() {
       <div class="admin-news-body">
         <div class="admin-news-title">${escHtml(n.title)}</div>
         <div class="admin-news-meta">
+          ${n.branch && BRANCHES[n.branch] ? `<span class="branch-mini-badge" style="background:${BRANCHES[n.branch].color}">${BRANCHES[n.branch].icon} ${escHtml(BRANCHES[n.branch].label)}</span>` : ''}
           <span class="category-badge ${n.category}">${escHtml(categoryLabel(n.category))}</span>
           ${n.slider ? '<span class="slider-badge">SLIDER</span>' : ''}
           <span>${formatDateShort(n.date)}</span>
@@ -472,6 +557,8 @@ function editNews(id) {
 
   editingId = id;
   document.getElementById('newsTitle').value = news.title;
+  const branchEl = document.getElementById('newsBranch');
+  if (branchEl) branchEl.value = news.branch || '';
   document.getElementById('newsCategory').value = news.category;
   document.getElementById('newsSummary').value = news.summary;
   document.getElementById('newsContent').value = news.content;

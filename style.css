@@ -468,12 +468,17 @@ img { max-width: 100%; display: block; }
   background-position: center;
   position: relative;
   flex-shrink: 0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 
-.news-card-image .category-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
+.news-card-image .category-badge,
+.news-card-image .branch-badge {
+  position: relative;
+  z-index: 1;
 }
 
 .news-card-body {
@@ -1044,6 +1049,110 @@ img { max-width: 100%; display: block; }
 .footer-nav { display: flex; gap: 20px; }
 .footer-nav a { font-size: 13px; transition: color 0.2s; }
 .footer-nav a:hover { color: #fff; }
+
+/* ==================== BRANCH NAV ==================== */
+.branch-nav {
+  background: var(--ts-blue);
+  border-bottom: 3px solid var(--ts-gold);
+  position: sticky;
+  top: 70px;
+  z-index: 90;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.branch-nav::-webkit-scrollbar { display: none; }
+
+.branch-nav-inner {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 46px;
+  white-space: nowrap;
+  padding: 0 4px;
+}
+
+.branch-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.branch-link:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+}
+
+.branch-link.active {
+  background: var(--ts-gold);
+  color: var(--ts-blue);
+}
+
+.branch-icon { font-size: 15px; line-height: 1; }
+
+/* Branch badge on news cards */
+.news-card-image {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px;
+}
+
+.branch-badge {
+  display: inline-block;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+/* Branch pill in article */
+.branch-pill {
+  display: inline-block;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+  transition: opacity 0.2s;
+}
+
+.branch-pill:hover { opacity: 0.85; }
+
+/* Branch mini badge in admin list */
+.branch-mini-badge {
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+/* Mobile branch divider */
+.mobile-branch-divider {
+  padding: 8px 16px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ts-gold);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 4px;
+}
 
 /* ==================== SCROLLBAR ==================== */
 ::-webkit-scrollbar { width: 6px; }

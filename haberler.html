@@ -30,14 +30,40 @@
         <a href="index.html" class="nav-link">Anasayfa</a>
         <a href="haberler.html" class="nav-link">Haberler</a>
         <a href="admin.html" class="nav-link">+ Haber Ekle</a>
+        <div class="mobile-branch-divider">Branşlar</div>
+        <a href="haberler.html?brans=futbol-a" class="nav-link">⚽ Futbol A Takım</a>
+        <a href="haberler.html?brans=basketbol" class="nav-link">🏀 Basketbol</a>
+        <a href="haberler.html?brans=kadin-futbol" class="nav-link">👟 Kadın Futbol A Takım</a>
+        <a href="haberler.html?brans=akademi" class="nav-link">🌱 Akademi</a>
       </nav>
     </div>
   </header>
 
-  <div class="page-hero">
+  <!-- BRANCH NAV -->
+  <nav class="branch-nav">
     <div class="container">
-      <h1>Tüm Haberler</h1>
-      <p>Trabzonspor'dan son dakika gelişmeleri</p>
+      <div class="branch-nav-inner">
+        <a href="haberler.html" class="branch-link">Tümü</a>
+        <a href="haberler.html?brans=futbol-a" class="branch-link">
+          <span class="branch-icon">⚽</span> Futbol A Takım
+        </a>
+        <a href="haberler.html?brans=basketbol" class="branch-link">
+          <span class="branch-icon">🏀</span> Basketbol
+        </a>
+        <a href="haberler.html?brans=kadin-futbol" class="branch-link">
+          <span class="branch-icon">👟</span> Kadın Futbol A Takım
+        </a>
+        <a href="haberler.html?brans=akademi" class="branch-link">
+          <span class="branch-icon">🌱</span> Akademi
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-hero" id="pageHero">
+    <div class="container">
+      <h1 id="pageHeroTitle">Tüm Haberler</h1>
+      <p id="pageHeroSub">Trabzonspor'dan son dakika gelişmeleri</p>
     </div>
   </div>
 
@@ -88,6 +114,7 @@
     renderAllNews();
     document.getElementById('searchInput').addEventListener('input', renderAllNews);
     document.getElementById('categoryFilter').addEventListener('change', renderAllNews);
+    highlightActiveBranch();
   </script>
 </body>
 </html>
