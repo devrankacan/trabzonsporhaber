@@ -313,10 +313,10 @@ img { max-width: 100%; display: block; }
 
 .slider {
   position: relative;
-  height: 420px;
+  height: 460px;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   box-shadow: var(--shadow-lg);
 }
@@ -505,7 +505,7 @@ img { max-width: 100%; display: block; }
   align-items: center;
   overflow: hidden;
   height: 36px;
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   border-radius: 0 0 var(--radius) var(--radius);
 }
