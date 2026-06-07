@@ -925,7 +925,7 @@ function renderStandingsSidebar() {
           const b = BRANCHES[r.team];
           const av = (r.goalsFor || 0) - (r.goalsAgainst || 0);
           return `
-            <tr class="${i < 4 ? 'st-ucl' : i < 6 ? 'st-uel' : ''}">
+            <tr class="${i === 0 ? 'st-ucl1' : i === 1 ? 'st-ucl2' : i === 2 ? 'st-uel' : i === 3 ? 'st-uecl' : ''}">
               <td class="st-rank">${i + 1}</td>
               <td class="st-team">
                 ${getLogo(r.team)
@@ -947,8 +947,10 @@ function renderStandingsSidebar() {
       </tbody>
     </table>
     <div class="standings-legend">
-      <span class="legend-dot legend-ucl"></span> Şampiyonlar Ligi
-      <span class="legend-dot legend-uel" style="margin-left:8px"></span> Avrupa Ligi
+      <div class="legend-row"><span class="legend-dot" style="background:#1565c0"></span> <span>1. ŞL (Lig Aşaması)</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:#42a5f5"></span> <span>2. ŞL (2. Eleme)</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:#e65100"></span> <span>3. AL (2. Eleme)</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:#2e7d32"></span> <span>4. KL (2. Eleme)</span></div>
     </div>
   `;
 }

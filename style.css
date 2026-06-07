@@ -2277,25 +2277,31 @@ img { max-width: 100%; display: block; }
 }
 .st-points { font-weight: 800; color: var(--ts-red); }
 
-.st-ucl td:first-child { border-left: 3px solid #1565c0; }
-.st-uel td:first-child { border-left: 3px solid #e65100; }
+.st-ucl1 td:first-child { border-left: 3px solid #1565c0; }
+.st-ucl2 td:first-child { border-left: 3px solid #42a5f5; }
+.st-uel  td:first-child { border-left: 3px solid #e65100; }
+.st-uecl td:first-child { border-left: 3px solid #2e7d32; }
 
 .standings-legend {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 4px;
   padding: 8px 4px 4px;
   font-size: 10px;
   color: var(--text-muted);
 }
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 .legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
   display: inline-block;
 }
-.legend-ucl { background: #1565c0; }
-.legend-uel { background: #e65100; }
 
 /* Admin standings table */
 .admin-standings-table {
