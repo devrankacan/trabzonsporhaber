@@ -874,7 +874,10 @@ const DEFAULT_STANDINGS = [
 
 function getStandings() {
   const stored = localStorage.getItem(STANDINGS_KEY);
-  if (stored) return JSON.parse(stored);
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    if (parsed.length > 0) return parsed;
+  }
   localStorage.setItem(STANDINGS_KEY, JSON.stringify(DEFAULT_STANDINGS));
   return DEFAULT_STANDINGS;
 }
