@@ -1846,6 +1846,10 @@ function openAuthModal(tab) {
           <label class="form-label">Şifre</label>
           <input type="password" id="regPwd" class="form-input" placeholder="En az 6 karakter" autocomplete="new-password" />
         </div>
+        <div class="form-group captcha-group">
+          <label class="form-label captcha-label" id="captchaQuestion"></label>
+          <input type="number" id="captchaAnswer" class="form-input" placeholder="Cevabınız" autocomplete="off" />
+        </div>
         <div class="auth-error" id="regError" style="display:none"></div>
         <button class="btn-primary full-width" style="margin-top:16px" onclick="handleRegister()">Üye Ol</button>
       </div>
@@ -1853,7 +1857,23 @@ function openAuthModal(tab) {
   `;
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if (e.target === modal) closeAuthModal(); });
-  setTimeout(() => modal.classList.add('open'), 10);
+  setTimeout(() => { modal.classList.add('open'); generateCaptcha(); }, 10);
+}
+
+let _captchaAnswer = 0;
+function generateCaptcha() {
+  const q = document.getElementById('captchaQuestion');
+  if (!q) return;
+  const a = Math.floor(Math.random() * 10) + 1;
+  const b = Math.floor(Math.random() * 10) + 1;
+  const ops = [
+    { text: `${a} + ${b} kaç eder?`, ans: a + b },
+    { text: `${a + b} - ${a} kaç eder?`, ans: b },
+    { text: `${a} × ${b} kaç eder?`, ans: a * b },
+  ];
+  const pick = ops[Math.floor(Math.random() * ops.length)];
+  q.textContent = pick.text;
+  _captchaAnswer = pick.ans;
 }
 
 function closeAuthModal() {
@@ -1886,10 +1906,17 @@ function handleRegister() {
   const username = document.getElementById('regUsername').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const pwd = document.getElementById('regPwd').value;
+  const captcha = parseInt(document.getElementById('captchaAnswer').value, 10);
   const err = document.getElementById('regError');
   if (!username || !email || !pwd) { showAuthError(err, 'Tüm alanları doldurun.'); return; }
   if (pwd.length < 6) { showAuthError(err, 'Şifre en az 6 karakter olmalı.'); return; }
   if (!/^[a-zA-Z0-9_]+$/.test(username)) { showAuthError(err, 'Kullanıcı adı sadece harf, rakam ve _ içerebilir.'); return; }
+  if (isNaN(captcha) || captcha !== _captchaAnswer) {
+    showAuthError(err, 'Robot doğrulama hatalı. Lütfen tekrar deneyin.');
+    generateCaptcha();
+    document.getElementById('captchaAnswer').value = '';
+    return;
+  }
   const result = registerUser(username, email, pwd);
   if (result.error) { showAuthError(err, result.error); return; }
   userLogin(result.user);

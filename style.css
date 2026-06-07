@@ -2814,6 +2814,21 @@ img { max-width: 100%; display: block; }
   box-shadow: var(--shadow);
 }
 
+.captcha-group {
+  background: var(--bg);
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  padding: 12px 14px 8px;
+}
+
+.captcha-label {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  display: block;
+  margin-bottom: 8px;
+}
+
 .auth-error {
   background: #fff0f0;
   border: 1px solid #fca5a5;
