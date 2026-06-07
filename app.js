@@ -86,7 +86,7 @@ function renderAnalytics() {
 
   // Branch breakdown
   const branchBreak = {};
-  news.forEach(n => { branchBreak[n.branch] = (branchBreak[n.branch] || 0) + 1; });
+  news.forEach(n => { getTeams(n).forEach(k => { branchBreak[k] = (branchBreak[k] || 0) + 1; }); });
 
   // Recent comments (last 5)
   const recentComments = [];
@@ -271,6 +271,11 @@ function branchLabel(key) {
 
 function branchShortLabel(key) {
   return BRANCHES[key] ? BRANCHES[key].label : key || '';
+}
+
+function getTeams(n) {
+  if (!n.branch) return [];
+  return Array.isArray(n.branch) ? n.branch : [n.branch];
 }
 
 const SAMPLE_NEWS = [
@@ -495,10 +500,16 @@ function buildTicker() {
 // ==================== NEWS GRID ====================
 
 function buildNewsCard(n) {
-  const branchData = BRANCHES[n.branch];
+  const teams = getTeams(n);
+  const badgesHtml = teams.slice(0, 2).map(key => {
+    const b = BRANCHES[key];
+    if (!b) return '';
+    return `<span class="news-team-badge" style="background:linear-gradient(135deg,${b.color} 50%,${b.color2||b.color} 50%);color:#fff">${escHtml(b.label)}</span>`;
+  }).join('');
   return `
     <div class="news-card" onclick="location.href='${slugify(n.id)}'">
       <div class="news-card-image" style="${buildBgStyle(n.image)}">
+        ${badgesHtml ? `<div class="news-card-badges">${badgesHtml}</div>` : ''}
       </div>
       <div class="news-card-body">
         <h3 class="news-card-title">${escHtml(n.title)}</h3>
@@ -1125,7 +1136,7 @@ function renderAllNews() {
 
   let news = getNews();
   if (query) news = news.filter(n => n.title.toLowerCase().includes(query) || n.summary.toLowerCase().includes(query));
-  if (teamFilter) news = news.filter(n => n.branch === teamFilter);
+  if (teamFilter) news = news.filter(n => getTeams(n).includes(teamFilter));
 
   if (news.length === 0) {
     grid.innerHTML = '';
@@ -1162,12 +1173,17 @@ function renderArticle() {
   const contentHtml = news.content.split('\n').filter(p => p.trim()).map(p => `<p>${escHtml(p)}</p>`).join('');
 
   const views = incrementViews(news.id);
-  const branchData = BRANCHES[news.branch];
+  const teams = getTeams(news);
+  const articleTeamBadges = teams.map(key => {
+    const b = BRANCHES[key];
+    if (!b) return '';
+    return `<a class="branch-pill" href="haberler.html" style="background:linear-gradient(135deg,${b.color} 50%,${b.color2||b.color} 50%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.4)">${escHtml(b.label)}</a>`;
+  }).join('');
   articleEl.innerHTML = `
     <div class="article-header">
       <div class="article-category">
         <span class="category-badge ${news.category}">${escHtml(categoryLabel(news.category))}</span>
-        ${branchData ? `<a class="branch-pill" href="haberler.html" style="background:linear-gradient(135deg,${branchData.color} 50%,${branchData.color2||branchData.color} 50%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.4)">${escHtml(branchData.label)}</a>` : ''}
+        ${articleTeamBadges}
       </div>
       <h1 class="article-title">${escHtml(news.title)}</h1>
       <div class="article-meta">
@@ -1258,9 +1274,65 @@ function renderRecentSidebar(excludeId) {
 
 let editingId = null;
 
+// ==================== MULTI-SELECT BRANCH ====================
+
+function initBranchMultiSelect() {
+  const dropdown = document.getElementById('branchDropdown');
+  const trigger = document.getElementById('branchTrigger');
+  if (!dropdown || !trigger) return;
+
+  const order = ['galatasaray','fenerbahce','trabzonspor','besiktas','amed','alanyaspor','rizespor','chorumfk','erzurumspor','eyupspor','gaziantep','genclerbirligi','goztepe','basaksehir','kasimpasa','kocaelispor','konyaspor','samsunspor','milli-takim'];
+  dropdown.innerHTML = order.map(key => {
+    const b = BRANCHES[key];
+    if (!b) return '';
+    return `
+      <label class="multi-select-option">
+        <input type="checkbox" class="branch-cb" value="${key}" />
+        <span class="multi-select-dot" style="background:${b.color}"></span>
+        ${escHtml(b.label)}
+      </label>`;
+  }).join('');
+
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown.classList.toggle('open');
+  });
+
+  dropdown.addEventListener('change', updateBranchTrigger);
+
+  document.addEventListener('click', e => {
+    if (!document.getElementById('branchMultiWrap')?.contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
+}
+
+function getSelectedBranches() {
+  return [...document.querySelectorAll('.branch-cb:checked')].map(cb => cb.value);
+}
+
+function setSelectedBranches(arr) {
+  document.querySelectorAll('.branch-cb').forEach(cb => {
+    cb.checked = arr.includes(cb.value);
+  });
+  updateBranchTrigger();
+}
+
+function updateBranchTrigger() {
+  const selected = getSelectedBranches();
+  const el = document.getElementById('branchTriggerText');
+  if (!el) return;
+  if (selected.length === 0) {
+    el.textContent = 'Takım seçin...';
+  } else {
+    el.textContent = selected.map(k => BRANCHES[k]?.label || k).join(', ');
+  }
+}
+
 function initAdmin() {
   renderAdminList();
   initAdminForm();
+  initBranchMultiSelect();
   renderAnalytics();
   renderAdminTransfers();
   initTransferForm();
@@ -1406,7 +1478,7 @@ function initAdminForm() {
 
 function handleSubmit() {
   const title = document.getElementById('newsTitle').value.trim();
-  const branch = document.getElementById('newsBranch')?.value || '';
+  const branch = getSelectedBranches();
   const category = document.getElementById('newsCategory').value;
   const summary = document.getElementById('newsSummary').value.trim();
   const content = document.getElementById('newsContent').value.trim();
@@ -1414,8 +1486,8 @@ function handleSubmit() {
   const author = document.getElementById('newsAuthor').value.trim();
   const slider = document.getElementById('newsSlider').checked;
 
-  if (!title || !branch || !category || !summary || !content) {
-    showMessage('error', 'Lütfen zorunlu alanları doldurun (Başlık, Branş, Kategori, Özet, İçerik).');
+  if (!title || !branch.length || !category || !summary || !content) {
+    showMessage('error', 'Lütfen zorunlu alanları doldurun (Başlık, Takım, Kategori, Özet, İçerik).');
     return;
   }
 
@@ -1464,8 +1536,7 @@ function resetForm() {
   editingId = null;
   currentImageData = '';
   document.getElementById('newsTitle').value = '';
-  const branchEl = document.getElementById('newsBranch');
-  if (branchEl) branchEl.value = '';
+  setSelectedBranches([]);
   document.getElementById('newsCategory').value = '';
   document.getElementById('newsSummary').value = '';
   document.getElementById('newsContent').value = '';
@@ -1501,7 +1572,7 @@ function renderAdminList() {
       <div class="admin-news-body">
         <div class="admin-news-title">${escHtml(n.title)}</div>
         <div class="admin-news-meta">
-          ${n.branch && BRANCHES[n.branch] ? `<span class="branch-mini-badge" style="background:linear-gradient(135deg,${BRANCHES[n.branch].color} 50%,${BRANCHES[n.branch].color2||BRANCHES[n.branch].color} 50%)">${escHtml(BRANCHES[n.branch].label)}</span>` : ''}
+          ${getTeams(n).map(k => BRANCHES[k] ? `<span class="branch-mini-badge" style="background:linear-gradient(135deg,${BRANCHES[k].color} 50%,${BRANCHES[k].color2||BRANCHES[k].color} 50%)">${escHtml(BRANCHES[k].label)}</span>` : '').join('')}
           <span class="category-badge ${n.category}">${escHtml(categoryLabel(n.category))}</span>
           ${n.slider ? '<span class="slider-badge">SLIDER</span>' : ''}
           <span>${formatDateShort(n.date)}</span>
@@ -1521,8 +1592,7 @@ function editNews(id) {
 
   editingId = id;
   document.getElementById('newsTitle').value = news.title;
-  const branchEl = document.getElementById('newsBranch');
-  if (branchEl) branchEl.value = news.branch || '';
+  setSelectedBranches(getTeams(news));
   document.getElementById('newsCategory').value = news.category;
   document.getElementById('newsSummary').value = news.summary;
   document.getElementById('newsContent').value = news.content;
