@@ -43,26 +43,26 @@
   <nav class="branch-nav">
     <div class="container">
       <div class="branch-nav-inner">
-        <a href="#" class="branch-link" onclick="setTeamFilter('')">Tümü</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('galatasaray')">Galatasaray</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('fenerbahce')">Fenerbahçe</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('trabzonspor')">Trabzonspor</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('besiktas')">Beşiktaş</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('amed')">Amed Sportif</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('alanyaspor')">Corendon Alanyaspor</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('rizespor')">Çaykur Rizespor</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('chorumfk')">Çorum FK</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('erzurumspor')">Erzurumspor FK</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('eyupspor')">Eyüpspor</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('gaziantep')">Gaziantep FK</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('genclerbirligi')">Gençlerbirliği</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('goztepe')">Göztepe</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('basaksehir')">İstanbul Başakşehir</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('kasimpasa')">Kasımpaşa</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('kocaelispor')">Kocaelispor</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('konyaspor')">Konyaspor</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('samsunspor')">Samsunspor</a>
-        <a href="#" class="branch-link" onclick="setTeamFilter('milli-takim')">Milli Takım</a>
+        <a href="/haberler" class="branch-link" onclick="return navTeam(event,'')">Tümü</a>
+        <a href="/haberler/galatasaray" class="branch-link" onclick="return navTeam(event,'galatasaray')">Galatasaray</a>
+        <a href="/haberler/fenerbahce" class="branch-link" onclick="return navTeam(event,'fenerbahce')">Fenerbahçe</a>
+        <a href="/haberler/trabzonspor" class="branch-link" onclick="return navTeam(event,'trabzonspor')">Trabzonspor</a>
+        <a href="/haberler/besiktas" class="branch-link" onclick="return navTeam(event,'besiktas')">Beşiktaş</a>
+        <a href="/haberler/amed" class="branch-link" onclick="return navTeam(event,'amed')">Amed Sportif</a>
+        <a href="/haberler/alanyaspor" class="branch-link" onclick="return navTeam(event,'alanyaspor')">Corendon Alanyaspor</a>
+        <a href="/haberler/rizespor" class="branch-link" onclick="return navTeam(event,'rizespor')">Çaykur Rizespor</a>
+        <a href="/haberler/chorumfk" class="branch-link" onclick="return navTeam(event,'chorumfk')">Çorum FK</a>
+        <a href="/haberler/erzurumspor" class="branch-link" onclick="return navTeam(event,'erzurumspor')">Erzurumspor FK</a>
+        <a href="/haberler/eyupspor" class="branch-link" onclick="return navTeam(event,'eyupspor')">Eyüpspor</a>
+        <a href="/haberler/gaziantep" class="branch-link" onclick="return navTeam(event,'gaziantep')">Gaziantep FK</a>
+        <a href="/haberler/genclerbirligi" class="branch-link" onclick="return navTeam(event,'genclerbirligi')">Gençlerbirliği</a>
+        <a href="/haberler/goztepe" class="branch-link" onclick="return navTeam(event,'goztepe')">Göztepe</a>
+        <a href="/haberler/basaksehir" class="branch-link" onclick="return navTeam(event,'basaksehir')">İstanbul Başakşehir</a>
+        <a href="/haberler/kasimpasa" class="branch-link" onclick="return navTeam(event,'kasimpasa')">Kasımpaşa</a>
+        <a href="/haberler/kocaelispor" class="branch-link" onclick="return navTeam(event,'kocaelispor')">Kocaelispor</a>
+        <a href="/haberler/konyaspor" class="branch-link" onclick="return navTeam(event,'konyaspor')">Konyaspor</a>
+        <a href="/haberler/samsunspor" class="branch-link" onclick="return navTeam(event,'samsunspor')">Samsunspor</a>
+        <a href="/haberler/milli-takim" class="branch-link" onclick="return navTeam(event,'milli-takim')">Milli Takım</a>
       </div>
     </div>
   </nav>
@@ -183,17 +183,36 @@
 
   <script src="app.js"></script>
   <script>
-    function setTeamFilter(val) {
-      document.getElementById('teamFilter').value = val;
-      // Highlight active nav link
-      document.querySelectorAll('.branch-link').forEach(l => l.classList.remove('active'));
-      event.target.classList.add('active');
-      renderAllNews();
+    function navTeam(e, val) {
+      e.preventDefault();
+      const url = val ? '/haberler/' + val : '/haberler';
+      history.pushState({team: val}, '', url);
+      applyTeamFilter(val);
       return false;
     }
+
+    function applyTeamFilter(val) {
+      document.getElementById('teamFilter').value = val;
+      document.querySelectorAll('.branch-link').forEach(l => {
+        const href = l.getAttribute('href');
+        const linkVal = href === '/haberler' ? '' : href.replace('/haberler/', '');
+        l.classList.toggle('active', linkVal === val);
+      });
+      renderAllNews();
+    }
+
+    window.addEventListener('popstate', (e) => {
+      const team = (e.state && e.state.team) || '';
+      applyTeamFilter(team);
+    });
+
     initAuth();
     trackPageView('haberler');
-    renderAllNews();
+
+    // Read team from URL path on page load
+    const _pathTeam = location.pathname.match(/\/haberler\/([^/]+)/)?.[1] || '';
+    applyTeamFilter(_pathTeam);
+
     initDragScroll();
     document.getElementById('searchInput').addEventListener('input', renderAllNews);
     document.getElementById('teamFilter').addEventListener('change', renderAllNews);
