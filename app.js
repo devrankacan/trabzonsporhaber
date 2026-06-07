@@ -914,7 +914,9 @@ function renderStandingsSidebar() {
             <tr class="${i < 4 ? 'st-ucl' : i < 6 ? 'st-uel' : ''}">
               <td class="st-rank">${i + 1}</td>
               <td class="st-team">
-                <span class="st-dot" style="background:${b?.color || '#888'}"></span>
+                ${getLogo(r.team)
+                  ? `<img src="${escAttr(getLogo(r.team))}" class="st-logo" alt="${escAttr(b?.label||r.team)}" />`
+                  : `<span class="st-dot" style="background:${b?.color || '#888'}"></span>`}
                 <span class="st-name">${escHtml(b?.label || r.team)}</span>
               </td>
               <td>${r.played || 0}</td>

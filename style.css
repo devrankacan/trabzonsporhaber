@@ -2261,6 +2261,12 @@ img { max-width: 100%; display: block; }
   border-radius: 50%;
   flex-shrink: 0;
 }
+.st-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
 .st-name {
   font-weight: 600;
   font-size: 11px;
