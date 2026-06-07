@@ -5,6 +5,216 @@
 const STORAGE_KEY = 'ts_haberler';
 const COMMENTS_KEY = 'ts_comments';
 const VIEWS_KEY = 'ts_views';
+const ANALYTICS_KEY = 'ts_analytics';
+
+// ==================== ANALYTICS ====================
+
+function trackPageView(page, newsId) {
+  const entry = { ts: Date.now(), page };
+  if (newsId) entry.newsId = newsId;
+  const data = JSON.parse(localStorage.getItem(ANALYTICS_KEY) || '[]');
+  data.push(entry);
+  // Keep last 365 days
+  const cutoff = Date.now() - 365 * 86400000;
+  const trimmed = data.filter(e => e.ts > cutoff);
+  // Cap at 20000 entries
+  if (trimmed.length > 20000) trimmed.splice(0, trimmed.length - 20000);
+  localStorage.setItem(ANALYTICS_KEY, JSON.stringify(trimmed));
+}
+
+function getAnalytics() {
+  return JSON.parse(localStorage.getItem(ANALYTICS_KEY) || '[]');
+}
+
+function dayKey(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function todayKey() { return dayKey(Date.now()); }
+
+function renderAnalytics() {
+  const container = document.getElementById('analyticsPanel');
+  if (!container) return;
+
+  const all = getAnalytics();
+  const news = getNews();
+  const views = JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}');
+  const comments = JSON.parse(localStorage.getItem(COMMENTS_KEY) || '{}');
+
+  const now = Date.now();
+  const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+  const startOfWeek = new Date(startOfDay); startOfWeek.setDate(startOfDay.getDate() - startOfDay.getDay());
+  const startOfMonth = new Date(startOfDay.getFullYear(), startOfDay.getMonth(), 1);
+  const startOfYear = new Date(startOfDay.getFullYear(), 0, 1);
+
+  const countSince = (ts) => all.filter(e => e.ts >= ts).length;
+  const todayCount = countSince(startOfDay.getTime());
+  const weekCount = countSince(startOfWeek.getTime());
+  const monthCount = countSince(startOfMonth.getTime());
+  const yearCount = countSince(startOfYear.getTime());
+  const totalCount = all.length;
+
+  // Last 7 days bar chart data
+  const last7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(startOfDay); d.setDate(d.getDate() - i);
+    const key = dayKey(d.getTime());
+    const count = all.filter(e => dayKey(e.ts) === key).length;
+    const label = i === 0 ? 'Bugün' : ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'][d.getDay()];
+    last7.push({ label, count });
+  }
+  const maxBar = Math.max(...last7.map(d => d.count), 1);
+
+  // Page breakdown
+  const pageLabels = { index: 'Anasayfa', haberler: 'Haberler', haber: 'Haber Detay', admin: 'Admin' };
+  const pageBreak = {};
+  all.forEach(e => { pageBreak[e.page] = (pageBreak[e.page] || 0) + 1; });
+
+  // Top 5 viewed news
+  const topNews = news
+    .map(n => ({ ...n, viewCount: views[n.id] || 0 }))
+    .sort((a, b) => b.viewCount - a.viewCount)
+    .slice(0, 5);
+
+  // Total comments
+  const totalComments = Object.values(comments).reduce((s, arr) => s + arr.length, 0);
+  const newsWithComments = Object.keys(comments).filter(k => comments[k].length > 0).length;
+
+  // Branch breakdown
+  const branchBreak = {};
+  news.forEach(n => { branchBreak[n.branch] = (branchBreak[n.branch] || 0) + 1; });
+
+  // Recent comments (last 5)
+  const recentComments = [];
+  Object.entries(comments).forEach(([nid, arr]) => {
+    const n = news.find(x => String(x.id) === String(nid));
+    arr.forEach(c => recentComments.push({ ...c, newsTitle: n ? n.title : 'Silinmiş Haber', newsId: nid }));
+  });
+  recentComments.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const last5Comments = recentComments.slice(0, 5);
+
+  container.innerHTML = `
+    <!-- Stat Cards -->
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value">${todayCount}</div>
+        <div class="stat-label">Bugün</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📆</div>
+        <div class="stat-value">${weekCount}</div>
+        <div class="stat-label">Bu Hafta</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🗓️</div>
+        <div class="stat-value">${monthCount}</div>
+        <div class="stat-label">Bu Ay</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value">${totalCount}</div>
+        <div class="stat-label">Toplam Ziyaret</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📰</div>
+        <div class="stat-value">${news.length}</div>
+        <div class="stat-label">Toplam Haber</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value">${totalComments}</div>
+        <div class="stat-label">Toplam Yorum</div>
+      </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="analytics-card">
+      <h4 class="analytics-card-title">Son 7 Günlük Trafik</h4>
+      <div class="bar-chart">
+        ${last7.map(d => `
+          <div class="bar-col">
+            <div class="bar-label-top">${d.count || ''}</div>
+            <div class="bar-wrap">
+              <div class="bar-fill" style="height:${Math.round((d.count/maxBar)*100)}%"></div>
+            </div>
+            <div class="bar-label">${d.label}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="analytics-row">
+      <!-- Page Breakdown -->
+      <div class="analytics-card">
+        <h4 class="analytics-card-title">Sayfa Dağılımı</h4>
+        ${Object.entries(pageBreak).length === 0
+          ? '<p class="no-news-text">Henüz veri yok.</p>'
+          : Object.entries(pageBreak).sort((a,b) => b[1]-a[1]).map(([pg, cnt]) => `
+          <div class="breakdown-row">
+            <span class="breakdown-label">${pageLabels[pg] || pg}</span>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar" style="width:${Math.round((cnt/totalCount)*100)}%"></div>
+            </div>
+            <span class="breakdown-count">${cnt}</span>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Branch Breakdown -->
+      <div class="analytics-card">
+        <h4 class="analytics-card-title">Branş Dağılımı (Haber)</h4>
+        ${Object.keys(branchBreak).length === 0
+          ? '<p class="no-news-text">Henüz haber yok.</p>'
+          : Object.entries(branchBreak).sort((a,b) => b[1]-a[1]).map(([br, cnt]) => `
+          <div class="breakdown-row">
+            <span class="breakdown-label">${branchLabel(br)}</span>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar" style="width:${Math.round((cnt/news.length)*100)}%;background:${BRANCHES[br]?.color||'#7A1219'}"></div>
+            </div>
+            <span class="breakdown-count">${cnt}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Top News -->
+    <div class="analytics-card">
+      <h4 class="analytics-card-title">En Çok Okunan Haberler</h4>
+      ${topNews.length === 0 ? '<p class="no-news-text">Henüz görüntülenme yok.</p>' : `
+      <table class="analytics-table">
+        <thead><tr><th>#</th><th>Haber</th><th>Branş</th><th>Görüntülenme</th><th>Yorum</th></tr></thead>
+        <tbody>
+          ${topNews.map((n, i) => `
+            <tr>
+              <td class="rank">${i+1}</td>
+              <td><a href="${slugify(n.id)}" target="_blank">${escHtml(n.title.length > 55 ? n.title.slice(0,55)+'…' : n.title)}</a></td>
+              <td>${escHtml(branchLabel(n.branch))}</td>
+              <td><strong>${n.viewCount}</strong></td>
+              <td>${comments[n.id] ? comments[n.id].length : 0}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`}
+    </div>
+
+    <!-- Recent Comments -->
+    <div class="analytics-card">
+      <h4 class="analytics-card-title">Son Yorumlar</h4>
+      ${last5Comments.length === 0 ? '<p class="no-news-text">Henüz yorum yok.</p>' : last5Comments.map(c => `
+        <div class="analytics-comment-row">
+          <div class="analytics-comment-meta">
+            <strong>${escHtml(c.name)}</strong>
+            <span class="analytics-comment-news">→ ${escHtml(c.newsTitle.length > 40 ? c.newsTitle.slice(0,40)+'…' : c.newsTitle)}</span>
+            <span class="analytics-comment-date">${formatDate(c.date)}</span>
+          </div>
+          <p class="analytics-comment-text">${escHtml(c.text.length > 120 ? c.text.slice(0,120)+'…' : c.text)}</p>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
 
 function getComments(newsId) {
   const all = JSON.parse(localStorage.getItem(COMMENTS_KEY) || '{}');
@@ -492,6 +702,7 @@ let editingId = null;
 function initAdmin() {
   renderAdminList();
   initAdminForm();
+  renderAnalytics();
   initMobileNav();
   initHeaderSearch();
 }

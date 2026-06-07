@@ -141,6 +141,8 @@
 
   <script src="app.js"></script>
   <script>
+    const _aid = new URLSearchParams(location.search).get('id');
+    trackPageView('haber', _aid ? Number(_aid) : null);
     renderArticle();
   </script>
 </body>
