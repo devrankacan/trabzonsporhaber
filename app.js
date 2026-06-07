@@ -9,6 +9,8 @@ const ANALYTICS_KEY = 'ts_analytics';
 const TRANSFERS_KEY = 'ts_transfers';
 const STANDINGS_KEY = 'ts_standings';
 const LOGOS_KEY = 'ts_logos';
+const USERS_KEY = 'ts_users';
+const USER_SESSION_KEY = 'ts_user_session';
 
 // ==================== ANALYTICS ====================
 
@@ -1754,4 +1756,185 @@ function initDragScroll() {
       moved = false;
     }
   }, true);
+}
+
+// ==================== USER AUTH ====================
+
+function hashPassword(str) {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+  return h.toString(16).padStart(8, '0');
+}
+
+function getUsers() { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
+function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+
+function getCurrentUser() {
+  const s = sessionStorage.getItem(USER_SESSION_KEY);
+  return s ? JSON.parse(s) : null;
+}
+
+function userLogin(user) {
+  sessionStorage.setItem(USER_SESSION_KEY, JSON.stringify({ id: user.id, username: user.username, email: user.email }));
+}
+
+function userLogout() {
+  sessionStorage.removeItem(USER_SESSION_KEY);
+  updateAuthUI();
+  closeAuthModal();
+}
+
+function registerUser(username, email, password) {
+  const users = getUsers();
+  if (users.find(u => u.email === email)) return { error: 'Bu e-posta zaten kayıtlı.' };
+  if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) return { error: 'Bu kullanıcı adı alınmış.' };
+  const user = { id: Date.now(), username, email, passwordHash: hashPassword(password), createdAt: new Date().toISOString() };
+  users.push(user);
+  saveUsers(users);
+  return { user };
+}
+
+function loginUser(email, password) {
+  const users = getUsers();
+  const user = users.find(u => u.email === email && u.passwordHash === hashPassword(password));
+  if (!user) return { error: 'E-posta veya şifre hatalı.' };
+  return { user };
+}
+
+// ---- Modal ----
+function openAuthModal(tab) {
+  if (document.getElementById('authModal')) return;
+  const modal = document.createElement('div');
+  modal.id = 'authModal';
+  modal.className = 'auth-modal-overlay';
+  modal.innerHTML = `
+    <div class="auth-modal">
+      <button class="auth-modal-close" onclick="closeAuthModal()">×</button>
+      <div class="auth-tabs">
+        <button class="auth-tab ${tab !== 'register' ? 'active' : ''}" id="tabLoginBtn" onclick="switchAuthTab('login')">Giriş Yap</button>
+        <button class="auth-tab ${tab === 'register' ? 'active' : ''}" id="tabRegBtn" onclick="switchAuthTab('register')">Üye Ol</button>
+      </div>
+
+      <div id="authLoginForm" style="display:${tab !== 'register' ? 'block' : 'none'}">
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">E-posta</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="ornek@mail.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Şifre</label>
+          <input type="password" id="loginPwd" class="form-input" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <div class="auth-error" id="loginError" style="display:none"></div>
+        <button class="btn-primary full-width" style="margin-top:16px" onclick="handleLogin()">Giriş Yap</button>
+      </div>
+
+      <div id="authRegForm" style="display:${tab === 'register' ? 'block' : 'none'}">
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">Kullanıcı Adı</label>
+          <input type="text" id="regUsername" class="form-input" placeholder="kullanici_adi" maxlength="30" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-posta</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="ornek@mail.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Şifre</label>
+          <input type="password" id="regPwd" class="form-input" placeholder="En az 6 karakter" autocomplete="new-password" />
+        </div>
+        <div class="auth-error" id="regError" style="display:none"></div>
+        <button class="btn-primary full-width" style="margin-top:16px" onclick="handleRegister()">Üye Ol</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeAuthModal(); });
+  setTimeout(() => modal.classList.add('open'), 10);
+}
+
+function closeAuthModal() {
+  const m = document.getElementById('authModal');
+  if (!m) return;
+  m.classList.remove('open');
+  setTimeout(() => m.remove(), 250);
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('authLoginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('authRegForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tabLoginBtn').classList.toggle('active', tab === 'login');
+  document.getElementById('tabRegBtn').classList.toggle('active', tab === 'register');
+}
+
+function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd = document.getElementById('loginPwd').value;
+  const err = document.getElementById('loginError');
+  if (!email || !pwd) { showAuthError(err, 'Tüm alanları doldurun.'); return; }
+  const result = loginUser(email, pwd);
+  if (result.error) { showAuthError(err, result.error); return; }
+  userLogin(result.user);
+  closeAuthModal();
+  updateAuthUI();
+}
+
+function handleRegister() {
+  const username = document.getElementById('regUsername').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pwd = document.getElementById('regPwd').value;
+  const err = document.getElementById('regError');
+  if (!username || !email || !pwd) { showAuthError(err, 'Tüm alanları doldurun.'); return; }
+  if (pwd.length < 6) { showAuthError(err, 'Şifre en az 6 karakter olmalı.'); return; }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) { showAuthError(err, 'Kullanıcı adı sadece harf, rakam ve _ içerebilir.'); return; }
+  const result = registerUser(username, email, pwd);
+  if (result.error) { showAuthError(err, result.error); return; }
+  userLogin(result.user);
+  closeAuthModal();
+  updateAuthUI();
+}
+
+function showAuthError(el, msg) {
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function updateAuthUI() {
+  const user = getCurrentUser();
+  document.querySelectorAll('.auth-btn-wrap').forEach(wrap => {
+    if (user) {
+      const initials = user.username.slice(0, 2).toUpperCase();
+      wrap.innerHTML = `
+        <div class="user-avatar-btn" onclick="toggleUserMenu(this)">
+          <div class="user-avatar">${initials}</div>
+        </div>
+        <div class="user-menu" style="display:none">
+          <div class="user-menu-name">👤 ${escHtml(user.username)}</div>
+          <div class="user-menu-email">${escHtml(user.email)}</div>
+          <hr style="margin:8px 0;border-color:var(--border)">
+          <button class="user-menu-item" onclick="userLogout()">🚪 Çıkış Yap</button>
+        </div>
+      `;
+    } else {
+      wrap.innerHTML = `<button class="auth-icon-btn" onclick="openAuthModal('login')" title="Giriş Yap / Üye Ol">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </button>`;
+    }
+  });
+}
+
+function toggleUserMenu(btn) {
+  const menu = btn.parentElement.querySelector('.user-menu');
+  if (!menu) return;
+  const isOpen = menu.style.display === 'block';
+  document.querySelectorAll('.user-menu').forEach(m => m.style.display = 'none');
+  menu.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    setTimeout(() => document.addEventListener('click', function close(e) {
+      if (!btn.parentElement.contains(e.target)) { menu.style.display = 'none'; document.removeEventListener('click', close); }
+    }), 0);
+  }
+}
+
+function initAuth() {
+  updateAuthUI();
 }

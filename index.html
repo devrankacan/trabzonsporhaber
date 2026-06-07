@@ -25,6 +25,7 @@
           <span class="header-search-icon">&#9906;</span>
           <div class="search-dropdown" id="searchDropdown"></div>
         </div>
+        <div class="auth-btn-wrap"></div>
         <button class="hamburger" id="hamburger">&#9776;</button>
       </div>
       <nav class="mobile-nav" id="mobileNav">
@@ -180,6 +181,7 @@
   <script src="app.js"></script>
   <script>
     trackPageView('index');
+    initAuth();
     renderHomePage();
     renderTransfersSidebar();
     renderStandingsSidebar();
