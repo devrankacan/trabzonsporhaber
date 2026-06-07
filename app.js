@@ -241,11 +241,26 @@ function incrementViews(newsId) {
 }
 
 const BRANCHES = {
-  'galatasaray':  { label: 'Galatasaray',      color: '#C8102E' },
-  'fenerbahce':   { label: 'Fenerbahçe',        color: '#003D7C' },
-  'besiktas':     { label: 'Beşiktaş',          color: '#1a1a1a' },
-  'trabzonspor':  { label: 'Trabzonspor',       color: '#7A1219' },
-  'diger':        { label: 'Diğer Takımlar',    color: '#555' },
+  'galatasaray':    { label: 'Galatasaray',      color: '#C8102E' },
+  'fenerbahce':     { label: 'Fenerbahçe',        color: '#003D7C' },
+  'besiktas':       { label: 'Beşiktaş',          color: '#1a1a1a' },
+  'trabzonspor':    { label: 'Trabzonspor',       color: '#7A1219' },
+  'basaksehir':     { label: 'Başakşehir FK',     color: '#1a56db' },
+  'samsunspor':     { label: 'Samsunspor',        color: '#c0392b' },
+  'kasimpasa':      { label: 'Kasımpaşa',         color: '#117a3b' },
+  'sivasspor':      { label: 'Sivasspor',         color: '#d4001a' },
+  'antalyaspor':    { label: 'Antalyaspor',       color: '#e74c3c' },
+  'alanyaspor':     { label: 'Alanyaspor',        color: '#e67e22' },
+  'gaziantep':      { label: 'Gaziantep FK',      color: '#8e44ad' },
+  'kayserispor':    { label: 'Kayserispor',       color: '#c0392b' },
+  'hatayspor':      { label: 'Hatayspor',         color: '#27ae60' },
+  'rizespor':       { label: 'Çaykur Rizespor',   color: '#1a7a3f' },
+  'konyaspor':      { label: 'Konyaspor',         color: '#2ecc71' },
+  'ankaragucu':     { label: 'Ankaragücü',        color: '#f39c12' },
+  'adanademirspor': { label: 'Adana Demirspor',   color: '#2980b9' },
+  'eyupspor':       { label: 'Eyüpspor',          color: '#6c3483' },
+  'bodrumfk':       { label: 'Bodrum FK',         color: '#16a085' },
+  'milli-takim':    { label: 'Milli Takım',       color: '#C8102E' },
 };
 
 function branchLabel(key) {
@@ -334,18 +349,7 @@ const SAMPLE_NEWS = [
 function getNews() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Migrate old Trabzonspor branches to new Süper Lig branches
-      const oldBranches = { 'futbol-a': 'trabzonspor', 'basketbol': 'diger', 'kadin-futbol': 'diger', 'akademi': 'diger' };
-      const oldCats = { 'taraftar': 'kulup' };
-      const migrated = parsed.map(n => ({
-        ...n,
-        branch: oldBranches[n.branch] !== undefined ? oldBranches[n.branch] : n.branch,
-        category: oldCats[n.category] !== undefined ? oldCats[n.category] : n.category,
-      }));
-      return migrated;
-    }
+    if (stored) return JSON.parse(stored);
   } catch (e) {}
   localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE_NEWS));
   return SAMPLE_NEWS;
@@ -572,13 +576,11 @@ function renderAllNews() {
   if (!grid) return;
 
   const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
-  const category = document.getElementById('categoryFilter')?.value || '';
-  const branch = getActiveBranch();
+  const teamFilter = document.getElementById('teamFilter')?.value || '';
 
   let news = getNews();
-  if (branch) news = news.filter(n => n.branch === branch);
   if (query) news = news.filter(n => n.title.toLowerCase().includes(query) || n.summary.toLowerCase().includes(query));
-  if (category) news = news.filter(n => n.category === category);
+  if (teamFilter) news = news.filter(n => n.branch === teamFilter);
 
   if (news.length === 0) {
     grid.innerHTML = '';

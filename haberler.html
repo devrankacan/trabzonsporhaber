@@ -37,48 +37,42 @@
           <input type="text" class="mobile-search-input" id="mobileSearchInput" placeholder="Haber ara..." autocomplete="off" />
           <div class="search-dropdown" id="mobileSearchDropdown"></div>
         </div>
-        <div class="mobile-branch-divider">Takımlar</div>
-        <a href="haberler.html?brans=galatasaray" class="nav-link">Galatasaray</a>
-        <a href="haberler.html?brans=fenerbahce" class="nav-link">Fenerbahçe</a>
-        <a href="haberler.html?brans=besiktas" class="nav-link">Beşiktaş</a>
-        <a href="haberler.html?brans=trabzonspor" class="nav-link">Trabzonspor</a>
-        <a href="haberler.html?brans=diger" class="nav-link">Diğer Takımlar</a>
       </nav>
     </div>
   </header>
 
-  <!-- TAKIM NAV -->
-  <nav class="branch-nav">
+  <div class="page-hero">
     <div class="container">
-      <div class="branch-nav-inner">
-        <a href="haberler.html" class="branch-link">Tümü</a>
-        <a href="haberler.html?brans=galatasaray" class="branch-link">Galatasaray</a>
-        <a href="haberler.html?brans=fenerbahce" class="branch-link">Fenerbahçe</a>
-        <a href="haberler.html?brans=besiktas" class="branch-link">Beşiktaş</a>
-        <a href="haberler.html?brans=trabzonspor" class="branch-link">Trabzonspor</a>
-        <a href="haberler.html?brans=diger" class="branch-link">Diğer Takımlar</a>
-      </div>
-    </div>
-  </nav>
-
-  <div class="page-hero" id="pageHero">
-    <div class="container">
-      <h1 id="pageHeroTitle">Tüm Haberler</h1>
-      <p id="pageHeroSub">Süper Lig'den son dakika gelişmeleri</p>
+      <h1>Tüm Haberler</h1>
+      <p>Süper Lig'den son dakika gelişmeleri</p>
     </div>
   </div>
 
   <main class="main container">
     <div class="filter-bar">
       <input type="text" id="searchInput" class="search-input" placeholder="Haber ara..." />
-      <select id="categoryFilter" class="category-select">
-        <option value="">Tüm Kategoriler</option>
-        <option value="transfer">Transfer</option>
-        <option value="mac">Maç</option>
+      <select id="teamFilter" class="category-select">
+        <option value="">Tüm Takımlar</option>
+        <option value="galatasaray">Galatasaray</option>
+        <option value="fenerbahce">Fenerbahçe</option>
+        <option value="besiktas">Beşiktaş</option>
+        <option value="trabzonspor">Trabzonspor</option>
+        <option value="basaksehir">Başakşehir FK</option>
+        <option value="samsunspor">Samsunspor</option>
+        <option value="kasimpasa">Kasımpaşa</option>
+        <option value="sivasspor">Sivasspor</option>
+        <option value="antalyaspor">Antalyaspor</option>
+        <option value="alanyaspor">Alanyaspor</option>
+        <option value="gaziantep">Gaziantep FK</option>
+        <option value="kayserispor">Kayserispor</option>
+        <option value="hatayspor">Hatayspor</option>
+        <option value="rizespor">Çaykur Rizespor</option>
+        <option value="konyaspor">Konyaspor</option>
+        <option value="ankaragucu">Ankaragücü</option>
+        <option value="adanademirspor">Adana Demirspor</option>
+        <option value="eyupspor">Eyüpspor</option>
+        <option value="bodrumfk">Bodrum FK</option>
         <option value="milli-takim">Milli Takım</option>
-        <option value="kulup">Kulüp</option>
-        <option value="yonetim">Yönetim</option>
-        <option value="diger">Diğer</option>
       </select>
     </div>
 
@@ -107,13 +101,12 @@
             <p class="footer-desc">Süper Lig haberleri için bağımsız haber kaynağı.</p>
           </div>
           <div class="footer-col">
-            <h4 class="footer-col-title">Takımlar</h4>
+            <h4 class="footer-col-title">Büyük Dört</h4>
             <ul class="footer-links">
-              <li><a href="haberler.html?brans=galatasaray">Galatasaray</a></li>
-              <li><a href="haberler.html?brans=fenerbahce">Fenerbahçe</a></li>
-              <li><a href="haberler.html?brans=besiktas">Beşiktaş</a></li>
-              <li><a href="haberler.html?brans=trabzonspor">Trabzonspor</a></li>
-              <li><a href="haberler.html?brans=diger">Diğer Takımlar</a></li>
+              <li><a href="haberler.html">Galatasaray</a></li>
+              <li><a href="haberler.html">Fenerbahçe</a></li>
+              <li><a href="haberler.html">Beşiktaş</a></li>
+              <li><a href="haberler.html">Trabzonspor</a></li>
             </ul>
           </div>
           <div class="footer-col">
@@ -122,7 +115,6 @@
               <li><a href="haberler.html">Transfer</a></li>
               <li><a href="haberler.html">Maç Haberleri</a></li>
               <li><a href="haberler.html">Milli Takım</a></li>
-              <li><a href="haberler.html">Kulüp</a></li>
               <li><a href="haberler.html">Yönetim</a></li>
             </ul>
           </div>
@@ -150,8 +142,7 @@
     trackPageView('haberler');
     renderAllNews();
     document.getElementById('searchInput').addEventListener('input', renderAllNews);
-    document.getElementById('categoryFilter').addEventListener('change', renderAllNews);
-    highlightActiveBranch();
+    document.getElementById('teamFilter').addEventListener('change', renderAllNews);
   </script>
 </body>
 </html>
