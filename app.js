@@ -503,16 +503,9 @@ function buildTicker() {
 // ==================== NEWS GRID ====================
 
 function buildNewsCard(n) {
-  const teams = getTeams(n);
-  const badgesHtml = teams.slice(0, 2).map(key => {
-    const b = BRANCHES[key];
-    if (!b) return '';
-    return `<span class="news-team-badge" style="background:linear-gradient(135deg,${b.color} 50%,${b.color2||b.color} 50%);color:#fff">${escHtml(b.label)}</span>`;
-  }).join('');
   return `
     <div class="news-card" onclick="location.href='${slugify(n.id)}'">
       <div class="news-card-image" style="${buildBgStyle(n.image)}">
-        ${badgesHtml ? `<div class="news-card-badges">${badgesHtml}</div>` : ''}
       </div>
       <div class="news-card-body">
         <h3 class="news-card-title">${escHtml(n.title)}</h3>
