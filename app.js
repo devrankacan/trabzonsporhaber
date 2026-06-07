@@ -565,7 +565,7 @@ function highlightActiveBranch() {
   const titleEl = document.getElementById('pageHeroTitle');
   const subEl = document.getElementById('pageHeroSub');
   if (active && BRANCHES[active] && titleEl) {
-    titleEl.textContent = `${BRANCHES[active].icon} ${BRANCHES[active].label}`;
+    titleEl.textContent = BRANCHES[active].label;
     if (subEl) subEl.textContent = `Trabzonspor ${BRANCHES[active].label} haberleri`;
   }
 }
@@ -622,7 +622,7 @@ function renderArticle() {
     <div class="article-header">
       <div class="article-category">
         <span class="category-badge ${news.category}">${escHtml(categoryLabel(news.category))}</span>
-        ${branchData ? `<a class="branch-pill" href="haberler.html?brans=${news.branch}" style="background:${branchData.color}">${branchData.icon} ${escHtml(branchData.label)}</a>` : ''}
+        ${branchData ? `<a class="branch-pill" href="haberler.html" style="background:${branchData.color}">${escHtml(branchData.label)}</a>` : ''}
       </div>
       <h1 class="article-title">${escHtml(news.title)}</h1>
       <div class="article-meta">
@@ -951,7 +951,7 @@ function renderAdminList() {
       <div class="admin-news-body">
         <div class="admin-news-title">${escHtml(n.title)}</div>
         <div class="admin-news-meta">
-          ${n.branch && BRANCHES[n.branch] ? `<span class="branch-mini-badge" style="background:${BRANCHES[n.branch].color}">${BRANCHES[n.branch].icon} ${escHtml(BRANCHES[n.branch].label)}</span>` : ''}
+          ${n.branch && BRANCHES[n.branch] ? `<span class="branch-mini-badge" style="background:${BRANCHES[n.branch].color}">${escHtml(BRANCHES[n.branch].label)}</span>` : ''}
           <span class="category-badge ${n.category}">${escHtml(categoryLabel(n.category))}</span>
           ${n.slider ? '<span class="slider-badge">SLIDER</span>' : ''}
           <span>${formatDateShort(n.date)}</span>
