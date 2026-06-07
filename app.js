@@ -246,8 +246,6 @@ function buildNewsCard(n) {
   return `
     <div class="news-card" onclick="location.href='${slugify(n.id)}'">
       <div class="news-card-image" style="${buildBgStyle(n.image)}">
-        <span class="category-badge ${n.category}">${escHtml(categoryLabel(n.category))}</span>
-        ${branchData ? `<span class="branch-badge" style="background:${branchData.color}">${branchData.icon} ${escHtml(branchData.label)}</span>` : ''}
       </div>
       <div class="news-card-body">
         <h3 class="news-card-title">${escHtml(n.title)}</h3>
