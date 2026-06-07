@@ -184,7 +184,6 @@ function buildSlides() {
       <div class="slide-bg" style="${buildBgStyle(n.image)}"></div>
       <div class="slide-overlay"></div>
       <div class="slide-content">
-        <span class="slide-category">${escHtml(categoryLabel(n.category))}</span>
         <h2 class="slide-title">${escHtml(n.title)}</h2>
         <p class="slide-summary">${escHtml(n.summary)}</p>
         <div class="slide-meta">
