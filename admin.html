@@ -357,6 +357,22 @@
       <div class="dash-form-card" style="padding:16px">
         <div id="adminLogosList" class="logos-admin-grid"></div>
       </div>
+
+      <!-- Foreign Club Logos -->
+      <div class="dash-section-header" style="margin-top:32px">
+        <h2 class="dash-section-title">Yabancı Kulüp Logoları</h2>
+        <span style="font-size:12px;color:#888">Transferlerde yabancı takım logosu olarak görünür</span>
+      </div>
+      <div class="dash-form-card" style="padding:16px">
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+          <input type="text" id="foreignLogoName" class="form-input" placeholder="Kulüp adı (örn: Barcelona)" style="flex:1;min-width:160px" />
+          <label class="btn-primary btn-sm" style="cursor:pointer;white-space:nowrap">
+            Logo Yükle
+            <input type="file" accept="image/*" style="display:none" onchange="handleForeignLogoFile(this)" />
+          </label>
+        </div>
+        <div id="foreignLogosList"></div>
+      </div>
     </section>
 
     <!-- TAB: PUAN TABLOSU -->

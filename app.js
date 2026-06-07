@@ -13,6 +13,7 @@ const USERS_KEY = 'ts_users';
 const USER_SESSION_KEY = 'ts_user_session';
 const SITE_LOGO_KEY = 'ts_site_logo';
 const TEAM_BANNERS_KEY = 'ts_team_banners';
+const FOREIGN_LOGOS_KEY = 'ts_foreign_logos';
 
 // ==================== ANALYTICS ====================
 
@@ -571,6 +572,56 @@ function saveLogos(obj) {
   localStorage.setItem(LOGOS_KEY, JSON.stringify(obj));
 }
 
+function getForeignLogos() {
+  return JSON.parse(localStorage.getItem(FOREIGN_LOGOS_KEY) || '{}');
+}
+function getForeignLogo(name) {
+  if (!name) return '';
+  return getForeignLogos()[name.toLowerCase().trim()] || '';
+}
+function saveForeignLogo(name, src) {
+  const logos = getForeignLogos();
+  const key = name.toLowerCase().trim();
+  if (src) logos[key] = src;
+  else delete logos[key];
+  localStorage.setItem(FOREIGN_LOGOS_KEY, JSON.stringify(logos));
+}
+
+function renderForeignLogosAdmin() {
+  const el = document.getElementById('foreignLogosList');
+  if (!el) return;
+  const logos = getForeignLogos();
+  const keys = Object.keys(logos);
+  if (keys.length === 0) {
+    el.innerHTML = '<p class="no-news-text" style="padding:12px 0">Henüz yabancı kulüp logosu eklenmedi.</p>';
+    return;
+  }
+  el.innerHTML = `<div class="logos-admin-grid">${keys.map(k => `
+    <div class="logo-admin-item">
+      <img src="${escAttr(logos[k])}" alt="${escHtml(k)}" class="logo-admin-img" />
+      <div class="logo-admin-name">${escHtml(k)}</div>
+      <button class="btn-danger btn-sm" style="margin-top:4px" onclick="deleteForeignLogo('${escAttr(k)}')">Sil</button>
+    </div>
+  `).join('')}</div>`;
+}
+
+async function handleForeignLogoFile(input) {
+  const name = document.getElementById('foreignLogoName').value.trim();
+  if (!name) { alert('Kulüp adı girin.'); return; }
+  if (!input.files[0]) return;
+  const src = await compressImage(input.files[0], 200, 200, 0.9);
+  saveForeignLogo(name, src);
+  document.getElementById('foreignLogoName').value = '';
+  input.value = '';
+  renderForeignLogosAdmin();
+}
+
+function deleteForeignLogo(name) {
+  if (!confirm('Bu logo silinsin mi?')) return;
+  saveForeignLogo(name, null);
+  renderForeignLogosAdmin();
+}
+
 function getLogo(teamKey) {
   return getLogos()[teamKey] || '';
 }
@@ -600,7 +651,9 @@ function renderTransfersSidebar() {
 
   function clubLogoHtml(key, foreignName) {
     if (!key || key === 'yabanci') {
-      return `<div class="tr2-club-icon" style="background:#666">${escHtml((foreignName||'?').slice(0,2).toUpperCase())}</div>`;
+      const fLogo = getForeignLogo(foreignName);
+      if (fLogo) return `<img src="${escAttr(fLogo)}" class="tr2-club-logo" alt="${escHtml(foreignName||'')}" title="${escHtml(foreignName||'')}" />`;
+      return `<div class="tr2-club-icon" style="background:#555;color:#fff">${escHtml((foreignName||'?').slice(0,2).toUpperCase())}</div>`;
     }
     const logo = getLogo(key);
     const b = BRANCHES[key];
@@ -1381,6 +1434,7 @@ function initAdmin() {
   renderAdminTransfers();
   initTransferForm();
   renderLogosAdmin();
+  renderForeignLogosAdmin();
   renderAdminStandings();
   initStandingsForm();
 }
