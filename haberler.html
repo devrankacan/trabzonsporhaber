@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Haberler | Trabzonspor Haber</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">TS</div>
+          <div>
+            <div class="logo-title">Trabzonspor</div>
+            <div class="logo-sub">HABER</div>
+          </div>
+        </a>
+        <nav class="nav">
+          <a href="index.html" class="nav-link">Anasayfa</a>
+          <a href="haberler.html" class="nav-link active">Haberler</a>
+          <a href="admin.html" class="nav-link admin-link">+ Haber Ekle</a>
+        </nav>
+        <button class="hamburger" id="hamburger">&#9776;</button>
+      </div>
+      <nav class="mobile-nav" id="mobileNav">
+        <a href="index.html" class="nav-link">Anasayfa</a>
+        <a href="haberler.html" class="nav-link">Haberler</a>
+        <a href="admin.html" class="nav-link">+ Haber Ekle</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <div class="container">
+      <h1>Tüm Haberler</h1>
+      <p>Trabzonspor'dan son dakika gelişmeleri</p>
+    </div>
+  </div>
+
+  <main class="main container">
+    <div class="filter-bar">
+      <input type="text" id="searchInput" class="search-input" placeholder="Haber ara..." />
+      <select id="categoryFilter" class="category-select">
+        <option value="">Tüm Kategoriler</option>
+        <option value="transfer">Transfer</option>
+        <option value="mac">Maç</option>
+        <option value="taraftar">Taraftar</option>
+        <option value="yonetim">Yönetim</option>
+        <option value="diger">Diğer</option>
+      </select>
+    </div>
+
+    <div class="news-grid all-news" id="allNewsGrid"></div>
+    <div class="news-empty" id="allNewsEmpty" style="display:none">
+      <div class="empty-box">
+        <div class="empty-icon">🔍</div>
+        <h3>Haber bulunamadı</h3>
+        <p>Arama kriterlerinize uygun haber yok.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">
+          <div class="logo-icon small">TS</div>
+          <div>
+            <div class="logo-title">Trabzonspor Haber</div>
+            <div class="footer-copy">&copy; 2024 Tüm hakları saklıdır.</div>
+          </div>
+        </div>
+        <nav class="footer-nav">
+          <a href="index.html">Anasayfa</a>
+          <a href="haberler.html">Haberler</a>
+          <a href="admin.html">Admin</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    renderAllNews();
+    document.getElementById('searchInput').addEventListener('input', renderAllNews);
+    document.getElementById('categoryFilter').addEventListener('change', renderAllNews);
+  </script>
+</body>
+</html>

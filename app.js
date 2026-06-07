@@ -1,0 +1,511 @@
+'use strict';
+
+// ==================== DATA LAYER ====================
+
+const STORAGE_KEY = 'ts_haberler';
+
+const SAMPLE_NEWS = [
+  {
+    id: 1,
+    title: "Trabzonspor, Yeni Sezon Transferlerini Açıkladı",
+    summary: "Bordo-mavili kulüp, yeni sezon öncesinde 3 önemli transferi kadroya kattığını duyurdu.",
+    content: "Trabzonspor Kulübü, yeni sezon hazırlıkları kapsamında gerçekleştirilen transfer çalışmalarını basın toplantısıyla kamuoyuyla paylaştı.\n\nKulüp yönetimi, teknik direktörün talepleri doğrultusunda kadro güçlendirme çalışmalarını sürdürdüklerini belirtti.\n\nYeni transferlerin takıma büyük katkı sağlayacağı öngörülmekte, taraftarlar bu haberle büyük sevinç yaşadı.",
+    category: "transfer",
+    image: "",
+    author: "Spor Editörü",
+    date: new Date(Date.now() - 86400000).toISOString(),
+    slider: true
+  },
+  {
+    id: 2,
+    title: "Trabzonspor 3-1 Galibiyetle Döndü",
+    summary: "Deplasmanda oynanan kritik maçta Trabzonspor rakibini 3-1 mağlup etti.",
+    content: "Süper Lig'in kritik haftasında Trabzonspor, deplasmanda oynadığı müsabakada rakibini 3-1 mağlup etmeyi başardı.\n\nMaçın ilk yarısında 2-0 öne geçen bordo-mavililerin gollerini Yusuf Yazıcı, Enis Destan ve Berat Özdemir attı.\n\nGalibiyet sonrası takım ikinci sıraya yükselirken teknik direktör maç sonrası değerlendirmelerini paylaştı.",
+    category: "mac",
+    image: "",
+    author: "Maç Muhabiri",
+    date: new Date(Date.now() - 172800000).toISOString(),
+    slider: true
+  },
+  {
+    id: 3,
+    title: "Papara Park'ta Şampiyonluk Kutlaması",
+    summary: "Trabzonspor taraftarları Papara Park'ta muhteşem bir kutlama organizasyonu düzenledi.",
+    content: "Trabzonspor taraftarları, takımın son galibiyetinin ardından Papara Park önünde büyük bir kutlama organizasyonu gerçekleştirdi.\n\nBinlerce taraftar bordo-mavi atkılar ve flamalarıyla bir araya gelirken havai fişek gösterisi de düzenlendi.\n\nTaraftar dernekleri bu kutlamayı sezonun en önemli anlarından biri olarak nitelendirdi.",
+    category: "taraftar",
+    image: "",
+    author: "Taraftar Muhabiri",
+    date: new Date(Date.now() - 259200000).toISOString(),
+    slider: false
+  }
+];
+
+function getNews() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch (e) {}
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE_NEWS));
+  return SAMPLE_NEWS;
+}
+
+function saveNews(list) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+function getNewsById(id) {
+  return getNews().find(n => n.id === Number(id));
+}
+
+// ==================== UTILITIES ====================
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function formatDateShort(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function categoryLabel(cat) {
+  const map = { transfer: 'Transfer', mac: 'Maç', taraftar: 'Taraftar', yonetim: 'Yönetim', diger: 'Diğer' };
+  return map[cat] || cat || 'Genel';
+}
+
+function slugify(id) {
+  return `haber.html?id=${id}`;
+}
+
+function buildBgStyle(image) {
+  if (image) return `background-image: url('${escAttr(image)}');`;
+  const colors = [
+    'linear-gradient(135deg, #6b0000, #003478)',
+    'linear-gradient(135deg, #003478, #6b0000)',
+    'linear-gradient(135deg, #8B0000, #004aaa)',
+    'linear-gradient(135deg, #4a0000, #002050)',
+  ];
+  return `background: ${colors[Math.floor(Math.random() * colors.length)]};`;
+}
+
+function escAttr(str) {
+  return String(str).replace(/"/g, '&quot;');
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// ==================== SLIDER ====================
+
+let currentSlide = 0;
+let slideTimer = null;
+let slides = [];
+
+function buildSlides() {
+  const list = getNews().filter(n => n.slider);
+  slides = list;
+  const track = document.getElementById('sliderTrack');
+  const dots = document.getElementById('sliderDots');
+  const empty = document.getElementById('sliderEmpty');
+  const sliderEl = document.getElementById('slider');
+
+  if (!track) return;
+
+  if (list.length === 0) {
+    if (sliderEl) sliderEl.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+
+  if (sliderEl) sliderEl.style.display = 'block';
+  if (empty) empty.style.display = 'none';
+
+  track.innerHTML = list.map((n, i) => `
+    <div class="slide" onclick="location.href='${slugify(n.id)}'">
+      <div class="slide-bg" style="${buildBgStyle(n.image)}"></div>
+      <div class="slide-overlay"></div>
+      <div class="slide-content">
+        <span class="slide-category">${escHtml(categoryLabel(n.category))}</span>
+        <h2 class="slide-title">${escHtml(n.title)}</h2>
+        <p class="slide-summary">${escHtml(n.summary)}</p>
+        <div class="slide-meta">
+          <span class="slide-date">${formatDate(n.date)}</span>
+          <a class="slide-read-more" href="${slugify(n.id)}">Devamını Oku</a>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  dots.innerHTML = list.map((_, i) =>
+    `<button class="dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`
+  ).join('');
+
+  currentSlide = 0;
+  startSliderTimer();
+}
+
+function goToSlide(idx) {
+  const track = document.getElementById('sliderTrack');
+  if (!track) return;
+  currentSlide = (idx + slides.length) % slides.length;
+  track.style.transform = `translateX(-${currentSlide * 100}%)`;
+  document.querySelectorAll('.dot').forEach((d, i) =>
+    d.classList.toggle('active', i === currentSlide)
+  );
+}
+
+function startSliderTimer() {
+  clearInterval(slideTimer);
+  if (slides.length <= 1) return;
+  slideTimer = setInterval(() => goToSlide(currentSlide + 1), 5000);
+}
+
+function initSliderControls() {
+  const prev = document.getElementById('sliderPrev');
+  const next = document.getElementById('sliderNext');
+  if (prev) prev.addEventListener('click', () => { goToSlide(currentSlide - 1); startSliderTimer(); });
+  if (next) next.addEventListener('click', () => { goToSlide(currentSlide + 1); startSliderTimer(); });
+}
+
+// ==================== TICKER ====================
+
+function buildTicker() {
+  const el = document.getElementById('tickerText');
+  if (!el) return;
+  const news = getNews();
+  if (news.length === 0) {
+    el.textContent = 'Trabzonspor Haber\'e hoş geldiniz!';
+    return;
+  }
+  el.textContent = news.map(n => `• ${n.title}`).join('   ');
+}
+
+// ==================== NEWS GRID ====================
+
+function buildNewsCard(n) {
+  return `
+    <div class="news-card" onclick="location.href='${slugify(n.id)}'">
+      <div class="news-card-image" style="${buildBgStyle(n.image)}">
+        <span class="category-badge ${n.category}">${escHtml(categoryLabel(n.category))}</span>
+      </div>
+      <div class="news-card-body">
+        <h3 class="news-card-title">${escHtml(n.title)}</h3>
+        <p class="news-card-summary">${escHtml(n.summary)}</p>
+        <div class="news-card-footer">
+          <span class="news-card-date">📅 ${formatDateShort(n.date)}</span>
+          ${n.author ? `<span>${escHtml(n.author)}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ==================== HOME PAGE ====================
+
+function renderHomePage() {
+  buildSlides();
+  initSliderControls();
+  buildTicker();
+
+  const grid = document.getElementById('newsGrid');
+  const empty = document.getElementById('newsEmpty');
+  if (!grid) return;
+
+  const news = getNews().slice(0, 6);
+  if (news.length === 0) {
+    grid.style.display = 'none';
+    if (empty) empty.style.display = 'block';
+  } else {
+    grid.innerHTML = news.map(buildNewsCard).join('');
+    if (empty) empty.style.display = 'none';
+  }
+
+  renderPopularNews();
+  initMobileNav();
+}
+
+function renderPopularNews() {
+  const el = document.getElementById('popularNews');
+  if (!el) return;
+  const news = getNews().slice(0, 5);
+  if (news.length === 0) { el.innerHTML = '<p class="no-news-text">Henüz haber yok.</p>'; return; }
+  el.innerHTML = news.map((n, i) => `
+    <div class="popular-item" onclick="location.href='${slugify(n.id)}'">
+      <div class="popular-num">${i + 1}</div>
+      <div class="popular-title">${escHtml(n.title)}</div>
+    </div>
+  `).join('');
+}
+
+// ==================== ALL NEWS PAGE ====================
+
+function renderAllNews() {
+  const grid = document.getElementById('allNewsGrid');
+  const empty = document.getElementById('allNewsEmpty');
+  if (!grid) return;
+
+  const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const category = document.getElementById('categoryFilter')?.value || '';
+
+  let news = getNews();
+  if (query) news = news.filter(n => n.title.toLowerCase().includes(query) || n.summary.toLowerCase().includes(query));
+  if (category) news = news.filter(n => n.category === category);
+
+  if (news.length === 0) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+  } else {
+    grid.innerHTML = news.map(buildNewsCard).join('');
+    if (empty) empty.style.display = 'none';
+  }
+
+  initMobileNav();
+}
+
+// ==================== ARTICLE PAGE ====================
+
+function renderArticle() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  const articleEl = document.getElementById('articleContent');
+
+  if (!articleEl) return;
+
+  if (!id) { articleEl.innerHTML = '<div class="article-loading">Haber bulunamadı.</div>'; return; }
+
+  const news = getNewsById(id);
+  if (!news) { articleEl.innerHTML = '<div class="article-loading">Haber bulunamadı. <a href="haberler.html">Geri dön</a></div>'; return; }
+
+  document.title = `${news.title} | Trabzonspor Haber`;
+
+  const imageHtml = news.image
+    ? `<img class="article-image" src="${escAttr(news.image)}" alt="${escAttr(news.title)}" />`
+    : `<div style="height:300px;background:${buildBgStyle(news.image).replace('background-image:url(','').replace(');','')};background:linear-gradient(135deg,#6b0000,#003478);"></div>`;
+
+  const contentHtml = news.content.split('\n').filter(p => p.trim()).map(p => `<p>${escHtml(p)}</p>`).join('');
+
+  articleEl.innerHTML = `
+    <div class="article-header">
+      <div class="article-category"><span class="category-badge ${news.category}">${escHtml(categoryLabel(news.category))}</span></div>
+      <h1 class="article-title">${escHtml(news.title)}</h1>
+      <div class="article-meta">
+        <span>📅 ${formatDate(news.date)}</span>
+        ${news.author ? `<span>✍️ ${escHtml(news.author)}</span>` : ''}
+      </div>
+    </div>
+    ${imageHtml}
+    <div class="article-body">${contentHtml}</div>
+  `;
+
+  renderRecentSidebar(Number(id));
+  initMobileNav();
+}
+
+function renderRecentSidebar(excludeId) {
+  const el = document.getElementById('recentNewsSidebar');
+  if (!el) return;
+  const news = getNews().filter(n => n.id !== excludeId).slice(0, 5);
+  if (news.length === 0) { el.innerHTML = '<p class="no-news-text">Başka haber yok.</p>'; return; }
+  el.innerHTML = news.map(n => `
+    <div class="recent-sidebar-item" onclick="location.href='${slugify(n.id)}'">
+      <div class="recent-thumb" style="${buildBgStyle(n.image)}"></div>
+      <div class="recent-title">${escHtml(n.title)}</div>
+    </div>
+  `).join('');
+}
+
+// ==================== ADMIN ====================
+
+let editingId = null;
+
+function initAdmin() {
+  renderAdminList();
+  initAdminForm();
+  initMobileNav();
+}
+
+function initAdminForm() {
+  const titleInput = document.getElementById('newsTitle');
+  const summaryInput = document.getElementById('newsSummary');
+  const imageInput = document.getElementById('newsImage');
+  const submitBtn = document.getElementById('submitBtn');
+  const cancelBtn = document.getElementById('cancelEdit');
+
+  titleInput?.addEventListener('input', () => {
+    document.getElementById('titleCount').textContent = titleInput.value.length;
+  });
+
+  summaryInput?.addEventListener('input', () => {
+    document.getElementById('summaryCount').textContent = summaryInput.value.length;
+  });
+
+  imageInput?.addEventListener('input', () => {
+    const url = imageInput.value.trim();
+    const preview = document.getElementById('imagePreview');
+    const img = document.getElementById('previewImg');
+    if (url && preview && img) {
+      img.src = url;
+      preview.style.display = 'block';
+      img.onerror = () => { preview.style.display = 'none'; };
+    } else if (preview) {
+      preview.style.display = 'none';
+    }
+  });
+
+  submitBtn?.addEventListener('click', handleSubmit);
+  cancelBtn?.addEventListener('click', resetForm);
+}
+
+function handleSubmit() {
+  const title = document.getElementById('newsTitle').value.trim();
+  const category = document.getElementById('newsCategory').value;
+  const summary = document.getElementById('newsSummary').value.trim();
+  const content = document.getElementById('newsContent').value.trim();
+  const image = document.getElementById('newsImage').value.trim();
+  const author = document.getElementById('newsAuthor').value.trim();
+  const slider = document.getElementById('newsSlider').checked;
+
+  const msg = document.getElementById('formMessage');
+
+  if (!title || !category || !summary || !content) {
+    showMessage('error', 'Lütfen zorunlu alanları doldurun (Başlık, Kategori, Özet, İçerik).');
+    return;
+  }
+
+  const list = getNews();
+
+  if (editingId !== null) {
+    const idx = list.findIndex(n => n.id === editingId);
+    if (idx !== -1) {
+      list[idx] = { ...list[idx], title, category, summary, content, image, author, slider };
+    }
+    showMessage('success', 'Haber başarıyla güncellendi!');
+    editingId = null;
+  } else {
+    const newItem = {
+      id: Date.now(),
+      title,
+      category,
+      summary,
+      content,
+      image,
+      author,
+      slider,
+      date: new Date().toISOString()
+    };
+    list.unshift(newItem);
+    showMessage('success', 'Haber başarıyla yayınlandı!');
+  }
+
+  saveNews(list);
+  resetForm();
+  renderAdminList();
+}
+
+function showMessage(type, text) {
+  const el = document.getElementById('formMessage');
+  if (!el) return;
+  el.className = `form-message ${type}`;
+  el.textContent = text;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function resetForm() {
+  editingId = null;
+  document.getElementById('newsTitle').value = '';
+  document.getElementById('newsCategory').value = '';
+  document.getElementById('newsSummary').value = '';
+  document.getElementById('newsContent').value = '';
+  document.getElementById('newsImage').value = '';
+  document.getElementById('newsAuthor').value = '';
+  document.getElementById('newsSlider').checked = false;
+  document.getElementById('titleCount').textContent = '0';
+  document.getElementById('summaryCount').textContent = '0';
+  document.getElementById('imagePreview').style.display = 'none';
+  document.getElementById('formTitle').textContent = 'Yeni Haber Ekle';
+  document.getElementById('submitBtn').textContent = 'Haberi Yayınla';
+  const cancelBtn = document.getElementById('cancelEdit');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
+function renderAdminList() {
+  const list = getNews();
+  const el = document.getElementById('adminNewsList');
+  const countEl = document.getElementById('newsCountBadge');
+
+  if (countEl) countEl.textContent = `${list.length} haber`;
+  if (!el) return;
+
+  if (list.length === 0) {
+    el.innerHTML = '<p class="no-news-text">Henüz haber eklenmedi.</p>';
+    return;
+  }
+
+  el.innerHTML = list.map(n => `
+    <div class="admin-news-item">
+      <div class="admin-news-thumb" style="${buildBgStyle(n.image)}"></div>
+      <div class="admin-news-body">
+        <div class="admin-news-title">${escHtml(n.title)}</div>
+        <div class="admin-news-meta">
+          <span class="category-badge ${n.category}">${escHtml(categoryLabel(n.category))}</span>
+          ${n.slider ? '<span class="slider-badge">SLIDER</span>' : ''}
+          <span>${formatDateShort(n.date)}</span>
+        </div>
+      </div>
+      <div class="admin-news-actions">
+        <button class="btn-icon btn-edit" onclick="editNews(${n.id})">Düzenle</button>
+        <button class="btn-icon btn-delete" onclick="deleteNews(${n.id})">Sil</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function editNews(id) {
+  const news = getNewsById(id);
+  if (!news) return;
+
+  editingId = id;
+  document.getElementById('newsTitle').value = news.title;
+  document.getElementById('newsCategory').value = news.category;
+  document.getElementById('newsSummary').value = news.summary;
+  document.getElementById('newsContent').value = news.content;
+  document.getElementById('newsImage').value = news.image || '';
+  document.getElementById('newsAuthor').value = news.author || '';
+  document.getElementById('newsSlider').checked = !!news.slider;
+  document.getElementById('titleCount').textContent = news.title.length;
+  document.getElementById('summaryCount').textContent = news.summary.length;
+  document.getElementById('formTitle').textContent = 'Haberi Düzenle';
+  document.getElementById('submitBtn').textContent = 'Güncelle';
+  document.getElementById('cancelEdit').style.display = 'inline-block';
+
+  if (news.image) {
+    document.getElementById('previewImg').src = news.image;
+    document.getElementById('imagePreview').style.display = 'block';
+  }
+
+  document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function deleteNews(id) {
+  if (!confirm('Bu haberi silmek istediğinizden emin misiniz?')) return;
+  const list = getNews().filter(n => n.id !== id);
+  saveNews(list);
+  if (editingId === id) resetForm();
+  renderAdminList();
+}
+
+// ==================== MOBILE NAV ====================
+
+function initMobileNav() {
+  const btn = document.getElementById('hamburger');
+  const nav = document.getElementById('mobileNav');
+  if (btn && nav) {
+    btn.addEventListener('click', () => nav.classList.toggle('open'));
+  }
+}

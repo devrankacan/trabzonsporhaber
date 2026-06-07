@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Haber Detayı | Trabzonspor Haber</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">TS</div>
+          <div>
+            <div class="logo-title">Trabzonspor</div>
+            <div class="logo-sub">HABER</div>
+          </div>
+        </a>
+        <nav class="nav">
+          <a href="index.html" class="nav-link">Anasayfa</a>
+          <a href="haberler.html" class="nav-link">Haberler</a>
+          <a href="admin.html" class="nav-link admin-link">+ Haber Ekle</a>
+        </nav>
+        <button class="hamburger" id="hamburger">&#9776;</button>
+      </div>
+      <nav class="mobile-nav" id="mobileNav">
+        <a href="index.html" class="nav-link">Anasayfa</a>
+        <a href="haberler.html" class="nav-link">Haberler</a>
+        <a href="admin.html" class="nav-link">+ Haber Ekle</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main container">
+    <div class="content-grid">
+      <article class="article" id="articleContent">
+        <div class="article-loading">Haber yükleniyor...</div>
+      </article>
+
+      <aside class="sidebar">
+        <div class="sidebar-card">
+          <h3 class="sidebar-title">Son Haberler</h3>
+          <div id="recentNewsSidebar"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">
+          <div class="logo-icon small">TS</div>
+          <div>
+            <div class="logo-title">Trabzonspor Haber</div>
+            <div class="footer-copy">&copy; 2024 Tüm hakları saklıdır.</div>
+          </div>
+        </div>
+        <nav class="footer-nav">
+          <a href="index.html">Anasayfa</a>
+          <a href="haberler.html">Haberler</a>
+          <a href="admin.html">Admin</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    renderArticle();
+  </script>
+</body>
+</html>

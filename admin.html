@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Paneli | Trabzonspor Haber</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">TS</div>
+          <div>
+            <div class="logo-title">Trabzonspor</div>
+            <div class="logo-sub">HABER</div>
+          </div>
+        </a>
+        <nav class="nav">
+          <a href="index.html" class="nav-link">Anasayfa</a>
+          <a href="haberler.html" class="nav-link">Haberler</a>
+          <a href="admin.html" class="nav-link active admin-link">+ Haber Ekle</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-hero admin-hero">
+    <div class="container">
+      <h1>Admin Paneli</h1>
+      <p>Yeni haber ekle ve mevcut haberleri yönet</p>
+    </div>
+  </div>
+
+  <main class="main container">
+    <div class="admin-grid">
+
+      <!-- FORM -->
+      <section class="admin-form-section">
+        <div class="form-card" id="formCard">
+          <h2 class="form-title" id="formTitle">Yeni Haber Ekle</h2>
+
+          <div class="form-group">
+            <label class="form-label">Başlık *</label>
+            <input type="text" id="newsTitle" class="form-input" placeholder="Haber başlığı girin..." maxlength="120" />
+            <div class="char-count"><span id="titleCount">0</span>/120</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Kategori *</label>
+              <select id="newsCategory" class="form-input">
+                <option value="">Seçin...</option>
+                <option value="transfer">Transfer</option>
+                <option value="mac">Maç</option>
+                <option value="taraftar">Taraftar</option>
+                <option value="yonetim">Yönetim</option>
+                <option value="diger">Diğer</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Slider'da Göster</label>
+              <div class="toggle-wrap">
+                <label class="toggle">
+                  <input type="checkbox" id="newsSlider" />
+                  <span class="toggle-track"></span>
+                  <span class="toggle-label">Slider'a ekle</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Özet *</label>
+            <textarea id="newsSummary" class="form-input form-textarea" placeholder="Kısa haber özeti (slider ve kart önizlemesinde görünür)..." maxlength="200" rows="3"></textarea>
+            <div class="char-count"><span id="summaryCount">0</span>/200</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Haber İçeriği *</label>
+            <textarea id="newsContent" class="form-input form-textarea" placeholder="Haber içeriği..." rows="10"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Görsel URL (opsiyonel)</label>
+            <input type="url" id="newsImage" class="form-input" placeholder="https://ornek.com/resim.jpg" />
+            <div class="image-preview" id="imagePreview" style="display:none">
+              <img id="previewImg" src="" alt="Önizleme" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Yazar</label>
+            <input type="text" id="newsAuthor" class="form-input" placeholder="Yazar adı (opsiyonel)" />
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-secondary" id="cancelEdit" style="display:none">İptal</button>
+            <button class="btn-primary" id="submitBtn">Haberi Yayınla</button>
+          </div>
+
+          <div class="form-message" id="formMessage" style="display:none"></div>
+        </div>
+      </section>
+
+      <!-- NEWS LIST -->
+      <section class="admin-list-section">
+        <div class="admin-list-header">
+          <h2 class="form-title">Mevcut Haberler</h2>
+          <span class="news-count" id="newsCountBadge">0 haber</span>
+        </div>
+        <div id="adminNewsList" class="admin-news-list">
+          <p class="no-news-text">Henüz haber eklenmedi.</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">
+          <div class="logo-icon small">TS</div>
+          <div>
+            <div class="logo-title">Trabzonspor Haber</div>
+            <div class="footer-copy">&copy; 2024 Tüm hakları saklıdır.</div>
+          </div>
+        </div>
+        <nav class="footer-nav">
+          <a href="index.html">Anasayfa</a>
+          <a href="haberler.html">Haberler</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    initAdmin();
+  </script>
+</body>
+</html>
