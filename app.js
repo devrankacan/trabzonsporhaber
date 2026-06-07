@@ -624,6 +624,7 @@ function renderAdminTransfers() {
           </div>
         </div>
         <div class="admin-news-actions">
+          <button class="btn-icon btn-edit" onclick="editTransfer(${t.id})">Düzenle</button>
           <button class="btn-icon btn-delete" onclick="deleteTransfer(${t.id})">Sil</button>
         </div>
       </div>
@@ -632,6 +633,7 @@ function renderAdminTransfers() {
 }
 
 let currentTrImageData = '';
+let editingTrId = null;
 
 function switchTrImgTab(tab) {
   const fileTab = document.getElementById('trImgTabFile');
@@ -655,6 +657,45 @@ function toggleTransferForm(show) {
   card.style.display = show ? 'block' : 'none';
   if (btn) btn.style.display = show ? 'none' : 'inline-block';
   if (show) card.scrollIntoView({ behavior: 'smooth' });
+  if (!show) {
+    editingTrId = null;
+    document.getElementById('trPlayer').value = '';
+    document.getElementById('trFrom').value = '';
+    document.getElementById('trTo').value = '';
+    document.getElementById('trFee').value = '';
+    document.getElementById('trForeignTeam').value = '';
+    currentTrImageData = '';
+    const prev = document.getElementById('trImagePreview');
+    if (prev) prev.style.display = 'none';
+    const title = document.getElementById('transferFormTitle');
+    if (title) title.textContent = 'Yeni Transfer Ekle';
+    const btn2 = document.getElementById('trSubmitBtn');
+    if (btn2) btn2.textContent = 'Transferi Kaydet';
+  }
+}
+
+function editTransfer(id) {
+  const t = getTransfers().find(x => x.id === id);
+  if (!t) return;
+  editingTrId = id;
+  document.getElementById('trPlayer').value = t.player || '';
+  document.getElementById('trFrom').value = t.fromTeam || '';
+  document.getElementById('trTo').value = t.toTeam || '';
+  document.getElementById('trStatus').value = t.status || 'iddia';
+  document.getElementById('trFee').value = t.fee || '';
+  document.getElementById('trForeignTeam').value = t.foreignTeam || '';
+  currentTrImageData = t.playerImage || '';
+  if (t.playerImage) {
+    const prev = document.getElementById('trImagePreview');
+    const img = document.getElementById('trPreviewImg');
+    if (img) img.src = t.playerImage;
+    if (prev) prev.style.display = 'block';
+  }
+  const title = document.getElementById('transferFormTitle');
+  if (title) title.textContent = 'Transferi Düzenle';
+  const btn = document.getElementById('trSubmitBtn');
+  if (btn) btn.textContent = 'Güncelle';
+  toggleTransferForm(true);
 }
 
 function initTransferForm() {
@@ -716,20 +757,15 @@ function initTransferForm() {
     if (!status) { showTrMsg('error', 'Durum seçin.'); return; }
 
     const list = getTransfers();
-    list.unshift({ id: Date.now(), player, fromTeam, toTeam, status, fee, foreignTeam, playerImage: currentTrImageData, date: new Date().toISOString() });
+    if (editingTrId !== null) {
+      const idx = list.findIndex(t => t.id === editingTrId);
+      if (idx !== -1) list[idx] = { ...list[idx], player, fromTeam, toTeam, status, fee, foreignTeam, playerImage: currentTrImageData };
+    } else {
+      list.unshift({ id: Date.now(), player, fromTeam, toTeam, status, fee, foreignTeam, playerImage: currentTrImageData, date: new Date().toISOString() });
+    }
     saveTransfers(list);
 
-    // Reset form
-    document.getElementById('trPlayer').value = '';
-    document.getElementById('trFrom').value = '';
-    document.getElementById('trTo').value = '';
-    document.getElementById('trFee').value = '';
-    document.getElementById('trForeignTeam').value = '';
-    currentTrImageData = '';
-    const prev = document.getElementById('trImagePreview');
-    if (prev) prev.style.display = 'none';
-
-    showTrMsg('success', 'Transfer kaydedildi!');
+    showTrMsg('success', editingTrId ? 'Transfer güncellendi!' : 'Transfer kaydedildi!');
     renderAdminTransfers();
     toggleTransferForm(false);
   });
@@ -762,11 +798,11 @@ function saveStandings(list) {
 
 function sortedStandings() {
   return getStandings().slice().sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    const avA = a.goalsFor - a.goalsAgainst;
-    const avB = b.goalsFor - b.goalsAgainst;
-    if (avB !== avA) return avB - avA;
-    return b.goalsFor - a.goalsFor;
+    if (a.team === 'amed' && b.team !== 'amed') return 1;
+    if (b.team === 'amed' && a.team !== 'amed') return -1;
+    const labelA = BRANCHES[a.team]?.label || a.team;
+    const labelB = BRANCHES[b.team]?.label || b.team;
+    return labelA.localeCompare(labelB, 'tr');
   });
 }
 
@@ -788,6 +824,8 @@ function renderStandingsSidebar() {
           <th title="Galibiyet">G</th>
           <th title="Beraberlik">B</th>
           <th title="Mağlubiyet">M</th>
+          <th title="Attığı Gol">AG</th>
+          <th title="Yediği Gol">YG</th>
           <th title="Averaj">Av</th>
           <th title="Puan">P</th>
         </tr>
@@ -807,6 +845,8 @@ function renderStandingsSidebar() {
               <td>${r.won || 0}</td>
               <td>${r.drawn || 0}</td>
               <td>${r.lost || 0}</td>
+              <td>${r.goalsFor || 0}</td>
+              <td>${r.goalsAgainst || 0}</td>
               <td>${av > 0 ? '+' : ''}${av}</td>
               <td class="st-points">${r.points || 0}</td>
             </tr>
