@@ -133,7 +133,7 @@ function slugify(id) {
 }
 
 function buildBgStyle(image) {
-  if (image) return `background-image: url('${escAttr(image)}'); background-size: cover; background-position: center;`;
+  if (image) return `background: url('${escAttr(image)}') center / cover no-repeat;`;
   const colors = [
     'linear-gradient(135deg, #5c0d13, #2d7fa8)',
     'linear-gradient(135deg, #7A1219, #4A9BC4)',
@@ -461,10 +461,11 @@ function compressImage(file, maxW, maxH, quality) {
 function showImagePreview(src) {
   const preview = document.getElementById('imagePreview');
   const img = document.getElementById('previewImg');
-  if (preview && img) {
-    img.src = src;
-    preview.style.display = 'block';
-  }
+  if (!preview || !img) return;
+  img.onload = () => { preview.style.display = 'block'; };
+  img.onerror = () => { preview.style.display = 'none'; currentImageData = ''; };
+  img.src = src;
+  if (src.startsWith('data:')) preview.style.display = 'block';
 }
 
 function clearImagePreview() {
