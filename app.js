@@ -8,6 +8,7 @@ const VIEWS_KEY = 'ts_views';
 const ANALYTICS_KEY = 'ts_analytics';
 const TRANSFERS_KEY = 'ts_transfers';
 const STANDINGS_KEY = 'ts_standings';
+const LOGOS_KEY = 'ts_logos';
 
 // ==================== ANALYTICS ====================
 
@@ -554,13 +555,29 @@ function saveTransfers(list) {
   localStorage.setItem(TRANSFERS_KEY, JSON.stringify(list));
 }
 
+function getLogos() {
+  return JSON.parse(localStorage.getItem(LOGOS_KEY) || '{}');
+}
+
+function saveLogos(obj) {
+  localStorage.setItem(LOGOS_KEY, JSON.stringify(obj));
+}
+
+function getLogo(teamKey) {
+  return getLogos()[teamKey] || '';
+}
+
 function teamBadgeHtml(key, foreignName) {
   if (!key || key === 'yabanci') {
     return `<span class="transfer-team-badge" style="background:#555;color:#fff">${escHtml(foreignName || 'Yabancı')}</span>`;
   }
   const b = BRANCHES[key];
+  const logo = getLogo(key);
   if (!b) return `<span class="transfer-team-badge" style="background:#555;color:#fff">${escHtml(key)}</span>`;
   const shortName = b.label.split(' ')[0];
+  if (logo) {
+    return `<span class="transfer-team-logo-wrap" title="${escAttr(b.label)}"><img src="${escAttr(logo)}" alt="${escAttr(shortName)}" class="transfer-team-logo" /></span>`;
+  }
   return `<span class="transfer-team-badge" style="background:${b.color};color:#fff">${escHtml(shortName)}</span>`;
 }
 
@@ -784,6 +801,65 @@ function deleteTransfer(id) {
   if (!confirm('Bu transferi silmek istediğinizden emin misiniz?')) return;
   saveTransfers(getTransfers().filter(t => t.id !== id));
   renderAdminTransfers();
+}
+
+// ==================== CLUB LOGOS ====================
+
+function renderLogosAdmin() {
+  const el = document.getElementById('adminLogosList');
+  if (!el) return;
+  const logos = getLogos();
+  const teams = Object.entries(BRANCHES).filter(([k]) => k !== 'milli-takim');
+  el.innerHTML = teams.map(([key, b]) => {
+    const logo = logos[key] || '';
+    return `
+      <div class="logo-admin-item" id="logo-item-${key}">
+        <div class="logo-admin-preview">
+          ${logo
+            ? `<img src="${escAttr(logo)}" alt="${escAttr(b.label)}" class="logo-admin-img" />`
+            : `<div class="logo-admin-placeholder" style="background:${b.color}"><span>${escHtml(b.label.slice(0,2))}</span></div>`}
+        </div>
+        <div class="logo-admin-name">${escHtml(b.label)}</div>
+        <div class="logo-admin-actions">
+          <label class="btn-icon btn-edit logo-upload-label" title="Dosyadan yükle">
+            📁
+            <input type="file" accept="image/*" style="display:none" onchange="handleLogoFile('${key}', this)" />
+          </label>
+          <button class="btn-icon btn-edit" onclick="promptLogoUrl('${key}')" title="URL ile ekle">🔗</button>
+          ${logo ? `<button class="btn-icon btn-delete" onclick="removeLogo('${key}')" title="Logoyu kaldır">×</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function handleLogoFile(teamKey, input) {
+  const file = input.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  if (file.size > 2 * 1024 * 1024) { alert('Logo 2 MB\'dan büyük olamaz.'); return; }
+  try {
+    const compressed = await compressImage(file, 200, 200, 0.9);
+    const logos = getLogos();
+    logos[teamKey] = compressed;
+    saveLogos(logos);
+    renderLogosAdmin();
+  } catch(e) { alert('Hata oluştu.'); }
+}
+
+function promptLogoUrl(teamKey) {
+  const url = prompt('Logo URL girin:');
+  if (!url || !url.trim()) return;
+  const logos = getLogos();
+  logos[teamKey] = url.trim();
+  saveLogos(logos);
+  renderLogosAdmin();
+}
+
+function removeLogo(teamKey) {
+  const logos = getLogos();
+  delete logos[teamKey];
+  saveLogos(logos);
+  renderLogosAdmin();
 }
 
 // ==================== STANDINGS ====================
@@ -1163,6 +1239,7 @@ function initAdmin() {
   renderAnalytics();
   renderAdminTransfers();
   initTransferForm();
+  renderLogosAdmin();
   renderAdminStandings();
   initStandingsForm();
 }
