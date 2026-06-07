@@ -1108,7 +1108,10 @@ function renderAdminStandings() {
             <tr>
               <td>${i + 1}</td>
               <td>
-                <span class="branch-mini-badge" style="background:${b?.color||'#555'};color:#fff">${escHtml(b?.label || r.team)}</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  ${teamBadgeHtml(r.team, 26)}
+                  <span style="font-weight:600;font-size:13px">${escHtml(b?.label || r.team)}</span>
+                </div>
               </td>
               <td>${r.played}</td><td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td>
               <td>${r.goalsFor}</td><td>${r.goalsAgainst}</td>
