@@ -1022,27 +1022,146 @@ img { max-width: 100%; display: block; }
 .full-width { width: 100%; }
 
 /* ==================== FOOTER ==================== */
-.footer {
-  background: var(--text);
-  color: rgba(255,255,255,0.7);
-  padding: 32px 0;
-  margin-top: 60px;
+.footer { margin-top: 60px; }
+
+.footer-top {
+  background: #1a1a1a;
+  padding: 56px 0 40px;
 }
 
-.footer-inner {
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 40px;
+}
+
+.footer-col-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ts-gold);
+  margin-bottom: 16px;
+}
+
+/* Brand column */
+.footer-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.footer-logo-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--ts-red);
+  color: var(--ts-gold);
+  font-weight: 900;
+  font-size: 13px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.footer-logo-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+
+.footer-logo-sub {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--ts-gold);
+  margin-top: 3px;
+}
+
+.footer-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+  margin-bottom: 20px;
+  max-width: 280px;
+}
+
+.footer-badge-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.footer-badge {
+  background: rgba(201,168,76,0.15);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--ts-gold);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+/* Links */
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links a {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-links a::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: var(--ts-red);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.footer-links a:hover { color: #fff; }
+
+.footer-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 20px 0 16px;
+}
+
+.footer-stadium {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.6;
+}
+
+.footer-stadium span { color: rgba(255,255,255,0.3); font-size: 12px; }
+
+/* Bottom bar */
+.footer-bottom {
+  background: #111;
+  padding: 16px 0;
+  border-top: 2px solid var(--ts-red);
+}
+
+.footer-bottom-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 8px;
 }
 
-.footer-logo { display: flex; align-items: center; gap: 12px; }
-.footer-copy { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
-
-.footer-nav { display: flex; gap: 20px; }
-.footer-nav a { font-size: 13px; transition: color 0.2s; }
-.footer-nav a:hover { color: #fff; }
+.footer-bottom-right { color: var(--ts-gold); opacity: 0.6; }
 
 /* ==================== BRANCH NAV ==================== */
 .branch-nav {
@@ -1222,8 +1341,12 @@ img { max-width: 100%; display: block; }
   .admin-list-section { max-height: none; }
 
   /* Footer */
-  .footer { margin-top: 40px; padding: 24px 0; }
-  .footer-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .footer { margin-top: 40px; }
+  .footer-top { padding: 36px 0 28px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+  .footer-brand { grid-column: 1 / -1; }
+  .footer-desc { max-width: none; }
+  .footer-bottom-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
 }
 
 /* --- Mobil: 480px --- */
@@ -1290,8 +1413,9 @@ img { max-width: 100%; display: block; }
   .btn-icon { flex: 1; text-align: center; }
 
   /* Footer */
-  .footer-nav { gap: 12px; }
-  .footer-nav a { font-size: 12px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .footer-top { padding: 28px 0 20px; }
+  .footer-bottom-right { display: none; }
 
   /* Mobile branch divider */
   .mobile-branch-divider { border-top-color: var(--border); color: var(--ts-red); }
