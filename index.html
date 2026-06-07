@@ -24,14 +24,12 @@
         <nav class="nav">
           <a href="index.html" class="nav-link active">Anasayfa</a>
           <a href="haberler.html" class="nav-link">Haberler</a>
-          <a href="admin.html" class="nav-link admin-link">+ Haber Ekle</a>
         </nav>
         <button class="hamburger" id="hamburger">&#9776;</button>
       </div>
       <nav class="mobile-nav" id="mobileNav">
         <a href="index.html" class="nav-link">Anasayfa</a>
         <a href="haberler.html" class="nav-link">Haberler</a>
-        <a href="admin.html" class="nav-link">+ Haber Ekle</a>
         <div class="mobile-branch-divider">Branşlar</div>
         <a href="haberler.html?brans=futbol-a" class="nav-link">Futbol A Takım</a>
         <a href="haberler.html?brans=basketbol" class="nav-link">Basketbol</a>
@@ -46,18 +44,10 @@
     <div class="container">
       <div class="branch-nav-inner">
         <a href="haberler.html" class="branch-link">Tümü</a>
-        <a href="haberler.html?brans=futbol-a" class="branch-link">
-          Futbol A Takım
-        </a>
-        <a href="haberler.html?brans=basketbol" class="branch-link">
-          Basketbol
-        </a>
-        <a href="haberler.html?brans=kadin-futbol" class="branch-link">
-          Kadın Futbol A Takım
-        </a>
-        <a href="haberler.html?brans=akademi" class="branch-link">
-          Akademi
-        </a>
+        <a href="haberler.html?brans=futbol-a" class="branch-link">Futbol A Takım</a>
+        <a href="haberler.html?brans=basketbol" class="branch-link">Basketbol</a>
+        <a href="haberler.html?brans=kadin-futbol" class="branch-link">Kadın Futbol A Takım</a>
+        <a href="haberler.html?brans=akademi" class="branch-link">Akademi</a>
       </div>
     </div>
   </nav>
@@ -65,15 +55,13 @@
   <!-- SLIDER -->
   <section class="slider-section">
     <div class="slider" id="slider">
-      <div class="slider-track" id="sliderTrack">
-        <!-- slides injected by JS -->
-      </div>
+      <div class="slider-track" id="sliderTrack"></div>
       <button class="slider-btn prev" id="sliderPrev">&#8249;</button>
       <button class="slider-btn next" id="sliderNext">&#8250;</button>
       <div class="slider-dots" id="sliderDots"></div>
     </div>
     <div class="slider-empty" id="sliderEmpty" style="display:none">
-      <p>Henüz haber eklenmedi. <a href="admin.html">Haber eklemek için tıklayın.</a></p>
+      <p>Henüz haber eklenmedi.</p>
     </div>
   </section>
 
@@ -95,15 +83,11 @@
           <h2 class="section-title">Son Haberler</h2>
           <a href="haberler.html" class="see-all">Tümünü Gör →</a>
         </div>
-        <div class="news-grid" id="newsGrid">
-          <!-- injected by JS -->
-        </div>
+        <div class="news-grid" id="newsGrid"></div>
         <div class="news-empty" id="newsEmpty" style="display:none">
           <div class="empty-box">
             <div class="empty-icon">📰</div>
             <h3>Henüz haber bulunmuyor</h3>
-            <p>İlk haberi eklemek için admin panelini kullanın.</p>
-            <a href="admin.html" class="btn-primary">Haber Ekle</a>
           </div>
         </div>
       </section>
@@ -111,45 +95,10 @@
       <!-- SIDEBAR -->
       <aside class="sidebar">
         <div class="sidebar-card">
-          <h3 class="sidebar-title">Trabzonspor</h3>
-          <div class="team-info">
-            <div class="team-badge">TS</div>
-            <div>
-              <div class="team-name">Trabzonspor</div>
-              <div class="team-league">Süper Lig</div>
-            </div>
-          </div>
-          <div class="team-stats">
-            <div class="stat-item">
-              <span class="stat-label">Kuruluş</span>
-              <span class="stat-value">1967</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Lig Şampiyonluğu</span>
-              <span class="stat-value">7</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Türkiye Kupası</span>
-              <span class="stat-value">9</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Stad</span>
-              <span class="stat-value">Papara Park</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="sidebar-card">
           <h3 class="sidebar-title">Popüler Haberler</h3>
           <div id="popularNews">
             <p class="no-news-text">Henüz haber yok.</p>
           </div>
-        </div>
-
-        <div class="sidebar-card haber-ekle-card">
-          <h3 class="sidebar-title">Haber Ekle</h3>
-          <p>Trabzonspor ile ilgili son gelişmeleri siteye ekleyin.</p>
-          <a href="admin.html" class="btn-primary full-width">Haber Ekle</a>
         </div>
       </aside>
     </div>
@@ -169,7 +118,6 @@
         <nav class="footer-nav">
           <a href="index.html">Anasayfa</a>
           <a href="haberler.html">Haberler</a>
-          <a href="admin.html">Admin</a>
         </nav>
       </div>
     </div>
