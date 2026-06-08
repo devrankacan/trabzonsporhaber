@@ -3470,10 +3470,14 @@ img { max-width: 100%; display: block; }
   padding: 0 14px !important;
 }
 .branch-link-wc img {
-  display: inline-block;
+  display: inline-flex;
   background: #fff;
   border-radius: 4px;
   padding: 2px 2px;
+  height: 16px;
+  width: auto;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 .branch-link-wc:hover {
   background: rgba(255,255,255,0.13) !important;
