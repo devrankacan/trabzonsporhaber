@@ -64,6 +64,8 @@ function serveHtml(file) {
 app.get('/', serveHtml('index.html'));
 app.get('/index.html', (req, res) => res.redirect(301, '/'));
 app.get('/haberler.html', serveHtml('haberler.html'));
+app.get('/haberler', serveHtml('haberler.html'));
+app.get('/haberler/*', serveHtml('haberler.html'));
 app.get('/haber.html', serveHtml('haber.html'));
 app.get('/dunyakupasi.html', serveHtml('dunyakupasi.html'));
 app.get('/admin.html', serveHtml('admin.html'));
