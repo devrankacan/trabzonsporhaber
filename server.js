@@ -12,7 +12,7 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 const API_KEY = 'ee098b74';
 
 const ALLOWED_KEYS = [
-  'ts_haberler', 'ts_transfers', 'ts_standings', 'ts_logos',
+  'ts_haberler', 'ts_transfers', 'ts_standings', 'ts_standings_logo', 'ts_logos',
   'ts_users', 'ts_foreign_logos', 'ts_site_logo', 'ts_team_banners',
   'ts_comments', 'ts_views', 'ts_wc2026'
 ];

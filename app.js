@@ -8,6 +8,7 @@ const VIEWS_KEY = 'ts_views';
 const ANALYTICS_KEY = 'ts_analytics';
 const TRANSFERS_KEY = 'ts_transfers';
 const STANDINGS_KEY = 'ts_standings';
+const STANDINGS_LOGO_KEY = 'ts_standings_logo';
 const LOGOS_KEY = 'ts_logos';
 const USERS_KEY = 'ts_users';
 const USER_SESSION_KEY = 'ts_user_session';
@@ -375,7 +376,7 @@ function renderWCPlayers() {
 // ==================== API SYNC ====================
 
 const _API_KEY = 'ee098b74';
-const _SYNC_KEYS = [STORAGE_KEY, TRANSFERS_KEY, STANDINGS_KEY, LOGOS_KEY,
+const _SYNC_KEYS = [STORAGE_KEY, TRANSFERS_KEY, STANDINGS_KEY, STANDINGS_LOGO_KEY, LOGOS_KEY,
   USERS_KEY, FOREIGN_LOGOS_KEY, SITE_LOGO_KEY, TEAM_BANNERS_KEY, COMMENTS_KEY, VIEWS_KEY, WC_KEY];
 
 async function _apiSave(key, data) {
@@ -1466,9 +1467,25 @@ function sortedStandings() {
   });
 }
 
+function getStandingsLogo() {
+  return localStorage.getItem(STANDINGS_LOGO_KEY) || '';
+}
+function saveStandingsLogo(logo) {
+  localStorage.setItem(STANDINGS_LOGO_KEY, logo);
+  _apiSave(STANDINGS_LOGO_KEY, logo);
+}
+
 function renderStandingsSidebar() {
   const el = document.getElementById('standingsSidebar');
   if (!el) return;
+  const headerEl = document.getElementById('standingsSidebarHeader');
+  if (headerEl) {
+    const logo = getStandingsLogo();
+    headerEl.innerHTML = logo
+      ? `<h3 class="sidebar-title" style="display:flex;align-items:center;gap:8px"><img src="" id="_slLogoImg" style="height:22px;width:auto;object-fit:contain">Trendyol Süper Lig Puan Tablosu</h3>`
+      : `<h3 class="sidebar-title">Trendyol Süper Lig Puan Tablosu</h3>`;
+    if (logo) { const img = document.getElementById('_slLogoImg'); if (img) img.src = logo; }
+  }
   const rows = sortedStandings();
   if (rows.length === 0) {
     el.innerHTML = '<p class="no-news-text">Henüz puan tablosu eklenmedi.</p>';

@@ -396,6 +396,19 @@
         <button class="btn-secondary btn-sm" onclick="resetAllStandings()" style="margin-left:8px">↺ Tüm Takımları Sıfırla</button>
       </div>
 
+      <!-- Lig Logosu -->
+      <div class="dash-form-card" style="margin-bottom:20px">
+        <h3 class="dash-section-title" style="font-size:15px;margin-bottom:12px">Lig Logosu</h3>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <img id="slLogoPreview" style="max-height:48px;max-width:120px;object-fit:contain;display:none;background:#f5f5f5;border-radius:6px;padding:4px" />
+          <label class="btn-secondary btn-sm" style="cursor:pointer">
+            Logo Yükle
+            <input type="file" accept="image/*" style="display:none" onchange="handleStandingsLogoUpload(this)" />
+          </label>
+          <button class="btn-secondary btn-sm" onclick="removeStandingsLogo()" style="color:var(--danger)">Kaldır</button>
+        </div>
+      </div>
+
       <!-- Add/Edit Form -->
       <div class="dash-form-card" id="standingsFormCard" style="display:none;margin-bottom:24px">
         <div class="dash-section-header" style="margin-bottom:16px">
@@ -813,6 +826,25 @@
     `).join('');
   }
 
+  function handleStandingsLogoUpload(input) {
+    if (!input.files[0]) return;
+    compressWCImg(input.files[0], 300, 120, b64 => {
+      saveStandingsLogo(b64);
+      const preview = document.getElementById('slLogoPreview');
+      if (preview) { preview.src = b64; preview.style.display = 'block'; }
+    });
+  }
+  function removeStandingsLogo() {
+    saveStandingsLogo('');
+    const preview = document.getElementById('slLogoPreview');
+    if (preview) { preview.src = ''; preview.style.display = 'none'; }
+  }
+  function initStandingsLogoPreview() {
+    const logo = getStandingsLogo();
+    const preview = document.getElementById('slLogoPreview');
+    if (preview && logo) { preview.src = logo; preview.style.display = 'block'; }
+  }
+
   function handleWCLogoUpload(input) {
     if (!input.files[0]) return;
     compressWCImg(input.files[0], 300, 150, b64 => {
@@ -967,6 +999,7 @@
     if (navEl) navEl.classList.add('active');
     document.getElementById('dashTopbarTitle').textContent = TAB_TITLES[name] || '';
     if (name === 'wc2026') { renderWCAdmin(); renderWCPlayersAdmin(); }
+    if (name === 'standings') { initStandingsLogoPreview(); }
     // Close sidebar on mobile
     if (window.innerWidth <= 768) document.getElementById('dashSidebar').classList.remove('open');
   }
