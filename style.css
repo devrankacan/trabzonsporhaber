@@ -3381,21 +3381,28 @@ img { max-width: 100%; display: block; }
 .fixture-item {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 0 28px;
+  gap: 10px;
+  padding: 0 24px;
   cursor: default;
 }
+.fixture-team-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .fixture-flag {
-  width: 22px;
-  height: 15px;
+  width: 26px;
+  height: 18px;
   object-fit: cover;
-  border-radius: 2px;
+  border-radius: 3px;
   flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
 }
 .fixture-team {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255,255,255,0.75);
+  color: rgba(255,255,255,0.7);
   letter-spacing: 0.2px;
 }
 .fixture-tr {
@@ -3407,25 +3414,26 @@ img { max-width: 100%; display: block; }
   flex-direction: column;
   align-items: center;
   gap: 1px;
-  padding: 0 4px;
+  padding: 0 6px;
 }
 .fixture-date {
-  font-size: 10px;
-  color: rgba(255,255,255,0.45);
+  font-size: 9.5px;
+  color: rgba(255,255,255,0.38);
   letter-spacing: 0.3px;
 }
 .fixture-time {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
-  color: #C8102E;
-  background: rgba(200,16,46,0.12);
-  border: 1px solid rgba(200,16,46,0.3);
+  color: #e03050;
+  background: rgba(200,16,46,0.15);
+  border: 1px solid rgba(200,16,46,0.35);
   border-radius: 4px;
-  padding: 1px 7px;
-  line-height: 1.4;
+  padding: 1px 8px;
+  line-height: 1.5;
+  letter-spacing: 0.5px;
 }
 .fixture-sep {
-  color: rgba(255,255,255,0.15);
-  font-size: 18px;
-  padding: 0 4px;
+  color: rgba(255,255,255,0.12);
+  font-size: 20px;
+  padding: 0 2px;
 }

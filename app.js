@@ -208,16 +208,20 @@ function renderFixtureTicker() {
 
   const itemHtml = fixtures.map(f => `
     <div class="fixture-item">
-      <img src="https://flagcdn.com/w32/${f.homeCode}.png" class="fixture-flag" onerror="this.onerror=null;this.style.display='none'">
-      <span class="fixture-team ${f.homeCode==='tr'?'fixture-tr':''}">${escHtml(f.home)}</span>
+      <div class="fixture-team-wrap">
+        <img src="https://flagcdn.com/w40/${f.homeCode}.png" class="fixture-flag" alt="${escHtml(f.home)}" onerror="this.onerror=null;this.style.opacity='0'">
+        <span class="fixture-team ${f.homeCode==='tr'?'fixture-tr':''}">${escHtml(f.home)}</span>
+      </div>
       <div class="fixture-mid">
         <div class="fixture-date">${escHtml(f.date)} · ${escHtml(f.day)}</div>
         <div class="fixture-time">${escHtml(f.time)}</div>
       </div>
-      <span class="fixture-team ${f.awayCode==='tr'?'fixture-tr':''}">${escHtml(f.away)}</span>
-      <img src="https://flagcdn.com/w32/${f.awayCode}.png" class="fixture-flag" onerror="this.onerror=null;this.style.display='none'">
+      <div class="fixture-team-wrap">
+        <span class="fixture-team ${f.awayCode==='tr'?'fixture-tr':''}">${escHtml(f.away)}</span>
+        <img src="https://flagcdn.com/w40/${f.awayCode}.png" class="fixture-flag" alt="${escHtml(f.away)}" onerror="this.onerror=null;this.style.opacity='0'">
+      </div>
     </div>
-    <div class="fixture-sep">|</div>
+    <div class="fixture-sep">·</div>
   `).join('');
 
   el.innerHTML = itemHtml + itemHtml;
