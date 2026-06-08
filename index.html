@@ -17,6 +17,8 @@
 </head>
 <body>
 
+  <div class="fixture-bar"><div class="fixture-track" id="fixtureTicker"></div></div>
+
   <header class="header">
     <div class="container">
       <div class="header-inner">
@@ -226,7 +228,7 @@
   <script src="app.js?v=2"></script>
   <script>
     trackPageView('index');
-    initTheme(); initSiteLogo(); updateAuthUI();
+    initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker();
     renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar();
     initDragScroll();
     _apiSyncAll().then(() => {

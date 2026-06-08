@@ -18,6 +18,12 @@ const WC_KEY = 'ts_wc2026';
 
 // ==================== WC2026 DATA ====================
 
+const WC_DEFAULT_FIXTURES = [
+  { home:'Avustralya', homeCode:'au', away:'Türkiye', awayCode:'tr', date:'14.6.2026', day:'Paz', time:'07:00' },
+  { home:'Türkiye',   homeCode:'tr', away:'Paraguay', awayCode:'py', date:'20.6.2026', day:'Cum', time:'06:00' },
+  { home:'Türkiye',   homeCode:'tr', away:'ABD',      awayCode:'us', date:'26.6.2026', day:'Cum', time:'05:00' },
+];
+
 const WC_DEFAULT_GROUPS = [
   { id: 'D', teams: [
     { name: 'Türkiye',   code: 'tr', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
@@ -102,6 +108,7 @@ function getWC() {
   } catch {}
   if (!data) data = { logo: '', groups: JSON.parse(JSON.stringify(WC_DEFAULT_GROUPS)) };
   if (!data.players) data.players = [];
+  if (!data.fixtures) data.fixtures = WC_DEFAULT_FIXTURES;
   data.groups.forEach(g => g.teams.forEach(t => {
     if (!t.logo) t.logo = `https://flagcdn.com/w40/${t.code}.png`;
   }));
@@ -189,6 +196,31 @@ function _wcNav(dir) {
   const groups = wc.groups || [];
   _wcGroupIdx = Math.max(0, Math.min(_wcGroupIdx + dir, groups.length - 1));
   _wcRenderGroup(groups);
+}
+
+// ==================== FIXTURE TICKER ====================
+
+function renderFixtureTicker() {
+  const el = document.getElementById('fixtureTicker');
+  if (!el) return;
+  const fixtures = getWC().fixtures || WC_DEFAULT_FIXTURES;
+  if (!fixtures.length) { el.closest('.fixture-bar')?.style && (el.closest('.fixture-bar').style.display = 'none'); return; }
+
+  const itemHtml = fixtures.map(f => `
+    <div class="fixture-item">
+      <img src="https://flagcdn.com/w32/${f.homeCode}.png" class="fixture-flag" onerror="this.onerror=null;this.style.display='none'">
+      <span class="fixture-team ${f.homeCode==='tr'?'fixture-tr':''}">${escHtml(f.home)}</span>
+      <div class="fixture-mid">
+        <div class="fixture-date">${escHtml(f.date)} · ${escHtml(f.day)}</div>
+        <div class="fixture-time">${escHtml(f.time)}</div>
+      </div>
+      <span class="fixture-team ${f.awayCode==='tr'?'fixture-tr':''}">${escHtml(f.away)}</span>
+      <img src="https://flagcdn.com/w32/${f.awayCode}.png" class="fixture-flag" onerror="this.onerror=null;this.style.display='none'">
+    </div>
+    <div class="fixture-sep">|</div>
+  `).join('');
+
+  el.innerHTML = itemHtml + itemHtml;
 }
 
 // ==================== WC PAGE ====================

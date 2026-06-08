@@ -15,6 +15,8 @@
 </head>
 <body>
 
+  <div class="fixture-bar"><div class="fixture-track" id="fixtureTicker"></div></div>
+
   <header class="header">
     <div class="container">
       <div class="header-inner">
@@ -232,7 +234,7 @@
       applyTeamFilter(team);
     });
 
-    initTheme(); initSiteLogo(); updateAuthUI();
+    initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker();
     trackPageView('haberler');
 
     // Read team from URL path on page load

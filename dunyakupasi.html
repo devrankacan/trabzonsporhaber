@@ -14,6 +14,8 @@
 </head>
 <body>
 
+  <div class="fixture-bar"><div class="fixture-track" id="fixtureTicker"></div></div>
+
   <header class="header">
     <div class="container">
       <div class="header-inner">
@@ -212,7 +214,7 @@
 
   <script src="/app.js?v=2"></script>
   <script>
-    initTheme(); initSiteLogo(); updateAuthUI(); initHeaderSearch(); initDragScroll();
+    initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); initHeaderSearch(); initDragScroll();
     renderWCPage(); renderWCStats(); renderWCPlayers();
     _apiSyncAll().then(() => { renderWCPage(); renderWCStats(); renderWCPlayers(); });
     requestAnimationFrame(initSegSliders);
