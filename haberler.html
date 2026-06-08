@@ -52,7 +52,7 @@
     <div class="container">
       <div class="branch-nav-inner">
         <a href="/haberler" class="branch-link" onclick="return navTeam(event,'')">Tümü</a>
-        <a href="/dunyakupasi.html" class="branch-link">🏆 Dünya Kupası</a>
+        <a href="/dunyakupasi.html" class="branch-link branch-link-wc" id="navWcLink">🏆 Dünya Kupası</a>
         <a href="/haberler/milli-takim" class="branch-link" onclick="return navTeam(event,'milli-takim')">Milli Takım</a>
         <a href="/haberler/galatasaray" class="branch-link" onclick="return navTeam(event,'galatasaray')">Galatasaray</a>
         <a href="/haberler/fenerbahce" class="branch-link" onclick="return navTeam(event,'fenerbahce')">Fenerbahçe</a>
@@ -234,7 +234,7 @@
       applyTeamFilter(team);
     });
 
-    initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker();
+    initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
     trackPageView('haberler');
 
     // Read team from URL path on page load

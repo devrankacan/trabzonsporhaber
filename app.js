@@ -198,6 +198,19 @@ function _wcNav(dir) {
   _wcRenderGroup(groups);
 }
 
+// ==================== NAV WC LOGO ====================
+
+function renderNavWcLogo() {
+  const link = document.getElementById('navWcLink');
+  if (!link) return;
+  const logo = getWC().logo;
+  if (logo) {
+    link.innerHTML = `<img src="${logo}" alt="Dünya Kupası" style="height:16px;width:auto;object-fit:contain;vertical-align:middle;margin-right:5px;border-radius:2px">Dünya Kupası`;
+  } else {
+    link.textContent = 'Dünya Kupası';
+  }
+}
+
 // ==================== FIXTURE TICKER ====================
 
 function renderFixtureTicker() {
