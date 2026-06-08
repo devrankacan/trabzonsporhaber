@@ -1535,20 +1535,22 @@ function saveTransfersLogo(logo) {
 }
 
 function _applyTransfersLogo(logo) {
-  const headerEl = document.getElementById('transfersSidebarHeader');
-  if (!headerEl) return;
-  const h3 = document.createElement('h3');
-  h3.className = 'sidebar-title';
-  h3.style.cssText = 'display:flex;align-items:center;gap:8px';
-  if (logo) {
-    const img = document.createElement('img');
-    img.style.cssText = 'height:22px;width:auto;object-fit:contain;flex-shrink:0';
-    img.src = logo;
-    h3.appendChild(img);
-  }
-  h3.appendChild(document.createTextNode('Son Transferler'));
-  headerEl.textContent = '';
-  headerEl.appendChild(h3);
+  ['transfersSidebarHeader', 'transfersHeroHeader'].forEach(id => {
+    const headerEl = document.getElementById(id);
+    if (!headerEl) return;
+    const h3 = document.createElement('h3');
+    h3.className = 'sidebar-title';
+    h3.style.cssText = 'display:flex;align-items:center;gap:8px';
+    if (logo) {
+      const img = document.createElement('img');
+      img.style.cssText = 'height:22px;width:auto;object-fit:contain;flex-shrink:0';
+      img.src = logo;
+      h3.appendChild(img);
+    }
+    h3.appendChild(document.createTextNode('Son Transferler'));
+    headerEl.textContent = '';
+    headerEl.appendChild(h3);
+  });
 }
 
 function fetchAndApplyTransfersLogo() {
