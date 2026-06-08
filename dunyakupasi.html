@@ -216,7 +216,7 @@
   <script>
     initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo(); initHeaderSearch(); initDragScroll();
     renderWCPage(); renderWCStats(); renderWCPlayers();
-    _apiSyncAll().then(() => { renderWCPage(); renderWCStats(); renderWCPlayers(); });
+    _apiSyncAll().then(() => { renderWCPage(); renderWCStats(); renderWCPlayers(); renderNavWcLogo(); renderFixtureTicker(); });
     requestAnimationFrame(initSegSliders);
 
     function segSelect(btn, ctrlId, renderFn) {
