@@ -737,7 +737,7 @@
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        cb(canvas.toDataURL('image/webp', 0.85));
+        cb(canvas.toDataURL('image/png'));
       };
       img.src = e.target.result;
     };
