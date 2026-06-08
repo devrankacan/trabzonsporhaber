@@ -82,6 +82,8 @@ app.get('/haber.html', (req, res) => {
   try {
     let html = fs.readFileSync(path.join(__dirname, 'haber.html'), 'utf8');
     const bootstrap = buildBootstrapScript();
+    const faviconTag = buildFaviconTag();
+    if (faviconTag) html = html.replace(/<link rel="icon"[^>]*>/, faviconTag);
     html = html.replace('</head>', bootstrap + '</head>');
 
     const id = parseInt(req.query.id);
