@@ -206,26 +206,24 @@ function _wcNav(dir) {
 
 // ==================== NAV WC LOGO ====================
 
-let _navWcLogoSet = false;
-function _setNavWcLogo(logo) {
-  if (!logo || _navWcLogoSet) return;
+function renderNavWcLogo() {
   const link = document.getElementById('navWcLink');
   if (!link) return;
-  _navWcLogoSet = true;
-  link.textContent = '';
-  const img = document.createElement('img');
-  img.alt = 'DK';
-  img.style.cssText = 'display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0';
-  img.src = logo;
-  link.appendChild(img);
-  link.appendChild(document.createTextNode('Dünya Kupası'));
-}
 
-function renderNavWcLogo() {
-  _setNavWcLogo(getWC().logo);
-  if (!_navWcLogoSet) {
+  function insertLogo(logo) {
+    if (!logo || link.querySelector('img._wc-nav-logo')) return;
+    const img = document.createElement('img');
+    img.className = '_wc-nav-logo';
+    img.alt = 'DK';
+    img.style.cssText = 'display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0';
+    img.src = logo;
+    link.insertBefore(img, link.firstChild);
+  }
+
+  insertLogo(getWC().logo);
+  if (!link.querySelector('img._wc-nav-logo')) {
     fetch('/api/ts_wc2026').then(r => r.ok ? r.json() : null).then(wc => {
-      if (wc && wc.logo) _setNavWcLogo(wc.logo);
+      if (wc && wc.logo) insertLogo(wc.logo);
     }).catch(() => {});
   }
 }
