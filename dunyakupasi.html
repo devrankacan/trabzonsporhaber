@@ -113,12 +113,13 @@
       <div class="wc-page-card">
         <div class="wc-page-card-header">
           <span>Tüm Takımlar — Puan Durumu</span>
-          <select id="wcStatSort" onchange="renderWCStats()" class="category-select" style="font-size:13px;padding:6px 10px;width:auto">
-            <option value="pts">Puana Göre</option>
-            <option value="gf">Atılan Gole Göre</option>
-            <option value="gd">Averaja Göre</option>
-            <option value="won">Galibiyete Göre</option>
-          </select>
+          <div class="seg-ctrl" id="wcStatSort">
+            <button class="seg-btn active" data-val="pts" onclick="segSelect(this,'wcStatSort',renderWCStats)">Puan</button>
+            <button class="seg-btn" data-val="gf" onclick="segSelect(this,'wcStatSort',renderWCStats)">Gol</button>
+            <button class="seg-btn" data-val="gd" onclick="segSelect(this,'wcStatSort',renderWCStats)">Averaj</button>
+            <button class="seg-btn" data-val="won" onclick="segSelect(this,'wcStatSort',renderWCStats)">Galibiyet</button>
+            <span class="seg-slider"></span>
+          </div>
         </div>
         <div style="overflow-x:auto">
           <table class="wc-stats-table" id="wcStatsTable">
@@ -141,11 +142,12 @@
       <div class="wc-page-card">
         <div class="wc-page-card-header">
           <span>Golcüler & İstatistikler</span>
-          <select id="wcPlayerSort" onchange="renderWCPlayers()" class="category-select" style="font-size:13px;padding:6px 10px;width:auto">
-            <option value="goals">Gole Göre</option>
-            <option value="assists">Asiste Göre</option>
-            <option value="minutes">Dakikaya Göre</option>
-          </select>
+          <div class="seg-ctrl" id="wcPlayerSort">
+            <button class="seg-btn active" data-val="goals" onclick="segSelect(this,'wcPlayerSort',renderWCPlayers)">Gol</button>
+            <button class="seg-btn" data-val="assists" onclick="segSelect(this,'wcPlayerSort',renderWCPlayers)">Asist</button>
+            <button class="seg-btn" data-val="minutes" onclick="segSelect(this,'wcPlayerSort',renderWCPlayers)">Dakika</button>
+            <span class="seg-slider"></span>
+          </div>
         </div>
         <div id="wcPlayersEmpty" style="display:none;padding:40px;text-align:center;color:var(--text-muted)">
           Henüz oyuncu istatistiği eklenmedi.
@@ -213,6 +215,32 @@
     initTheme(); initSiteLogo(); updateAuthUI(); initHeaderSearch(); initDragScroll();
     renderWCPage(); renderWCStats(); renderWCPlayers();
     _apiSyncAll().then(() => { renderWCPage(); renderWCStats(); renderWCPlayers(); });
+    requestAnimationFrame(initSegSliders);
+
+    function segSelect(btn, ctrlId, renderFn) {
+      const ctrl = document.getElementById(ctrlId);
+      ctrl.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const slider = ctrl.querySelector('.seg-slider');
+      if (slider) {
+        slider.style.width = btn.offsetWidth + 'px';
+        slider.style.transform = `translateX(${btn.offsetLeft}px)`;
+      }
+      renderFn();
+    }
+
+    function initSegSliders() {
+      document.querySelectorAll('.seg-ctrl').forEach(ctrl => {
+        const active = ctrl.querySelector('.seg-btn.active');
+        const slider = ctrl.querySelector('.seg-slider');
+        if (active && slider) {
+          slider.style.transition = 'none';
+          slider.style.width = active.offsetWidth + 'px';
+          slider.style.transform = `translateX(${active.offsetLeft}px)`;
+          requestAnimationFrame(() => { slider.style.transition = ''; });
+        }
+      });
+    }
 
     function wcShowTab(name) {
       document.querySelectorAll('.wc-tab-content').forEach(el => el.classList.remove('active'));

@@ -241,7 +241,7 @@ const _WC_GROUP_COLORS = [
 function renderWCStats() {
   const wc = getWC();
   const sortEl = document.getElementById('wcStatSort');
-  const sortBy = sortEl ? sortEl.value : 'pts';
+  const sortBy = sortEl ? (sortEl.querySelector('.seg-btn.active')?.dataset.val || sortEl.value || 'pts') : 'pts';
   const body = document.getElementById('wcStatsBody');
   if (!body) return;
 
@@ -283,7 +283,7 @@ function renderWCStats() {
 function renderWCPlayers() {
   const wc = getWC();
   const sortEl = document.getElementById('wcPlayerSort');
-  const sortBy = sortEl ? sortEl.value : 'goals';
+  const sortBy = sortEl ? (sortEl.querySelector('.seg-btn.active')?.dataset.val || sortEl.value || 'goals') : 'goals';
   const players = (wc.players || []).slice();
   const empty = document.getElementById('wcPlayersEmpty');
   const table = document.getElementById('wcPlayersTable');
