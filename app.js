@@ -205,13 +205,15 @@ function renderNavWcLogo() {
   const link = document.getElementById('navWcLink');
   if (!link) return;
   const logo = getWC().logo;
+  link.textContent = '';
   if (logo) {
-    link.innerHTML = '<img id="_wcNavImg" alt="DK" style="display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0">Dünya Kupası';
-    const img = document.getElementById('_wcNavImg');
-    if (img) img.src = logo;
-  } else {
-    link.textContent = 'Dünya Kupası';
+    const img = document.createElement('img');
+    img.alt = 'DK';
+    img.style.cssText = 'display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0';
+    img.src = logo;
+    link.appendChild(img);
   }
+  link.appendChild(document.createTextNode('Dünya Kupası'));
 }
 
 // ==================== FIXTURE TICKER ====================
@@ -1468,7 +1470,9 @@ function sortedStandings() {
 }
 
 function getStandingsLogo() {
-  return localStorage.getItem(STANDINGS_LOGO_KEY) || '';
+  const raw = localStorage.getItem(STANDINGS_LOGO_KEY);
+  if (!raw) return '';
+  try { const p = JSON.parse(raw); return typeof p === 'string' ? p : raw; } catch { return raw; }
 }
 function saveStandingsLogo(logo) {
   localStorage.setItem(STANDINGS_LOGO_KEY, logo);
@@ -1481,10 +1485,18 @@ function renderStandingsSidebar() {
   const headerEl = document.getElementById('standingsSidebarHeader');
   if (headerEl) {
     const logo = getStandingsLogo();
-    headerEl.innerHTML = logo
-      ? `<h3 class="sidebar-title" style="display:flex;align-items:center;gap:8px"><img src="" id="_slLogoImg" style="height:22px;width:auto;object-fit:contain">Trendyol Süper Lig Puan Tablosu</h3>`
-      : `<h3 class="sidebar-title">Trendyol Süper Lig Puan Tablosu</h3>`;
-    if (logo) { const img = document.getElementById('_slLogoImg'); if (img) img.src = logo; }
+    const h3 = document.createElement('h3');
+    h3.className = 'sidebar-title';
+    h3.style.cssText = 'display:flex;align-items:center;gap:8px';
+    if (logo) {
+      const img = document.createElement('img');
+      img.style.cssText = 'height:22px;width:auto;object-fit:contain;flex-shrink:0';
+      img.src = logo;
+      h3.appendChild(img);
+    }
+    h3.appendChild(document.createTextNode('Trendyol Süper Lig Puan Tablosu'));
+    headerEl.textContent = '';
+    headerEl.appendChild(h3);
   }
   const rows = sortedStandings();
   if (rows.length === 0) {
