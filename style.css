@@ -2903,18 +2903,48 @@ img { max-width: 100%; display: block; }
   background: none;
   border: none;
   cursor: pointer;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  color: var(--text-muted);
-  transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
 }
-.theme-toggle-btn:hover { background: var(--bg); color: var(--ts-red); }
+.tgl-track {
+  display: flex;
+  align-items: center;
+  width: 52px;
+  height: 26px;
+  border-radius: 13px;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.22);
+  padding: 2px;
+  transition: background 0.25s, border-color 0.25s;
+  position: relative;
+}
+.tgl-track.tgl-dark {
+  background: rgba(30,40,70,0.7);
+  border-color: rgba(255,255,255,0.12);
+}
+.tgl-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ts-blue);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: transform 0.25s, background 0.25s, color 0.25s;
+  transform: translateX(0);
+  flex-shrink: 0;
+}
+.tgl-dark .tgl-thumb {
+  transform: translateX(26px);
+  background: var(--ts-gold);
+  color: #1a1a2e;
+}
+.theme-toggle-btn:hover .tgl-track { border-color: rgba(255,255,255,0.4); }
 
 /* ==================== AUTH ==================== */
 .auth-btn-wrap { position: relative; display: flex; align-items: center; }
