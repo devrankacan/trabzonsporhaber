@@ -969,9 +969,10 @@ function buildNewsCard(n) {
 
 // ==================== HOME PAGE ====================
 
+let _sliderControlsInited = false;
 function renderHomePage() {
   buildSlides();
-  initSliderControls();
+  if (!_sliderControlsInited) { initSliderControls(); _sliderControlsInited = true; }
   buildTicker();
 
   const grid = document.getElementById('newsGrid');
