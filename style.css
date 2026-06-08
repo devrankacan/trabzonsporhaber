@@ -2853,11 +2853,20 @@ img { max-width: 100%; display: block; }
   object-fit: contain;
   display: block;
 }
+
+[data-theme="dark"] .site-logo-header {
+  filter: invert(1) brightness(2);
+}
+
 .site-logo-footer {
   height: 60px;
   max-width: 220px;
   object-fit: contain;
   display: block;
+}
+
+[data-theme="dark"] .site-logo-footer {
+  filter: invert(1) brightness(2);
 }
 
 .settings-logo-preview {
@@ -3453,6 +3462,9 @@ img { max-width: 100%; display: block; }
   color: rgba(255,255,255,0.9) !important;
   margin: 0 4px !important;
   padding: 0 14px !important;
+}
+.branch-link-wc img {
+  filter: brightness(0) invert(1);
 }
 .branch-link-wc:hover {
   background: rgba(255,255,255,0.13) !important;
