@@ -2668,7 +2668,11 @@ function applyTheme(theme) {
 
 // ==================== SITE LOGO ====================
 
-function getSiteLogo() { return localStorage.getItem(SITE_LOGO_KEY) || ''; }
+function getSiteLogo() {
+  const raw = localStorage.getItem(SITE_LOGO_KEY);
+  if (!raw) return '';
+  try { const p = JSON.parse(raw); return typeof p === 'string' ? p : raw; } catch { return raw; }
+}
 
 function applySiteLogo(src) {
   const header = document.getElementById('headerLogo');
