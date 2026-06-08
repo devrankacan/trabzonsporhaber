@@ -622,7 +622,7 @@ function categoryLabel(cat) {
 }
 
 function slugify(id) {
-  return `haber.html?id=${id}`;
+  return `/haber.html?id=${id}`;
 }
 
 function buildBgStyle(image) {
