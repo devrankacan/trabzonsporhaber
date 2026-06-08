@@ -232,6 +232,12 @@ function renderWCPage() {
   `).join('');
 }
 
+const _WC_GROUP_COLORS = [
+  '200,16,46','37,99,235','22,163,74','234,88,12',
+  '147,51,234','20,184,166','202,138,4','236,72,153',
+  '99,102,241','6,182,212','245,158,11','16,185,129'
+];
+
 function renderWCStats() {
   const wc = getWC();
   const sortEl = document.getElementById('wcStatSort');
@@ -239,17 +245,25 @@ function renderWCStats() {
   const body = document.getElementById('wcStatsBody');
   if (!body) return;
 
+  const groups = wc.groups || [];
+  const groupColorMap = {};
+  groups.forEach((g, i) => { groupColorMap[g.id] = _WC_GROUP_COLORS[i % _WC_GROUP_COLORS.length]; });
+
   const allTeams = [];
-  (wc.groups || []).forEach(g => g.teams.forEach(t => allTeams.push({ ...t, group: g.id })));
+  groups.forEach(g => g.teams.forEach(t => allTeams.push({ ...t, group: g.id })));
 
   allTeams.sort((a, b) => {
     if (sortBy === 'gd') return (b.gf - b.ga) - (a.gf - a.ga);
     return (b[sortBy] || 0) - (a[sortBy] || 0);
   });
 
-  body.innerHTML = allTeams.map((t, i) => `
-    <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}">
-      <td style="color:var(--text-muted);font-size:12px">${i + 1}</td>
+  body.innerHTML = allTeams.map((t, i) => {
+    const rgb = groupColorMap[t.group] || '100,100,100';
+    const bg = `rgba(${rgb},0.08)`;
+    const border = `rgba(${rgb},0.35)`;
+    return `
+    <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}" style="background:${bg}">
+      <td style="color:var(--text-muted);font-size:12px;border-left:3px solid ${border}">${i + 1}</td>
       <td>
         <div style="display:flex;align-items:center;gap:7px">
           <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.onerror=null;this.style.display='none'" />
@@ -262,7 +276,8 @@ function renderWCStats() {
       <td style="font-size:12px">${t.gf - t.ga > 0 ? '+' : ''}${t.gf - t.ga}</td>
       <td class="wc-pts">${t.pts}</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function renderWCPlayers() {
