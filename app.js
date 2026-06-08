@@ -138,18 +138,23 @@ function renderWC2026Sidebar() {
   const groups = wc.groups || [];
   if (!groups.length) return;
 
-  const titleEl = document.getElementById('wcSidebarTitle');
-  if (titleEl) {
-    if (wc.logo) {
-      titleEl.style.display = 'flex';
-      titleEl.style.alignItems = 'center';
-      titleEl.style.gap = '8px';
-      titleEl.innerHTML = `<img src="${wc.logo}" alt="" style="height:22px;width:auto;object-fit:contain;flex-shrink:0">2026 Dünya Kupası Grupları`;
-    } else {
-      titleEl.style.display = '';
-      titleEl.innerHTML = '2026 Dünya Kupası Grupları';
+  function _setWcSidebarTitle(logo) {
+    const titleEl = document.getElementById('wcSidebarTitle');
+    if (!titleEl) return;
+    titleEl.textContent = '';
+    titleEl.style.cssText = logo ? 'display:flex;align-items:center;gap:8px' : '';
+    if (logo) {
+      const img = document.createElement('img');
+      img.style.cssText = 'height:22px;width:auto;object-fit:contain;flex-shrink:0';
+      img.src = logo;
+      titleEl.appendChild(img);
     }
+    titleEl.appendChild(document.createTextNode('2026 Dünya Kupası Grupları'));
   }
+  _setWcSidebarTitle(wc.logo);
+  fetch('/api/ts_wc2026').then(r => r.ok ? r.json() : null).then(data => {
+    if (data && data.logo) _setWcSidebarTitle(data.logo);
+  }).catch(() => {});
 
   _wcGroupIdx = Math.max(0, Math.min(_wcGroupIdx, groups.length - 1));
   _wcRenderGroup(groups);
@@ -262,7 +267,14 @@ function renderWCPage() {
   // Hero logo
   const heroLogo = document.getElementById('wcHeroLogo');
   if (heroLogo) {
-    heroLogo.innerHTML = wc.logo ? `<img src="${wc.logo}" alt="2026 Dünya Kupası" />` : '';
+    function _setHeroLogo(logo) {
+      heroLogo.textContent = '';
+      if (logo) { const img = document.createElement('img'); img.alt = '2026 Dünya Kupası'; img.src = logo; heroLogo.appendChild(img); }
+    }
+    _setHeroLogo(wc.logo);
+    fetch('/api/ts_wc2026').then(r => r.ok ? r.json() : null).then(data => {
+      if (data && data.logo) _setHeroLogo(data.logo);
+    }).catch(() => {});
   }
 
   // Groups grid
