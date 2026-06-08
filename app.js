@@ -398,6 +398,8 @@ async function _apiSyncAll() {
         localStorage.setItem(key, JSON.stringify(val));
       }
     }
+    renderNavWcLogo();
+    renderFixtureTicker();
   } catch {}
 }
 
