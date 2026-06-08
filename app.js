@@ -423,6 +423,7 @@ async function _apiSyncAll() {
     renderFixtureTicker();
     fetchAndApplyStandingsLogo();
     fetchAndApplyTransfersLogo();
+    applySiteLogo(getSiteLogo());
   } catch {}
 }
 
