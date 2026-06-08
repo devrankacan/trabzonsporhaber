@@ -3464,7 +3464,7 @@ img { max-width: 100%; display: block; }
   padding: 0 14px !important;
 }
 .branch-link-wc img {
-  filter: brightness(0) invert(1);
+  display: inline-block;
 }
 .branch-link-wc:hover {
   background: rgba(255,255,255,0.13) !important;
