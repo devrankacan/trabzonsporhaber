@@ -41,12 +41,27 @@
   <!-- SIDEBAR -->
   <aside class="dash-sidebar" id="dashSidebar">
     <div class="dash-brand">
-      <div class="dash-brand-icon">TS</div>
-      <div>
-        <div class="dash-brand-title">Süper Lig</div>
-        <div class="dash-brand-sub">Admin Panel</div>
+      <img id="adminSiteLogoImg" class="site-logo-header" alt="Logo" style="display:none;height:40px;max-width:140px" />
+      <div id="adminSiteLogoFb" style="display:flex;align-items:center;gap:8px">
+        <div class="dash-brand-icon">TS</div>
+        <div>
+          <div class="dash-brand-title">Süper Lig</div>
+          <div class="dash-brand-sub">Admin Panel</div>
+        </div>
       </div>
     </div>
+    <script>
+      try {
+        var _sl=localStorage.getItem('ts_site_logo');
+        if(_sl){try{var _slp=JSON.parse(_sl);if(typeof _slp==='string')_sl=_slp;}catch(e){}}
+        if(_sl&&_sl.length>4){
+          var _si=document.getElementById('adminSiteLogoImg');
+          if(_si){_si.src=_sl;_si.style.display='block';}
+          var _fb=document.getElementById('adminSiteLogoFb');
+          if(_fb)_fb.style.display='none';
+        }
+      }catch(e){}
+    </script>
 
     <nav class="dash-nav">
       <button class="dash-nav-item active" onclick="showTab('stats')" id="tab-stats">
