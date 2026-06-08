@@ -122,8 +122,14 @@ function renderWC2026Sidebar() {
   const wc = getWC();
   const groups = wc.groups || [];
 
+  const titleEl = document.getElementById('wcSidebarTitle');
+  if (titleEl) {
+    titleEl.innerHTML = wc.logo
+      ? `<img src="${wc.logo}" alt="" style="height:18px;width:auto;object-fit:contain;vertical-align:middle;margin-right:6px;border-radius:2px">2026 Dünya Kupası Grupları`
+      : '2026 Dünya Kupası Grupları';
+  }
+
   el.innerHTML = `
-    ${wc.logo ? `<div class="wc-header-logo"><img src="${wc.logo}" alt="2026 Dünya Kupası" /></div>` : ''}
     <div class="wc-groups-scroll" id="wcGroupsScroll">
       ${groups.map(g => `
         <div class="wc-group-card">
