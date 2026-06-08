@@ -66,6 +66,9 @@
       <button class="dash-nav-item" onclick="showTab('standings')" id="tab-standings">
         <span class="dash-nav-icon">🏆</span> Puan Tablosu
       </button>
+      <button class="dash-nav-item" onclick="showTab('wc2026')" id="tab-wc2026">
+        <span class="dash-nav-icon">🌍</span> Dünya Kupası
+      </button>
       <button class="dash-nav-item" onclick="showTab('settings')" id="tab-settings">
         <span class="dash-nav-icon">⚙️</span> Ayarlar
       </button>
@@ -468,6 +471,19 @@
       </div>
     </section>
 
+    <!-- TAB: DÜNYA KUPASI 2026 -->
+    <section class="dash-tab" id="tabWc2026">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">🌍 2026 Dünya Kupası Grupları</h2>
+        <button class="btn-secondary btn-sm" onclick="resetWC()">↺ Varsayılana Sıfırla</button>
+      </div>
+      <div id="wcAdminGroups"></div>
+      <div style="margin-top:16px">
+        <button class="btn-primary" onclick="saveWCAdmin()">💾 Kaydet</button>
+        <span id="wcSaveMsg" style="margin-left:12px;font-size:13px;color:var(--success)"></span>
+      </div>
+    </section>
+
     <!-- TAB: ÜYELER -->
     <section class="dash-tab" id="tabMembers">
       <div class="dash-section-header">
@@ -649,7 +665,62 @@
     setTimeout(() => { msg.style.display = 'none'; }, 4000);
   }
 
-  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu', settings: 'Ayarlar', members: 'Üyeler' };
+  function renderWCAdmin() {
+    const groups = getWC();
+    const el = document.getElementById('wcAdminGroups');
+    if (!el) return;
+    el.innerHTML = groups.map((g, gi) => `
+      <div class="dash-form-card" style="margin-bottom:16px">
+        <div style="font-weight:700;font-size:15px;margin-bottom:10px;color:var(--primary)">Grup ${g.id}</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="background:var(--bg)">
+              <th style="padding:6px 8px;text-align:left">Ülke</th>
+              <th style="padding:6px 4px">O</th><th style="padding:6px 4px">G</th>
+              <th style="padding:6px 4px">B</th><th style="padding:6px 4px">M</th>
+              <th style="padding:6px 4px">AG</th><th style="padding:6px 4px">YG</th>
+              <th style="padding:6px 4px">P</th>
+            </tr></thead>
+            <tbody>
+              ${g.teams.map((t, ti) => `
+                <tr style="border-top:1px solid var(--border)">
+                  <td style="padding:5px 8px;display:flex;align-items:center;gap:6px">
+                    <img src="${flagUrl(t.code)}" style="width:18px;height:13px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'" />
+                    ${escHtml(t.name)}
+                  </td>
+                  ${['played','won','drawn','lost','gf','ga','pts'].map(f => `
+                    <td style="padding:4px"><input type="number" min="0" max="999" value="${t[f]}"
+                      data-gi="${gi}" data-ti="${ti}" data-field="${f}"
+                      class="wc-admin-input form-input" style="width:48px;padding:4px 6px;text-align:center" /></td>
+                  `).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function saveWCAdmin() {
+    const groups = getWC();
+    document.querySelectorAll('.wc-admin-input').forEach(inp => {
+      const gi = +inp.dataset.gi, ti = +inp.dataset.ti, f = inp.dataset.field;
+      groups[gi].teams[ti][f] = +inp.value;
+    });
+    saveWC(groups);
+    const msg = document.getElementById('wcSaveMsg');
+    msg.textContent = '✓ Kaydedildi!';
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  }
+
+  function resetWC() {
+    if (!confirm('Tüm veriler varsayılana dönecek. Emin misiniz?')) return;
+    saveWC(WC_DEFAULT_GROUPS);
+    renderWCAdmin();
+  }
+
+  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu', wc2026: '2026 Dünya Kupası', settings: 'Ayarlar', members: 'Üyeler' };
   function showTab(name) {
     document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dash-nav-item').forEach(b => b.classList.remove('active'));
@@ -659,6 +730,7 @@
     const navEl = document.getElementById('tab-' + name);
     if (navEl) navEl.classList.add('active');
     document.getElementById('dashTopbarTitle').textContent = TAB_TITLES[name] || '';
+    if (name === 'wc2026') renderWCAdmin();
     // Close sidebar on mobile
     if (window.innerWidth <= 768) document.getElementById('dashSidebar').classList.remove('open');
   }

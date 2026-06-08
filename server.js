@@ -14,7 +14,7 @@ const API_KEY = 'ee098b74';
 const ALLOWED_KEYS = [
   'ts_haberler', 'ts_transfers', 'ts_standings', 'ts_logos',
   'ts_users', 'ts_foreign_logos', 'ts_site_logo', 'ts_team_banners',
-  'ts_comments', 'ts_views'
+  'ts_comments', 'ts_views', 'ts_wc2026'
 ];
 
 function auth(req, res, next) {

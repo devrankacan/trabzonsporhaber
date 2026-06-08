@@ -14,12 +14,142 @@ const USER_SESSION_KEY = 'ts_user_session';
 const SITE_LOGO_KEY = 'ts_site_logo';
 const TEAM_BANNERS_KEY = 'ts_team_banners';
 const FOREIGN_LOGOS_KEY = 'ts_foreign_logos';
+const WC_KEY = 'ts_wc2026';
+
+// ==================== WC2026 DATA ====================
+
+const WC_DEFAULT_GROUPS = [
+  { id: 'D', teams: [
+    { name: 'Türkiye',   code: 'tr', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'ABD',       code: 'us', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Paraguay',  code: 'py', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Avustralya',code: 'au', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'A', teams: [
+    { name: 'Meksika',     code: 'mx', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Güney Afrika',code: 'za', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Güney Kore',  code: 'kr', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Çekya',       code: 'cz', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'B', teams: [
+    { name: 'Kanada',       code: 'ca', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Bosna Hersek', code: 'ba', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Katar',        code: 'qa', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'İsviçre',      code: 'ch', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'C', teams: [
+    { name: 'Brezilya', code: 'br', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Fas',      code: 'ma', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Haiti',    code: 'ht', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'İskoçya',  code: 'gb-sct', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'E', teams: [
+    { name: 'Almanya',    code: 'de', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Curaçao',    code: 'cw', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Fildişi Sahili', code: 'ci', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Ekvador',   code: 'ec', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'F', teams: [
+    { name: 'Hollanda', code: 'nl', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Japonya',  code: 'jp', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'İsveç',    code: 'se', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Tunus',    code: 'tn', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'G', teams: [
+    { name: 'Belçika',      code: 'be', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Mısır',        code: 'eg', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'İran',         code: 'ir', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Yeni Zelanda', code: 'nz', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'H', teams: [
+    { name: 'İspanya',    code: 'es', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Cabo Verde', code: 'cv', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'S. Arabistan',code: 'sa', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Uruguay',    code: 'uy', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'I', teams: [
+    { name: 'Fransa',  code: 'fr', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Senegal', code: 'sn', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Irak',    code: 'iq', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Norveç',  code: 'no', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'J', teams: [
+    { name: 'Arjantin', code: 'ar', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Cezayir',  code: 'dz', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Avusturya',code: 'at', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Ürdün',    code: 'jo', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'K', teams: [
+    { name: 'Portekiz',  code: 'pt', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'K. Kongo',  code: 'cd', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Özbekistan',code: 'uz', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Kolombiya', code: 'co', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+  { id: 'L', teams: [
+    { name: 'İngiltere', code: 'gb-eng', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Hırvatistan',code: 'hr', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Gana',      code: 'gh', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+    { name: 'Panama',    code: 'pa', played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 },
+  ]},
+];
+
+function getWC() {
+  const stored = localStorage.getItem(WC_KEY);
+  if (stored) try { return JSON.parse(stored); } catch {}
+  return WC_DEFAULT_GROUPS;
+}
+
+function saveWC(data) {
+  localStorage.setItem(WC_KEY, JSON.stringify(data));
+  _apiSave(WC_KEY, data);
+}
+
+function flagUrl(code) {
+  return `https://flagcdn.com/w32/${code}.png`;
+}
+
+function renderWC2026Sidebar() {
+  const el = document.getElementById('wc2026Sidebar');
+  if (!el) return;
+  const groups = getWC();
+
+  el.innerHTML = `
+    <div class="wc-groups-scroll" id="wcGroupsScroll">
+      ${groups.map(g => `
+        <div class="wc-group-card">
+          <div class="wc-group-title">Grup ${g.id}</div>
+          <table class="wc-table">
+            <thead>
+              <tr><th></th><th>O</th><th>G</th><th>B</th><th>M</th><th>P</th></tr>
+            </thead>
+            <tbody>
+              ${g.teams.map((t, i) => `
+                <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}${i < 2 ? ' wc-qualify' : ''}">
+                  <td class="wc-team-cell">
+                    <img src="${flagUrl(t.code)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.style.display='none'" />
+                    <span class="wc-team-name">${escHtml(t.name)}</span>
+                  </td>
+                  <td>${t.played}</td>
+                  <td>${t.won}</td>
+                  <td>${t.drawn}</td>
+                  <td>${t.lost}</td>
+                  <td class="wc-pts">${t.pts}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `).join('')}
+    </div>
+    <div class="wc-scroll-hint">← kaydır →</div>
+  `;
+}
 
 // ==================== API SYNC ====================
 
 const _API_KEY = 'ee098b74';
 const _SYNC_KEYS = [STORAGE_KEY, TRANSFERS_KEY, STANDINGS_KEY, LOGOS_KEY,
-  USERS_KEY, FOREIGN_LOGOS_KEY, SITE_LOGO_KEY, TEAM_BANNERS_KEY, COMMENTS_KEY, VIEWS_KEY];
+  USERS_KEY, FOREIGN_LOGOS_KEY, SITE_LOGO_KEY, TEAM_BANNERS_KEY, COMMENTS_KEY, VIEWS_KEY, WC_KEY];
 
 async function _apiSave(key, data) {
   try {
