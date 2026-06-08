@@ -724,12 +724,18 @@
                       ${escHtml(t.name)}
                     </div>
                   </td>
-                  <td style="padding:4px;text-align:center">
-                    <label style="cursor:pointer;font-size:11px;color:var(--primary);white-space:nowrap">
-                      ${t.logo ? '✓ Değiştir' : 'Yükle'}
+                  <td style="padding:4px;min-width:110px">
+                    <label style="cursor:pointer;font-size:11px;color:var(--primary);white-space:nowrap;display:block">
+                      📁 Dosya Yükle
                       <input type="file" accept="image/*" style="display:none"
                         onchange="handleTeamLogoUpload(this,${gi},${ti})" />
                     </label>
+                    <div style="display:flex;gap:4px;margin-top:4px">
+                      <input type="text" placeholder="Logo URL..." id="wc-url-${gi}-${ti}"
+                        value="${escHtml(t.logo && t.logo.startsWith('http') ? t.logo : '')}"
+                        style="font-size:10px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);flex:1;min-width:0" />
+                      <button onclick="setTeamLogoUrl(${gi},${ti})" style="font-size:10px;padding:3px 6px;background:var(--primary);color:#fff;border:none;border-radius:4px;cursor:pointer;white-space:nowrap">Kaydet</button>
+                    </div>
                     ${t.logo ? `<button onclick="removeTeamLogo(${gi},${ti})" style="display:block;font-size:10px;color:var(--danger);background:none;border:none;cursor:pointer;padding:0;margin-top:2px">Kaldır</button>` : ''}
                   </td>
                   ${['played','won','drawn','lost','gf','ga','pts'].map(f => `
@@ -771,6 +777,17 @@
       if (img) img.src = b64;
       renderWCAdmin();
     });
+  }
+
+  function setTeamLogoUrl(gi, ti) {
+    const inp = document.getElementById(`wc-url-${gi}-${ti}`);
+    const url = inp ? inp.value.trim() : '';
+    if (!url) return;
+    const wc = getWC();
+    wc.groups[gi].teams[ti].logo = url;
+    saveWC(wc);
+    const img = document.getElementById(`wc-team-img-${gi}-${ti}`);
+    if (img) { img.src = url; img.style.display = ''; }
   }
 
   function removeTeamLogo(gi, ti) {

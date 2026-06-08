@@ -95,12 +95,16 @@ const WC_DEFAULT_GROUPS = [
 
 function getWC() {
   const stored = localStorage.getItem(WC_KEY);
+  let data;
   if (stored) try {
     const d = JSON.parse(stored);
-    if (Array.isArray(d)) return { logo: '', groups: d };
-    return d;
+    data = Array.isArray(d) ? { logo: '', groups: d } : d;
   } catch {}
-  return { logo: '', groups: WC_DEFAULT_GROUPS };
+  if (!data) data = { logo: '', groups: JSON.parse(JSON.stringify(WC_DEFAULT_GROUPS)) };
+  data.groups.forEach(g => g.teams.forEach(t => {
+    if (!t.logo) t.logo = `https://flagcdn.com/w40/${t.code}.png`;
+  }));
+  return data;
 }
 
 function saveWC(data) {
@@ -109,7 +113,7 @@ function saveWC(data) {
 }
 
 function flagUrl(code) {
-  return `https://flagcdn.com/w32/${code}.png`;
+  return `https://flagcdn.com/w40/${code}.png`;
 }
 
 function teamImgSrc(t) {
