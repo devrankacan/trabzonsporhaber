@@ -3440,7 +3440,7 @@ img { max-width: 100%; display: block; }
 .fixture-time {
   font-size: 12px;
   font-weight: 800;
-  color: #e03050;
+  color: #fff;
   background: rgba(200,16,46,0.15);
   border: 1px solid rgba(200,16,46,0.35);
   border-radius: 4px;
