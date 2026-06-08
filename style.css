@@ -3465,7 +3465,9 @@ img { max-width: 100%; display: block; }
 }
 .branch-link-wc img {
   display: inline-block;
-  mix-blend-mode: screen;
+  background: #fff;
+  border-radius: 4px;
+  padding: 2px 4px;
 }
 .branch-link-wc:hover {
   background: rgba(255,255,255,0.13) !important;
