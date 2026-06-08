@@ -3397,14 +3397,17 @@ img { max-width: 100%; display: block; }
 .fixture-item {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 0;
   padding: 0 24px;
   cursor: default;
+  min-width: 320px;
 }
 .fixture-team-wrap {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex: 1;
+  justify-content: center;
 }
 .fixture-flag {
   width: 26px;
