@@ -1598,6 +1598,10 @@ img { max-width: 100%; display: block; }
 .btn-edit:hover { background: #bfdbfe; }
 .btn-delete { background: #fee2e2; color: #991b1b; }
 .btn-delete:hover { background: #fca5a5; }
+.btn-slider-on { background: #fef9c3; color: #92400e; font-size: 16px; }
+.btn-slider-on:hover { background: #fde68a; }
+.btn-slider-off { background: #f3f4f6; color: #9ca3af; font-size: 16px; }
+.btn-slider-off:hover { background: #e5e7eb; color: #374151; }
 
 /* ==================== BUTTONS ==================== */
 .btn-primary {

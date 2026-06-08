@@ -2271,6 +2271,7 @@ function renderAdminList() {
         </div>
       </div>
       <div class="admin-news-actions">
+        <button class="btn-icon ${n.slider ? 'btn-slider-on' : 'btn-slider-off'}" onclick="toggleNewsSlider(${n.id})" title="${n.slider ? 'Sliderdan çıkar' : 'Slidera ekle'}">${n.slider ? '★' : '☆'}</button>
         <button class="btn-icon btn-edit" onclick="editNews(${n.id})">Düzenle</button>
         <button class="btn-icon btn-delete" onclick="deleteNews(${n.id})">Sil</button>
       </div>
@@ -2320,6 +2321,15 @@ function deleteNews(id) {
   const list = getNews().filter(n => n.id !== id);
   saveNews(list);
   if (editingId === id) resetForm();
+  renderAdminList();
+}
+
+function toggleNewsSlider(id) {
+  const list = getNews();
+  const idx = list.findIndex(n => n.id === id);
+  if (idx === -1) return;
+  list[idx] = { ...list[idx], slider: !list[idx].slider };
+  saveNews(list);
   renderAdminList();
 }
 
