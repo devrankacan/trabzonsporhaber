@@ -201,10 +201,9 @@ function _wcNav(dir) {
 
 // ==================== NAV WC LOGO ====================
 
-function renderNavWcLogo() {
+function _setNavWcLogo(logo) {
   const link = document.getElementById('navWcLink');
   if (!link) return;
-  const logo = getWC().logo;
   link.textContent = '';
   if (logo) {
     const img = document.createElement('img');
@@ -214,6 +213,13 @@ function renderNavWcLogo() {
     link.appendChild(img);
   }
   link.appendChild(document.createTextNode('Dünya Kupası'));
+}
+
+function renderNavWcLogo() {
+  _setNavWcLogo(getWC().logo);
+  fetch('/api/ts_wc2026').then(r => r.ok ? r.json() : null).then(wc => {
+    if (wc && wc.logo) _setNavWcLogo(wc.logo);
+  }).catch(() => {});
 }
 
 // ==================== FIXTURE TICKER ====================
@@ -1484,19 +1490,24 @@ function renderStandingsSidebar() {
   if (!el) return;
   const headerEl = document.getElementById('standingsSidebarHeader');
   if (headerEl) {
-    const logo = getStandingsLogo();
-    const h3 = document.createElement('h3');
-    h3.className = 'sidebar-title';
-    h3.style.cssText = 'display:flex;align-items:center;gap:8px';
-    if (logo) {
-      const img = document.createElement('img');
-      img.style.cssText = 'height:22px;width:auto;object-fit:contain;flex-shrink:0';
-      img.src = logo;
-      h3.appendChild(img);
+    function _buildStandingsHeader(logo) {
+      const h3 = document.createElement('h3');
+      h3.className = 'sidebar-title';
+      h3.style.cssText = 'display:flex;align-items:center;gap:8px';
+      if (logo) {
+        const img = document.createElement('img');
+        img.style.cssText = 'height:22px;width:auto;object-fit:contain;flex-shrink:0';
+        img.src = logo;
+        h3.appendChild(img);
+      }
+      h3.appendChild(document.createTextNode('Trendyol Süper Lig Puan Tablosu'));
+      headerEl.textContent = '';
+      headerEl.appendChild(h3);
     }
-    h3.appendChild(document.createTextNode('Trendyol Süper Lig Puan Tablosu'));
-    headerEl.textContent = '';
-    headerEl.appendChild(h3);
+    _buildStandingsHeader(getStandingsLogo());
+    fetch('/api/ts_standings_logo').then(r => r.ok ? r.json() : null).then(logo => {
+      if (logo && typeof logo === 'string') _buildStandingsHeader(logo);
+    }).catch(() => {});
   }
   const rows = sortedStandings();
   if (rows.length === 0) {
