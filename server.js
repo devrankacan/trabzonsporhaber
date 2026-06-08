@@ -66,7 +66,45 @@ app.get('/index.html', (req, res) => res.redirect(301, '/'));
 app.get('/haberler.html', serveHtml('haberler.html'));
 app.get('/haberler', serveHtml('haberler.html'));
 app.get('/haberler/*', serveHtml('haberler.html'));
-app.get('/haber.html', serveHtml('haber.html'));
+app.get('/haber.html', (req, res) => {
+  try {
+    let html = fs.readFileSync(path.join(__dirname, 'haber.html'), 'utf8');
+    const bootstrap = buildBootstrapScript();
+    html = html.replace('</head>', bootstrap + '</head>');
+
+    const id = parseInt(req.query.id);
+    if (id) {
+      const haberler = readKey('ts_haberler');
+      const haber = Array.isArray(haberler) ? haberler.find(n => n.id === id) : null;
+      if (haber) {
+        const title = (haber.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        const summary = (haber.summary || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        const image = haber.image && !haber.image.startsWith('data:') ? haber.image : '';
+        const url = `https://habersuperlig.com/haber.html?id=${id}`;
+        const ogTags = [
+          `<meta property="og:title" content="${title}" />`,
+          `<meta property="og:description" content="${summary}" />`,
+          `<meta property="og:url" content="${url}" />`,
+          `<meta name="twitter:card" content="summary_large_image" />`,
+          `<meta name="twitter:title" content="${title}" />`,
+          `<meta name="twitter:description" content="${summary}" />`,
+          image ? `<meta property="og:image" content="${image}" />` : '',
+          image ? `<meta name="twitter:image" content="${image}" />` : '',
+          `<title>${title} | Süper Lig Haber</title>`,
+        ].filter(Boolean).join('\n');
+        html = html
+          .replace('<title>Haber Detayı | Süper Lig Haber</title>', '')
+          .replace('</head>', ogTags + '\n</head>');
+      }
+    }
+
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(html);
+  } catch (e) {
+    res.status(500).send('Error');
+  }
+});
 app.get('/dunyakupasi.html', serveHtml('dunyakupasi.html'));
 app.get('/admin.html', serveHtml('admin.html'));
 app.get('/hakkimizda.html', serveHtml('hakkimizda.html'));
