@@ -1952,12 +1952,19 @@ img { max-width: 100%; display: block; }
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.2px;
-  border-right: 1px solid rgba(255,255,255,0.1);
+  position: relative;
   transition: all 0.2s;
   white-space: nowrap;
 }
-
-.branch-link:first-child { border-left: none; }
+.branch-link + .branch-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: rgba(255,255,255,0.15);
+}
 
 .branch-link:hover {
   color: #fff;
