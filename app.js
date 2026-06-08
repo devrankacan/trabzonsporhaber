@@ -1120,6 +1120,8 @@ function teamBadgeHtml(key, foreignName) {
 function renderTransfersSidebar() {
   const el = document.getElementById('transfersSidebar');
   const elHero = document.getElementById('transfersSidebarHero');
+  _applyTransfersLogo(getTransfersLogo());
+  fetchAndApplyTransfersLogo();
   const transfers = getTransfers();
 
   function _renderInto(target) {
@@ -1550,8 +1552,6 @@ function _applyTransfersLogo(logo) {
 }
 
 function fetchAndApplyTransfersLogo() {
-  const local = getTransfersLogo();
-  if (local) { _applyTransfersLogo(local); return; }
   fetch('/api/ts_transfers_logo').then(r => r.ok ? r.json() : null).then(logo => {
     if (logo && typeof logo === 'string') _applyTransfersLogo(logo);
   }).catch(() => {});
