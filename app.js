@@ -101,6 +101,7 @@ function getWC() {
     data = Array.isArray(d) ? { logo: '', groups: d } : d;
   } catch {}
   if (!data) data = { logo: '', groups: JSON.parse(JSON.stringify(WC_DEFAULT_GROUPS)) };
+  if (!data.players) data.players = [];
   data.groups.forEach(g => g.teams.forEach(t => {
     if (!t.logo) t.logo = `https://flagcdn.com/w40/${t.code}.png`;
   }));
@@ -188,6 +189,118 @@ function _wcNav(dir) {
   const groups = wc.groups || [];
   _wcGroupIdx = Math.max(0, Math.min(_wcGroupIdx + dir, groups.length - 1));
   _wcRenderGroup(groups);
+}
+
+// ==================== WC PAGE ====================
+
+function renderWCPage() {
+  const wc = getWC();
+
+  // Hero logo
+  const heroLogo = document.getElementById('wcHeroLogo');
+  if (heroLogo) {
+    heroLogo.innerHTML = wc.logo ? `<img src="${wc.logo}" alt="2026 Dünya Kupası" />` : '';
+  }
+
+  // Groups grid
+  const grid = document.getElementById('wcGroupsGrid');
+  if (!grid) return;
+  const groups = wc.groups || [];
+
+  grid.innerHTML = groups.map(g => `
+    <div class="wc-full-group-card">
+      <div class="wc-full-group-title">Grup ${g.id}</div>
+      <table class="wc-table">
+        <thead>
+          <tr><th></th><th>O</th><th>G</th><th>B</th><th>M</th><th>AG</th><th>YG</th><th>P</th></tr>
+        </thead>
+        <tbody>
+          ${g.teams.map((t, i) => `
+            <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}${i < 2 ? ' wc-qualify' : ''}">
+              <td class="wc-team-cell">
+                <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.onerror=null;this.style.display='none'" />
+                <span class="wc-team-name">${escHtml(t.name)}</span>
+              </td>
+              <td>${t.played}</td><td>${t.won}</td><td>${t.drawn}</td><td>${t.lost}</td>
+              <td>${t.gf}</td><td>${t.ga}</td>
+              <td class="wc-pts">${t.pts}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `).join('');
+}
+
+function renderWCStats() {
+  const wc = getWC();
+  const sortEl = document.getElementById('wcStatSort');
+  const sortBy = sortEl ? sortEl.value : 'pts';
+  const body = document.getElementById('wcStatsBody');
+  if (!body) return;
+
+  const allTeams = [];
+  (wc.groups || []).forEach(g => g.teams.forEach(t => allTeams.push({ ...t, group: g.id })));
+
+  allTeams.sort((a, b) => {
+    if (sortBy === 'gd') return (b.gf - b.ga) - (a.gf - a.ga);
+    return (b[sortBy] || 0) - (a[sortBy] || 0);
+  });
+
+  body.innerHTML = allTeams.map((t, i) => `
+    <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}">
+      <td style="color:var(--text-muted);font-size:12px">${i + 1}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:7px">
+          <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.onerror=null;this.style.display='none'" />
+          <span>${escHtml(t.name)}</span>
+          <span style="font-size:11px;color:var(--text-muted);margin-left:2px">Gr.${t.group}</span>
+        </div>
+      </td>
+      <td>${t.played}</td><td>${t.won}</td><td>${t.drawn}</td><td>${t.lost}</td>
+      <td>${t.gf}</td><td>${t.ga}</td>
+      <td style="font-size:12px">${t.gf - t.ga > 0 ? '+' : ''}${t.gf - t.ga}</td>
+      <td class="wc-pts">${t.pts}</td>
+    </tr>
+  `).join('');
+}
+
+function renderWCPlayers() {
+  const wc = getWC();
+  const sortEl = document.getElementById('wcPlayerSort');
+  const sortBy = sortEl ? sortEl.value : 'goals';
+  const players = (wc.players || []).slice();
+  const empty = document.getElementById('wcPlayersEmpty');
+  const table = document.getElementById('wcPlayersTable');
+  if (!empty || !table) return;
+
+  if (!players.length) {
+    empty.style.display = '';
+    table.style.display = 'none';
+    return;
+  }
+
+  players.sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
+  empty.style.display = 'none';
+  table.style.display = '';
+
+  document.getElementById('wcPlayersBody').innerHTML = players.map((p, i) => `
+    <tr class="${p.countryCode === 'tr' ? 'wc-turkey-row' : ''}">
+      <td style="color:var(--text-muted);font-size:12px">${i + 1}</td>
+      <td style="font-weight:600">${escHtml(p.name)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <img src="https://flagcdn.com/w32/${p.countryCode || ''}.png" class="wc-flag" alt="${escHtml(p.country || '')}" onerror="this.onerror=null;this.style.display='none'" />
+          <span>${escHtml(p.country || '')}</span>
+        </div>
+      </td>
+      <td class="wc-pts">${p.goals || 0}</td>
+      <td>${p.assists || 0}</td>
+      <td style="color:#e67e22">${p.yellowCards || 0}</td>
+      <td style="color:var(--ts-red)">${p.redCards || 0}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${p.minutes || 0}'</td>
+    </tr>
+  `).join('');
 }
 
 // ==================== API SYNC ====================

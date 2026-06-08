@@ -3147,3 +3147,168 @@ img { max-width: 100%; display: block; }
   color: var(--text-muted);
   margin-left: 4px;
 }
+
+/* ===== WC PAGE ===== */
+.wc-page-hero {
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a0a0a 50%, #C8102E 100%);
+  padding: 40px 0 36px;
+  position: relative;
+  overflow: hidden;
+}
+.wc-page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.wc-hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  position: relative;
+}
+.wc-hero-badge {
+  display: inline-block;
+  background: var(--ts-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+.wc-hero-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 8px;
+  line-height: 1.1;
+}
+.wc-hero-sub {
+  color: rgba(255,255,255,0.65);
+  font-size: 14px;
+  margin: 0 0 14px;
+}
+.wc-hero-turkey {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+.wc-hero-turkey img { width: 24px; height: 17px; object-fit: cover; border-radius: 2px; }
+.wc-hero-logo img {
+  max-height: 90px;
+  max-width: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+}
+
+.wc-tabs-bar {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 72px;
+  z-index: 90;
+}
+.wc-tabs {
+  display: flex;
+  gap: 0;
+}
+.wc-tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.wc-tab:hover { color: var(--text); }
+.wc-tab.active { color: var(--ts-red); border-bottom-color: var(--ts-red); }
+
+.wc-tab-content { display: none; }
+.wc-tab-content.active { display: block; }
+
+.wc-groups-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 24px 0;
+}
+@media (max-width: 900px) { .wc-groups-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .wc-groups-grid { grid-template-columns: 1fr; } }
+
+.wc-full-group-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.wc-full-group-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ts-red);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.wc-page-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 24px 0;
+}
+.wc-page-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 15px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wc-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.wc-stats-table th {
+  padding: 10px 10px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.5px;
+}
+.wc-stats-table td {
+  padding: 9px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.wc-stats-table tr:last-child td { border-bottom: none; }
+.wc-stats-table tr:hover td { background: var(--bg); }
+
+@media (max-width: 480px) {
+  .wc-hero-title { font-size: 22px; }
+  .wc-hero-sub { font-size: 12px; }
+  .wc-tab { padding: 12px 14px; font-size: 13px; }
+}

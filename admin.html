@@ -479,8 +479,69 @@
       </div>
       <div id="wcAdminGroups"></div>
       <div style="margin-top:16px">
-        <button class="btn-primary" onclick="saveWCAdmin()">💾 Kaydet</button>
+        <button class="btn-primary" onclick="saveWCAdmin()">💾 Grupları Kaydet</button>
         <span id="wcSaveMsg" style="margin-left:12px;font-size:13px;color:var(--success)"></span>
+      </div>
+
+      <!-- OYUNCU İSTATİSTİKLERİ -->
+      <div class="dash-section-header" style="margin-top:32px">
+        <h2 class="dash-section-title" style="font-size:16px">Oyuncu İstatistikleri</h2>
+        <button class="btn-primary btn-sm" onclick="toggleWCPlayerForm(true)">+ Oyuncu Ekle</button>
+      </div>
+
+      <div class="dash-form-card" id="wcPlayerFormCard" style="display:none;margin-bottom:16px">
+        <div class="dash-section-header" style="margin-bottom:14px">
+          <h3 class="dash-section-title" style="font-size:14px" id="wcPlayerFormTitle">Oyuncu Ekle</h3>
+          <button class="btn-secondary btn-sm" onclick="toggleWCPlayerForm(false)">✕</button>
+        </div>
+        <div class="dash-form-row">
+          <div class="form-group">
+            <label class="form-label">Ad Soyad *</label>
+            <input type="text" id="wcpName" class="form-input" placeholder="Arda Güler" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ülke *</label>
+            <input type="text" id="wcpCountry" class="form-input" placeholder="Türkiye" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ülke Kodu</label>
+            <input type="text" id="wcpCode" class="form-input" placeholder="tr" maxlength="6" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gol</label>
+            <input type="number" id="wcpGoals" class="form-input" min="0" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Asist</label>
+            <input type="number" id="wcpAssists" class="form-input" min="0" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sarı Kart</label>
+            <input type="number" id="wcpYellow" class="form-input" min="0" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kırmızı Kart</label>
+            <input type="number" id="wcpRed" class="form-input" min="0" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dakika</label>
+            <input type="number" id="wcpMinutes" class="form-input" min="0" value="0" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="saveWCPlayer()">Kaydet</button>
+        </div>
+      </div>
+
+      <div class="dash-form-card" style="padding:0;overflow:hidden">
+        <table class="members-table" id="wcPlayersAdminTable">
+          <thead><tr>
+            <th>Oyuncu</th><th>Ülke</th><th>Gol</th><th>Asist</th><th>Dk.</th><th>İşlem</th>
+          </tr></thead>
+          <tbody id="wcPlayersAdminBody">
+            <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Henüz oyuncu eklenmedi.</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
@@ -815,6 +876,86 @@
     renderWCAdmin();
   }
 
+  let _wcPlayerEditIdx = -1;
+
+  function toggleWCPlayerForm(show, idx = -1) {
+    const card = document.getElementById('wcPlayerFormCard');
+    card.style.display = show ? '' : 'none';
+    _wcPlayerEditIdx = idx;
+    document.getElementById('wcPlayerFormTitle').textContent = idx >= 0 ? 'Oyuncu Düzenle' : 'Oyuncu Ekle';
+    if (idx >= 0) {
+      const p = getWC().players[idx];
+      document.getElementById('wcpName').value = p.name || '';
+      document.getElementById('wcpCountry').value = p.country || '';
+      document.getElementById('wcpCode').value = p.countryCode || '';
+      document.getElementById('wcpGoals').value = p.goals || 0;
+      document.getElementById('wcpAssists').value = p.assists || 0;
+      document.getElementById('wcpYellow').value = p.yellowCards || 0;
+      document.getElementById('wcpRed').value = p.redCards || 0;
+      document.getElementById('wcpMinutes').value = p.minutes || 0;
+    } else {
+      ['wcpName','wcpCountry','wcpCode'].forEach(id => document.getElementById(id).value = '');
+      ['wcpGoals','wcpAssists','wcpYellow','wcpRed','wcpMinutes'].forEach(id => document.getElementById(id).value = 0);
+    }
+  }
+
+  function saveWCPlayer() {
+    const name = document.getElementById('wcpName').value.trim();
+    if (!name) return alert('Ad Soyad zorunlu');
+    const player = {
+      name,
+      country: document.getElementById('wcpCountry').value.trim(),
+      countryCode: document.getElementById('wcpCode').value.trim().toLowerCase(),
+      goals: +document.getElementById('wcpGoals').value,
+      assists: +document.getElementById('wcpAssists').value,
+      yellowCards: +document.getElementById('wcpYellow').value,
+      redCards: +document.getElementById('wcpRed').value,
+      minutes: +document.getElementById('wcpMinutes').value,
+    };
+    const wc = getWC();
+    if (_wcPlayerEditIdx >= 0) wc.players[_wcPlayerEditIdx] = player;
+    else wc.players.push(player);
+    saveWC(wc);
+    toggleWCPlayerForm(false);
+    renderWCPlayersAdmin();
+  }
+
+  function deleteWCPlayer(idx) {
+    if (!confirm('Oyuncu silinsin mi?')) return;
+    const wc = getWC();
+    wc.players.splice(idx, 1);
+    saveWC(wc);
+    renderWCPlayersAdmin();
+  }
+
+  function renderWCPlayersAdmin() {
+    const body = document.getElementById('wcPlayersAdminBody');
+    if (!body) return;
+    const players = getWC().players || [];
+    if (!players.length) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Henüz oyuncu eklenmedi.</td></tr>';
+      return;
+    }
+    body.innerHTML = players.map((p, i) => `
+      <tr>
+        <td><strong>${escHtml(p.name)}</strong></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <img src="https://flagcdn.com/w32/${escHtml(p.countryCode||'')}.png" style="width:18px;height:13px;object-fit:cover;border-radius:2px" onerror="this.onerror=null;this.style.display='none'" />
+            ${escHtml(p.country||'')}
+          </div>
+        </td>
+        <td>${p.goals||0}</td>
+        <td>${p.assists||0}</td>
+        <td>${p.minutes||0}'</td>
+        <td>
+          <button class="btn-secondary btn-sm" onclick="toggleWCPlayerForm(true,${i})" style="margin-right:4px">Düzenle</button>
+          <button class="btn-secondary btn-sm" onclick="deleteWCPlayer(${i})" style="color:var(--danger)">Sil</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
   const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu', wc2026: '2026 Dünya Kupası', settings: 'Ayarlar', members: 'Üyeler' };
   function showTab(name) {
     document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
@@ -825,7 +966,7 @@
     const navEl = document.getElementById('tab-' + name);
     if (navEl) navEl.classList.add('active');
     document.getElementById('dashTopbarTitle').textContent = TAB_TITLES[name] || '';
-    if (name === 'wc2026') renderWCAdmin();
+    if (name === 'wc2026') { renderWCAdmin(); renderWCPlayersAdmin(); }
     // Close sidebar on mobile
     if (window.innerWidth <= 768) document.getElementById('dashSidebar').classList.remove('open');
   }
