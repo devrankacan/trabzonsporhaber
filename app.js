@@ -896,6 +896,43 @@ function initSliderControls() {
   const next = document.getElementById('sliderNext');
   if (prev) prev.addEventListener('click', () => { goToSlide(currentSlide - 1); startSliderTimer(); });
   if (next) next.addEventListener('click', () => { goToSlide(currentSlide + 1); startSliderTimer(); });
+
+  const track = document.getElementById('sliderTrack');
+  if (!track) return;
+
+  let startX = 0, startY = 0, dragging = false, dragMoved = false;
+
+  function onDragStart(x, y) {
+    startX = x; startY = y; dragging = true; dragMoved = false;
+    track.style.transition = 'none';
+  }
+
+  function onDragEnd(x) {
+    if (!dragging) return;
+    dragging = false;
+    track.style.transition = '';
+    const diff = startX - x;
+    if (Math.abs(diff) > 50) {
+      dragMoved = true;
+      if (diff > 0) goToSlide(currentSlide + 1);
+      else goToSlide(currentSlide - 1);
+      startSliderTimer();
+    } else {
+      goToSlide(currentSlide);
+    }
+    setTimeout(() => { dragMoved = false; }, 0);
+  }
+
+  // Touch
+  track.addEventListener('touchstart', e => onDragStart(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+  track.addEventListener('touchend', e => onDragEnd(e.changedTouches[0].clientX));
+
+  // Mouse
+  track.addEventListener('mousedown', e => { onDragStart(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', e => { if (dragging) onDragEnd(e.clientX); });
+
+  // Prevent click-to-navigate when dragged
+  track.addEventListener('click', e => { if (dragMoved) e.stopPropagation(); }, true);
 }
 
 // ==================== TICKER ====================
