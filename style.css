@@ -815,7 +815,7 @@ img { max-width: 100%; display: block; }
   box-shadow: var(--shadow);
 }
 .sidebar-accordion-header { display: none; }
-.sidebar-accordion-body { display: block !important; padding: 0; }
+.sidebar-accordion-body { padding: 0; }
 
 .sidebar-title {
   font-size: 16px;
