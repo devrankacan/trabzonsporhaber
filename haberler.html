@@ -46,6 +46,15 @@
       </div>
     </div>
   </header>
+  <script>
+    try {
+      var _slr = localStorage.getItem('ts_site_logo');
+      if (_slr) {
+        var _sls = _slr; try { var _slp = JSON.parse(_slr); if (typeof _slp === 'string') _sls = _slp; } catch(e) {}
+        if (_sls && _sls.length > 4) { var _slh = document.getElementById('headerLogo'); if (_slh) _slh.innerHTML = '<img src="' + _sls + '" class="site-logo-header" alt="Logo" />'; }
+      }
+    } catch(e) {}
+  </script>
 
   <!-- TAKIM NAV -->
   <nav class="branch-nav">
