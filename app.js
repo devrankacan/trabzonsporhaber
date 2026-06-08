@@ -136,7 +136,7 @@ function renderWC2026Sidebar() {
               ${g.teams.map((t, i) => `
                 <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}${i < 2 ? ' wc-qualify' : ''}">
                   <td class="wc-team-cell">
-                    <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.src='${flagUrl(t.code)}'" />
+                    <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.onerror=null;this.style.display='none'" />
                     <span class="wc-team-name">${escHtml(t.name)}</span>
                   </td>
                   <td>${t.played}</td>

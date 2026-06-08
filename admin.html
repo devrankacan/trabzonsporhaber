@@ -720,7 +720,7 @@
                 <tr style="border-top:1px solid var(--border)">
                   <td style="padding:5px 8px">
                     <div style="display:flex;align-items:center;gap:6px">
-                      <img id="wc-team-img-${gi}-${ti}" src="${escHtml(teamImgSrc(t))}" style="width:22px;height:16px;object-fit:cover;border-radius:2px" onerror="this.src='${flagUrl(t.code)}'" />
+                      <img id="wc-team-img-${gi}-${ti}" src="${escHtml(teamImgSrc(t))}" style="width:22px;height:16px;object-fit:cover;border-radius:2px" onerror="this.onerror=null;this.style.display='none'" />
                       ${escHtml(t.name)}
                     </div>
                   </td>
