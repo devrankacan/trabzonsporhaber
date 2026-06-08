@@ -205,7 +205,7 @@ function renderNavWcLogo() {
   if (!link) return;
   const logo = getWC().logo;
   if (logo) {
-    link.innerHTML = `<span style="display:inline-block;width:26px;height:20px;background:url('${logo}') no-repeat center/contain;background-color:#fff;border-radius:4px;margin-right:5px;vertical-align:middle;flex-shrink:0"></span>Dünya Kupası`;
+    link.innerHTML = `<span style="display:inline-block;width:20px;height:18px;background:url('${logo}') no-repeat center/contain;background-color:#fff;border-radius:3px;margin-right:5px;vertical-align:middle;flex-shrink:0"></span>Dünya Kupası`;
   } else {
     link.textContent = 'Dünya Kupası';
   }
