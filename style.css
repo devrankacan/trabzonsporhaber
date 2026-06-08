@@ -3478,6 +3478,7 @@ img { max-width: 100%; display: block; }
   color: rgba(255,255,255,0.9) !important;
   margin: 0 4px !important;
   padding: 0 14px !important;
+  transition: background 0.2s, color 0.2s !important;
 }
 .branch-link-wc img {
   display: inline-block !important;
@@ -3485,7 +3486,7 @@ img { max-width: 100%; display: block; }
   border-radius: 4px;
   padding: 2px 3px;
   height: 18px;
-  width: auto;
+  width: 28px;
   max-width: 60px;
   vertical-align: middle;
   flex-shrink: 0;
