@@ -24,12 +24,23 @@
     <div class="container">
       <div class="header-inner">
         <a href="/" class="logo" id="headerLogo">
-          <div class="logo-icon">SL</div>
-          <div>
-            <div class="logo-title">Süper Lig</div>
-            <div class="logo-sub">HABER</div>
-          </div>
+          <img id="siteLogoImg" class="site-logo-header" alt="Logo" style="display:none" />
+          <div class="logo-icon" id="_slFb1">SL</div>
+          <div id="_slFb2"><div class="logo-title">Süper Lig</div><div class="logo-sub">HABER</div></div>
         </a>
+        <script>
+          try {
+            var _sl=localStorage.getItem('ts_site_logo');
+            if(_sl){try{var _slp=JSON.parse(_sl);if(typeof _slp==='string')_sl=_slp;}catch(e){}}
+            if(_sl&&_sl.length>4){
+              var _si=document.getElementById('siteLogoImg');
+              if(_si){_si.src=_sl;_si.style.display='block';}
+              var _f1=document.getElementById('_slFb1'),_f2=document.getElementById('_slFb2');
+              if(_f1)_f1.style.display='none';
+              if(_f2)_f2.style.display='none';
+            }
+          }catch(e){}
+        </script>
         <div class="header-search" id="headerSearch">
           <input type="text" class="header-search-input" id="headerSearchInput" placeholder="Haber ara..." autocomplete="off" />
           <span class="header-search-icon">&#9906;</span>
@@ -49,15 +60,6 @@
       </div>
     </div>
   </header>
-  <script>
-    try {
-      var _slr = localStorage.getItem('ts_site_logo');
-      if (_slr) {
-        var _sls = _slr; try { var _slp = JSON.parse(_slr); if (typeof _slp === 'string') _sls = _slp; } catch(e) {}
-        if (_sls && _sls.length > 4) { var _slh = document.getElementById('headerLogo'); if (_slh) _slh.innerHTML = '<img src="' + _sls + '" class="site-logo-header" alt="Logo" />'; }
-      }
-    } catch(e) {}
-  </script>
 
   <!-- TAKIM NAV -->
   <nav class="branch-nav">

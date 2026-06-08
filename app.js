@@ -2676,12 +2676,18 @@ function getSiteLogo() {
 }
 
 function applySiteLogo(src) {
-  const header = document.getElementById('headerLogo');
-  if (header) {
+  const img = document.getElementById('siteLogoImg');
+  const fb1 = document.getElementById('_slFb1');
+  const fb2 = document.getElementById('_slFb2');
+  if (img) {
     if (src) {
-      header.innerHTML = `<img src="${escAttr(src)}" class="site-logo-header" alt="Logo" />`;
+      img.src = src; img.style.display = 'block';
+      if (fb1) fb1.style.display = 'none';
+      if (fb2) fb2.style.display = 'none';
     } else {
-      header.innerHTML = `<div class="logo-icon">SL</div><div><div class="logo-title">Süper Lig</div><div class="logo-sub">HABER</div></div>`;
+      img.style.display = 'none';
+      if (fb1) fb1.style.display = '';
+      if (fb2) fb2.style.display = '';
     }
   }
   const footer = document.getElementById('footerLogo');
