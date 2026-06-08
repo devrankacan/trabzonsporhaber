@@ -124,9 +124,15 @@ function renderWC2026Sidebar() {
 
   const titleEl = document.getElementById('wcSidebarTitle');
   if (titleEl) {
-    titleEl.innerHTML = wc.logo
-      ? `<img src="${wc.logo}" alt="" style="height:18px;width:auto;object-fit:contain;vertical-align:middle;margin-right:6px;border-radius:2px">2026 Dünya Kupası Grupları`
-      : '2026 Dünya Kupası Grupları';
+    if (wc.logo) {
+      titleEl.style.display = 'flex';
+      titleEl.style.alignItems = 'center';
+      titleEl.style.gap = '8px';
+      titleEl.innerHTML = `<img src="${wc.logo}" alt="" style="height:22px;width:auto;object-fit:contain;flex-shrink:0">2026 Dünya Kupası Grupları`;
+    } else {
+      titleEl.style.display = '';
+      titleEl.innerHTML = '2026 Dünya Kupası Grupları';
+    }
   }
 
   el.innerHTML = `
