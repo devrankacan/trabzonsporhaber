@@ -133,19 +133,34 @@
 
       <aside class="sidebar">
         <div class="sidebar-card sidebar-transfers-bottom">
-          <h3 class="sidebar-title">Son Transferler</h3>
-          <div id="transfersSidebar">
-            <p class="no-news-text">Henüz transfer yok.</p>
+          <div class="sidebar-accordion-header" onclick="toggleSidebarCard(this)">
+            <h3 class="sidebar-title">Son Transferler</h3>
+            <span class="sidebar-chevron">›</span>
+          </div>
+          <div class="sidebar-accordion-body">
+            <div id="transfersSidebar">
+              <p class="no-news-text">Henüz transfer yok.</p>
+            </div>
           </div>
         </div>
-        <div class="sidebar-card" style="margin-top:20px">
-          <h3 class="sidebar-title" id="wcSidebarTitle">2026 Dünya Kupası Grupları</h3>
-          <div id="wc2026Sidebar"></div>
+        <div class="sidebar-card">
+          <div class="sidebar-accordion-header" onclick="toggleSidebarCard(this)">
+            <h3 class="sidebar-title" id="wcSidebarTitle">2026 Dünya Kupası Grupları</h3>
+            <span class="sidebar-chevron">›</span>
+          </div>
+          <div class="sidebar-accordion-body">
+            <div id="wc2026Sidebar"></div>
+          </div>
         </div>
-        <div class="sidebar-card" style="margin-top:20px">
-          <div id="standingsSidebarHeader" class="sidebar-title-wrap"></div>
-          <div id="standingsSidebar">
-            <p class="no-news-text">Henüz puan tablosu eklenmedi.</p>
+        <div class="sidebar-card">
+          <div class="sidebar-accordion-header" onclick="toggleSidebarCard(this)">
+            <div id="standingsSidebarHeader" class="sidebar-title-wrap"></div>
+            <span class="sidebar-chevron">›</span>
+          </div>
+          <div class="sidebar-accordion-body">
+            <div id="standingsSidebar">
+              <p class="no-news-text">Henüz puan tablosu eklenmedi.</p>
+            </div>
           </div>
         </div>
       </aside>
@@ -227,6 +242,9 @@
 
   <script src="app.js?v=3"></script>
   <script>
+    function toggleSidebarCard(header) {
+      header.closest('.sidebar-card').classList.toggle('open');
+    }
     trackPageView('index');
     initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
     renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar();
