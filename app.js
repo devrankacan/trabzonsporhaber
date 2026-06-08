@@ -206,25 +206,28 @@ function _wcNav(dir) {
 
 // ==================== NAV WC LOGO ====================
 
+let _navWcLogoSet = false;
 function _setNavWcLogo(logo) {
+  if (!logo || _navWcLogoSet) return;
   const link = document.getElementById('navWcLink');
   if (!link) return;
+  _navWcLogoSet = true;
   link.textContent = '';
-  if (logo) {
-    const img = document.createElement('img');
-    img.alt = 'DK';
-    img.style.cssText = 'display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0';
-    img.src = logo;
-    link.appendChild(img);
-  }
+  const img = document.createElement('img');
+  img.alt = 'DK';
+  img.style.cssText = 'display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0';
+  img.src = logo;
+  link.appendChild(img);
   link.appendChild(document.createTextNode('Dünya Kupası'));
 }
 
 function renderNavWcLogo() {
   _setNavWcLogo(getWC().logo);
-  fetch('/api/ts_wc2026').then(r => r.ok ? r.json() : null).then(wc => {
-    if (wc && wc.logo) _setNavWcLogo(wc.logo);
-  }).catch(() => {});
+  if (!_navWcLogoSet) {
+    fetch('/api/ts_wc2026').then(r => r.ok ? r.json() : null).then(wc => {
+      if (wc && wc.logo) _setNavWcLogo(wc.logo);
+    }).catch(() => {});
+  }
 }
 
 // ==================== FIXTURE TICKER ====================
