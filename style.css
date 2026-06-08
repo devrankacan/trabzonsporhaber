@@ -3490,6 +3490,7 @@ img { max-width: 100%; display: block; }
   max-width: 60px;
   vertical-align: middle;
   flex-shrink: 0;
+  margin-right: 5px;
 }
 .branch-link-wc:hover {
   background: rgba(255,255,255,0.13) !important;
