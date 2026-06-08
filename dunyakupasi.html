@@ -10,23 +10,6 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1243468369473646" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/style.css?v=3" />
-  <script>
-    try {
-      var _wcd = JSON.parse(localStorage.getItem('ts_wc2026'));
-      if (_wcd && _wcd.logo) {
-        document.addEventListener('DOMContentLoaded', function() {
-          var l = document.getElementById('navWcLink');
-          if (l && !l.querySelector('img._wc-nav-logo')) {
-            var i = document.createElement('img');
-            i.className = '_wc-nav-logo';
-            i.src = _wcd.logo;
-            i.style.cssText = 'display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0';
-            l.insertBefore(i, l.firstChild);
-          }
-        });
-      }
-    } catch(e) {}
-  </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
@@ -90,6 +73,21 @@
       </div>
     </div>
   </nav>
+  <script>
+    try {
+      var _wcd = JSON.parse(localStorage.getItem('ts_wc2026'));
+      if (_wcd && _wcd.logo) {
+        var _l = document.getElementById('navWcLink');
+        if (_l && !_l.querySelector('img._wc-nav-logo')) {
+          var _i = document.createElement('img');
+          _i.className = '_wc-nav-logo';
+          _i.src = _wcd.logo;
+          _i.style.cssText = 'display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0';
+          _l.insertBefore(_i, _l.firstChild);
+        }
+      }
+    } catch(e) {}
+  </script>
 
   <!-- HERO -->
   <section class="wc-page-hero">
