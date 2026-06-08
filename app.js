@@ -44,6 +44,11 @@ async function _apiSyncAll() {
   } catch {}
 }
 
+async function _apiSyncAndRender(renderFn) {
+  await _apiSyncAll();
+  renderFn();
+}
+
 async function _apiPushAll() {
   let anyFail = false;
   for (const key of _SYNC_KEYS) {
@@ -2136,7 +2141,6 @@ function initAuth() {
   initTheme();
   initSiteLogo();
   updateAuthUI();
-  _apiSyncAll();
 }
 
 // ==================== THEME ====================

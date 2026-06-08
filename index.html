@@ -209,10 +209,12 @@
   <script src="app.js?v=2"></script>
   <script>
     trackPageView('index');
-    initAuth();
-    renderHomePage();
-    renderTransfersSidebar();
-    renderStandingsSidebar();
+    initTheme(); initSiteLogo(); updateAuthUI();
+    _apiSyncAll().then(() => {
+      renderHomePage();
+      renderTransfersSidebar();
+      renderStandingsSidebar();
+    });
     initDragScroll();
   </script>
 </body>
