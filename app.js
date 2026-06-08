@@ -20,7 +20,7 @@ const WC_KEY = 'ts_wc2026';
 
 const WC_DEFAULT_FIXTURES = [
   { home:'Avustralya', homeCode:'au', away:'Türkiye', awayCode:'tr', date:'14.6.2026', day:'Paz', time:'07:00' },
-  { home:'Türkiye',   homeCode:'tr', away:'Paraguay', awayCode:'py', date:'20.6.2026', day:'Cum', time:'06:00' },
+  { home:'Türkiye',   homeCode:'tr', away:'Paraguay', awayCode:'py', date:'20.6.2026', day:'Cmt', time:'06:00' },
   { home:'Türkiye',   homeCode:'tr', away:'ABD',      awayCode:'us', date:'26.6.2026', day:'Cum', time:'05:00' },
 ];
 
@@ -238,6 +238,9 @@ function renderFixtureTicker() {
   `).join('');
 
   el.innerHTML = itemHtml + itemHtml;
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = '';
 }
 
 // ==================== WC PAGE ====================
