@@ -205,12 +205,9 @@ function renderNavWcLogo() {
   if (!link) return;
   const logo = getWC().logo;
   if (logo) {
-    link.innerHTML = '<span id="_wcNavSpan"></span>Dünya Kupası';
-    const span = document.getElementById('_wcNavSpan');
-    if (span) {
-      span.style.cssText = 'display:inline-block;width:20px;height:18px;background-color:#fff;border-radius:3px;margin-right:5px;vertical-align:middle;flex-shrink:0;background-repeat:no-repeat;background-position:center;background-size:contain';
-      span.style.backgroundImage = 'url("' + logo + '")';
-    }
+    link.innerHTML = '<img id="_wcNavImg" alt="DK" style="display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0">Dünya Kupası';
+    const img = document.getElementById('_wcNavImg');
+    if (img) img.src = logo;
   } else {
     link.textContent = 'Dünya Kupası';
   }
