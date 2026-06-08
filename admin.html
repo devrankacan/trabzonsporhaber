@@ -237,6 +237,19 @@
         <button class="btn-primary btn-sm" id="showTransferFormBtn" onclick="toggleTransferForm(true)">+ Yeni Transfer</button>
       </div>
 
+      <!-- Transfers Logosu -->
+      <div class="dash-form-card" style="margin-bottom:20px">
+        <h3 class="dash-section-title" style="font-size:15px;margin-bottom:12px">Bölüm Logosu</h3>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <img id="trLogoPreview" style="max-height:48px;max-width:120px;object-fit:contain;display:none;background:#f5f5f5;border-radius:6px;padding:4px" />
+          <label class="btn-secondary btn-sm" style="cursor:pointer">
+            Logo Yükle
+            <input type="file" accept="image/*" style="display:none" onchange="handleTransfersLogoUpload(this)" />
+          </label>
+          <button class="btn-secondary btn-sm" onclick="removeTransfersLogo()" style="color:var(--danger)">Kaldır</button>
+        </div>
+      </div>
+
       <!-- Transfer Form -->
       <div class="dash-form-card" id="transferFormCard" style="display:none;margin-bottom:24px">
         <div class="dash-section-header" style="margin-bottom:16px">
@@ -826,6 +839,26 @@
     `).join('');
   }
 
+  function handleTransfersLogoUpload(input) {
+    if (!input.files[0]) return;
+    compressWCImg(input.files[0], 300, 120, b64 => {
+      saveTransfersLogo(b64);
+      const preview = document.getElementById('trLogoPreview');
+      if (preview) { preview.src = b64; preview.style.display = 'block'; }
+      _applyTransfersLogo(b64);
+    });
+  }
+  function removeTransfersLogo() {
+    saveTransfersLogo('');
+    const preview = document.getElementById('trLogoPreview');
+    if (preview) { preview.src = ''; preview.style.display = 'none'; }
+  }
+  function initTransfersLogoPreview() {
+    const logo = getTransfersLogo();
+    const preview = document.getElementById('trLogoPreview');
+    if (preview && logo) { preview.src = logo; preview.style.display = 'block'; }
+  }
+
   function handleStandingsLogoUpload(input) {
     if (!input.files[0]) return;
     compressWCImg(input.files[0], 300, 120, b64 => {
@@ -1000,6 +1033,7 @@
     document.getElementById('dashTopbarTitle').textContent = TAB_TITLES[name] || '';
     if (name === 'wc2026') { renderWCAdmin(); renderWCPlayersAdmin(); }
     if (name === 'standings') { initStandingsLogoPreview(); }
+    if (name === 'transfers') { initTransfersLogoPreview(); }
     // Close sidebar on mobile
     if (window.innerWidth <= 768) document.getElementById('dashSidebar').classList.remove('open');
   }

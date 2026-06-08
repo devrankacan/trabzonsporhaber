@@ -9,6 +9,7 @@ const ANALYTICS_KEY = 'ts_analytics';
 const TRANSFERS_KEY = 'ts_transfers';
 const STANDINGS_KEY = 'ts_standings';
 const STANDINGS_LOGO_KEY = 'ts_standings_logo';
+const TRANSFERS_LOGO_KEY = 'ts_transfers_logo';
 const LOGOS_KEY = 'ts_logos';
 const USERS_KEY = 'ts_users';
 const USER_SESSION_KEY = 'ts_user_session';
@@ -395,7 +396,7 @@ function renderWCPlayers() {
 // ==================== API SYNC ====================
 
 const _API_KEY = 'ee098b74';
-const _SYNC_KEYS = [STORAGE_KEY, TRANSFERS_KEY, STANDINGS_KEY, STANDINGS_LOGO_KEY, LOGOS_KEY,
+const _SYNC_KEYS = [STORAGE_KEY, TRANSFERS_KEY, STANDINGS_KEY, STANDINGS_LOGO_KEY, TRANSFERS_LOGO_KEY, LOGOS_KEY,
   USERS_KEY, FOREIGN_LOGOS_KEY, SITE_LOGO_KEY, TEAM_BANNERS_KEY, COMMENTS_KEY, VIEWS_KEY, WC_KEY];
 
 async function _apiSave(key, data) {
@@ -421,6 +422,7 @@ async function _apiSyncAll() {
     renderNavWcLogo();
     renderFixtureTicker();
     fetchAndApplyStandingsLogo();
+    fetchAndApplyTransfersLogo();
   } catch {}
 }
 
@@ -1517,6 +1519,41 @@ function _applyStandingsLogo(logo) {
 function fetchAndApplyStandingsLogo() {
   fetch('/api/ts_standings_logo').then(r => r.ok ? r.json() : null).then(logo => {
     if (logo && typeof logo === 'string') _applyStandingsLogo(logo);
+  }).catch(() => {});
+}
+
+function getTransfersLogo() {
+  const raw = localStorage.getItem(TRANSFERS_LOGO_KEY);
+  if (!raw) return '';
+  try { const p = JSON.parse(raw); return typeof p === 'string' ? p : raw; } catch { return raw; }
+}
+function saveTransfersLogo(logo) {
+  localStorage.setItem(TRANSFERS_LOGO_KEY, logo);
+  _apiSave(TRANSFERS_LOGO_KEY, logo);
+}
+
+function _applyTransfersLogo(logo) {
+  const headerEl = document.getElementById('transfersSidebarHeader');
+  if (!headerEl) return;
+  const h3 = document.createElement('h3');
+  h3.className = 'sidebar-title';
+  h3.style.cssText = 'display:flex;align-items:center;gap:8px';
+  if (logo) {
+    const img = document.createElement('img');
+    img.style.cssText = 'height:22px;width:auto;object-fit:contain;flex-shrink:0';
+    img.src = logo;
+    h3.appendChild(img);
+  }
+  h3.appendChild(document.createTextNode('Son Transferler'));
+  headerEl.textContent = '';
+  headerEl.appendChild(h3);
+}
+
+function fetchAndApplyTransfersLogo() {
+  const local = getTransfersLogo();
+  if (local) { _applyTransfersLogo(local); return; }
+  fetch('/api/ts_transfers_logo').then(r => r.ok ? r.json() : null).then(logo => {
+    if (logo && typeof logo === 'string') _applyTransfersLogo(logo);
   }).catch(() => {});
 }
 

@@ -143,7 +143,7 @@
       <aside class="sidebar">
         <div class="sidebar-card sidebar-transfers-bottom">
           <div class="sidebar-accordion-header" onclick="toggleSidebarCard(this)">
-            <h3 class="sidebar-title">Son Transferler</h3>
+            <div id="transfersSidebarHeader" class="sidebar-title-wrap"></div>
             <span class="sidebar-chevron">›</span>
           </div>
           <div class="sidebar-accordion-body">
@@ -257,6 +257,7 @@
     trackPageView('index');
     initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
     renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar();
+    fetchAndApplyTransfersLogo();
     initDragScroll();
     _apiSyncAll().then(() => {
       renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar(); renderNavWcLogo(); renderFixtureTicker();
