@@ -236,6 +236,7 @@
 
     // Read team from URL path on page load
     const _pathTeam = location.pathname.match(/\/haberler\/([^/]+)/)?.[1] || '';
+    applyTeamFilter(_pathTeam);
     _apiSyncAll().then(() => applyTeamFilter(_pathTeam));
 
     initDragScroll();

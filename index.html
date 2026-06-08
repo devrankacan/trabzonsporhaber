@@ -226,13 +226,11 @@
   <script>
     trackPageView('index');
     initTheme(); initSiteLogo(); updateAuthUI();
-    _apiSyncAll().then(() => {
-      renderHomePage();
-      renderTransfersSidebar();
-      renderStandingsSidebar();
-      renderWC2026Sidebar();
-    });
+    renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar();
     initDragScroll();
+    _apiSyncAll().then(() => {
+      renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar();
+    });
   </script>
 </body>
 </html>

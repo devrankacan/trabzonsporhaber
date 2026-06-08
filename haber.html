@@ -164,6 +164,7 @@
     initTheme(); initSiteLogo(); updateAuthUI();
     const _aid = new URLSearchParams(location.search).get('id');
     trackPageView('haber', _aid ? Number(_aid) : null);
+    renderArticle();
     _apiSyncAll().then(() => renderArticle());
     initDragScroll();
   </script>
