@@ -555,6 +555,7 @@ img { max-width: 100%; display: block; }
 }
 @media (max-width: 900px) {
   .slider-transfers-row { flex-direction: column; }
+  .slider-col { width: 100%; flex: none; }
   .transfers-col { width: 100%; display: none; }
 }
 
