@@ -3059,46 +3059,23 @@ img { max-width: 100%; display: block; }
 }
 
 /* ===== WC2026 GROUPS ===== */
-.wc-groups-scroll {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scrollbar-width: thin;
-}
-.wc-groups-scroll::-webkit-scrollbar { height: 4px; }
-.wc-groups-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
 .wc-group-card {
-  flex: 0 0 220px;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
-}
-
-.wc-group-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .wc-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: 12px;
 }
 .wc-table th {
   color: var(--text-muted);
   font-weight: 600;
-  padding: 2px 3px;
+  padding: 4px 4px;
   text-align: center;
 }
 .wc-table td {
-  padding: 3px 3px;
+  padding: 5px 4px;
   text-align: center;
   border-top: 1px solid var(--border);
   color: var(--text);
@@ -3107,12 +3084,12 @@ img { max-width: 100%; display: block; }
   text-align: left !important;
   display: flex;
   align-items: center;
-  gap: 5px;
-  min-width: 110px;
+  gap: 6px;
+  min-width: 120px;
 }
 .wc-flag {
-  width: 18px;
-  height: 13px;
+  width: 22px;
+  height: 16px;
   object-fit: cover;
   border-radius: 2px;
   flex-shrink: 0;
@@ -3121,25 +3098,52 @@ img { max-width: 100%; display: block; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 85px;
+  max-width: 100px;
 }
 .wc-turkey-row td { font-weight: 700; color: var(--primary); }
-.wc-qualify { background: rgba(37,99,235,0.05); }
+.wc-qualify { background: rgba(200,16,46,0.04); }
 .wc-pts { font-weight: 700; }
 
-.wc-scroll-hint {
-  font-size: 10px;
+.wc-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.wc-nav-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ts-red);
+  background: transparent;
+  color: var(--ts-red);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+}
+.wc-nav-btn:hover:not(:disabled) {
+  background: var(--ts-red);
+  color: #fff;
+}
+.wc-nav-btn:disabled {
+  border-color: var(--border);
   color: var(--text-muted);
-  text-align: center;
-  margin-top: 4px;
+  cursor: default;
 }
-
-.wc-header-logo {
-  text-align: center;
-  margin-bottom: 8px;
+.wc-nav-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
 }
-.wc-header-logo img {
-  max-height: 52px;
-  max-width: 100%;
-  object-fit: contain;
+.wc-nav-count {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 4px;
 }

@@ -116,11 +116,14 @@ function teamImgSrc(t) {
   return t.logo || flagUrl(t.code);
 }
 
+let _wcGroupIdx = 0;
+
 function renderWC2026Sidebar() {
   const el = document.getElementById('wc2026Sidebar');
   if (!el) return;
   const wc = getWC();
   const groups = wc.groups || [];
+  if (!groups.length) return;
 
   const titleEl = document.getElementById('wcSidebarTitle');
   if (titleEl) {
@@ -135,36 +138,52 @@ function renderWC2026Sidebar() {
     }
   }
 
+  _wcGroupIdx = Math.max(0, Math.min(_wcGroupIdx, groups.length - 1));
+  _wcRenderGroup(groups);
+}
+
+function _wcRenderGroup(groups) {
+  const el = document.getElementById('wc2026Sidebar');
+  if (!el) return;
+  const g = groups[_wcGroupIdx];
+  const total = groups.length;
+
   el.innerHTML = `
-    <div class="wc-groups-scroll" id="wcGroupsScroll">
-      ${groups.map(g => `
-        <div class="wc-group-card">
-          <div class="wc-group-title">Grup ${g.id}</div>
-          <table class="wc-table">
-            <thead>
-              <tr><th></th><th>O</th><th>G</th><th>B</th><th>M</th><th>P</th></tr>
-            </thead>
-            <tbody>
-              ${g.teams.map((t, i) => `
-                <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}${i < 2 ? ' wc-qualify' : ''}">
-                  <td class="wc-team-cell">
-                    <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.onerror=null;this.style.display='none'" />
-                    <span class="wc-team-name">${escHtml(t.name)}</span>
-                  </td>
-                  <td>${t.played}</td>
-                  <td>${t.won}</td>
-                  <td>${t.drawn}</td>
-                  <td>${t.lost}</td>
-                  <td class="wc-pts">${t.pts}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `).join('')}
+    <div class="wc-group-card">
+      <table class="wc-table">
+        <thead>
+          <tr><th></th><th>O</th><th>G</th><th>B</th><th>M</th><th>P</th></tr>
+        </thead>
+        <tbody>
+          ${g.teams.map((t, i) => `
+            <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}${i < 2 ? ' wc-qualify' : ''}">
+              <td class="wc-team-cell">
+                <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.onerror=null;this.style.display='none'" />
+                <span class="wc-team-name">${escHtml(t.name)}</span>
+              </td>
+              <td>${t.played}</td>
+              <td>${t.won}</td>
+              <td>${t.drawn}</td>
+              <td>${t.lost}</td>
+              <td class="wc-pts">${t.pts}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
     </div>
-    <div class="wc-scroll-hint">← kaydır →</div>
+    <div class="wc-nav">
+      <button class="wc-nav-btn" onclick="_wcNav(-1)" ${_wcGroupIdx === 0 ? 'disabled' : ''}>&#8592;</button>
+      <span class="wc-nav-label">Grup ${g.id} <span class="wc-nav-count">${_wcGroupIdx + 1}/${total}</span></span>
+      <button class="wc-nav-btn" onclick="_wcNav(1)" ${_wcGroupIdx === total - 1 ? 'disabled' : ''}>&#8594;</button>
+    </div>
   `;
+}
+
+function _wcNav(dir) {
+  const wc = getWC();
+  const groups = wc.groups || [];
+  _wcGroupIdx = Math.max(0, Math.min(_wcGroupIdx + dir, groups.length - 1));
+  _wcRenderGroup(groups);
 }
 
 // ==================== API SYNC ====================
