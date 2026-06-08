@@ -663,6 +663,20 @@
         </div>
       </div>
 
+      <!-- PAYLAŞIM GÖRSELİ -->
+      <div class="dash-form-card" style="margin-top:24px">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px">Varsayılan Paylaşım Görseli</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">WhatsApp/Twitter'da haberin kendi görseli yoksa veya görseli base64 ise bu görsel kullanılır. <strong>Sadece https:// URL girin.</strong></p>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <img id="ogImagePreview" src="" alt="" style="display:none;height:80px;max-width:180px;object-fit:cover;border-radius:8px;border:1px solid var(--border)" />
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="url" id="ogImageUrl" class="form-input" placeholder="https://ornek.com/paylasim-gorseli.jpg" style="flex:1" />
+          <button class="btn-primary btn-sm" onclick="saveOgImage()">Kaydet</button>
+          <button class="btn-secondary btn-sm" id="ogImageRemoveBtn" style="display:none" onclick="removeOgImage()">Kaldır</button>
+        </div>
+      </div>
+
       <!-- TAKIM GÖRSELLERİ -->
       <div class="dash-form-card" style="margin-top:24px">
         <h3 style="font-size:15px;font-weight:700;margin-bottom:4px">Takım Sayfa Görselleri</h3>

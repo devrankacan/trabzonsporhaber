@@ -397,9 +397,10 @@ function renderWCPlayers() {
 
 const _API_KEY = 'ee098b74';
 const FAVICON_KEY = 'ts_favicon';
+const OG_IMAGE_KEY = 'ts_og_image';
 
 const _SYNC_KEYS = [STORAGE_KEY, TRANSFERS_KEY, STANDINGS_KEY, STANDINGS_LOGO_KEY, TRANSFERS_LOGO_KEY, LOGOS_KEY,
-  USERS_KEY, FOREIGN_LOGOS_KEY, SITE_LOGO_KEY, TEAM_BANNERS_KEY, COMMENTS_KEY, VIEWS_KEY, WC_KEY, FAVICON_KEY];
+  USERS_KEY, FOREIGN_LOGOS_KEY, SITE_LOGO_KEY, TEAM_BANNERS_KEY, COMMENTS_KEY, VIEWS_KEY, WC_KEY, FAVICON_KEY, OG_IMAGE_KEY];
 
 async function _apiSave(key, data) {
   try {
@@ -2025,6 +2026,7 @@ function initAdmin() {
   renderAnalytics();
   renderSettingsLogoAdmin();
   renderFaviconAdmin();
+  renderOgImageAdmin();
   renderTeamBannersAdmin();
   renderAdminTransfers();
   initTransferForm();
@@ -2774,6 +2776,32 @@ function switchLogoTab(tab) {
   document.getElementById('logoImgTabUrl').style.display  = tab === 'url'  ? 'block' : 'none';
   document.getElementById('logoTabFile').classList.toggle('active', tab === 'file');
   document.getElementById('logoTabUrl').classList.toggle('active', tab === 'url');
+}
+
+// ==================== OG IMAGE ====================
+
+function renderOgImageAdmin() {
+  const val = localStorage.getItem(OG_IMAGE_KEY) || '';
+  const input = document.getElementById('ogImageUrl');
+  const preview = document.getElementById('ogImagePreview');
+  const removeBtn = document.getElementById('ogImageRemoveBtn');
+  if (input) input.value = val;
+  if (preview) { preview.src = val; preview.style.display = val ? 'block' : 'none'; }
+  if (removeBtn) removeBtn.style.display = val ? 'inline-block' : 'none';
+}
+
+function saveOgImage() {
+  const val = (document.getElementById('ogImageUrl')?.value || '').trim();
+  if (val && !val.startsWith('http')) { alert('Lütfen https:// ile başlayan bir URL girin.'); return; }
+  if (val) { localStorage.setItem(OG_IMAGE_KEY, val); _apiSave(OG_IMAGE_KEY, val); }
+  else { localStorage.removeItem(OG_IMAGE_KEY); _apiSave(OG_IMAGE_KEY, null); }
+  renderOgImageAdmin();
+}
+
+function removeOgImage() {
+  localStorage.removeItem(OG_IMAGE_KEY);
+  _apiSave(OG_IMAGE_KEY, null);
+  renderOgImageAdmin();
 }
 
 // ==================== FAVICON ====================

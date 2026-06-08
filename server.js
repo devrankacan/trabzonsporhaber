@@ -14,7 +14,7 @@ const API_KEY = 'ee098b74';
 const ALLOWED_KEYS = [
   'ts_haberler', 'ts_transfers', 'ts_standings', 'ts_standings_logo', 'ts_transfers_logo', 'ts_logos',
   'ts_users', 'ts_foreign_logos', 'ts_site_logo', 'ts_team_banners',
-  'ts_comments', 'ts_views', 'ts_wc2026', 'ts_favicon'
+  'ts_comments', 'ts_views', 'ts_wc2026', 'ts_favicon', 'ts_og_image'
 ];
 
 const DISPLAY_KEYS = ['ts_site_logo', 'ts_wc2026', 'ts_standings_logo', 'ts_transfers_logo', 'ts_favicon'];
@@ -91,7 +91,8 @@ app.get('/haber.html', (req, res) => {
       if (haber) {
         const title = (haber.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
         const summary = (haber.summary || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-        const image = haber.image && !haber.image.startsWith('data:') ? haber.image : '';
+        const defaultOg = (() => { const v = readKey('ts_og_image'); return v && typeof v === 'string' && v.startsWith('http') ? v : ''; })();
+        const image = (haber.image && !haber.image.startsWith('data:') ? haber.image : '') || defaultOg;
         const url = `https://habersuperlig.com/haber.html?id=${id}`;
         const ogTags = [
           `<meta property="og:title" content="${title}" />`,
