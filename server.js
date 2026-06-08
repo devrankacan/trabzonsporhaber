@@ -17,6 +17,8 @@ const ALLOWED_KEYS = [
   'ts_comments', 'ts_views', 'ts_wc2026'
 ];
 
+const DISPLAY_KEYS = ['ts_site_logo', 'ts_wc2026', 'ts_standings_logo', 'ts_transfers_logo'];
+
 function auth(req, res, next) {
   if (req.headers['x-api-key'] !== API_KEY) return res.status(401).json({ error: 'Unauthorized' });
   next();
@@ -31,6 +33,43 @@ function readKey(key) {
 function writeKey(key, value) {
   fs.writeFileSync(path.join(DATA_DIR, key + '.json'), JSON.stringify(value));
 }
+
+function buildBootstrapScript() {
+  const lines = ['<script>try{'];
+  for (const key of DISPLAY_KEYS) {
+    const val = readKey(key);
+    if (val !== null && val !== undefined) {
+      lines.push(`localStorage.setItem(${JSON.stringify(key)},${JSON.stringify(JSON.stringify(val))});`);
+    }
+  }
+  lines.push('}catch(e){}</script>');
+  return lines.join('');
+}
+
+function serveHtml(file) {
+  return (req, res) => {
+    try {
+      let html = fs.readFileSync(path.join(__dirname, file), 'utf8');
+      const bootstrap = buildBootstrapScript();
+      html = html.replace('</head>', bootstrap + '</head>');
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.send(html);
+    } catch (e) {
+      res.status(500).send('Error');
+    }
+  };
+}
+
+app.get('/', serveHtml('index.html'));
+app.get('/index.html', (req, res) => res.redirect(301, '/'));
+app.get('/haberler.html', serveHtml('haberler.html'));
+app.get('/haber.html', serveHtml('haber.html'));
+app.get('/dunyakupasi.html', serveHtml('dunyakupasi.html'));
+app.get('/admin.html', serveHtml('admin.html'));
+app.get('/hakkimizda.html', serveHtml('hakkimizda.html'));
+app.get('/gizlilik.html', serveHtml('gizlilik.html'));
+app.get('/iletisim.html', serveHtml('iletisim.html'));
 
 app.get('/api/all', (req, res) => {
   const result = {};
