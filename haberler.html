@@ -230,7 +230,9 @@
     }
 
     function applyTeamFilter(val) {
-      document.getElementById('teamFilter').value = val;
+      const teamFilterEl = document.getElementById('teamFilter');
+      teamFilterEl.value = val;
+      teamFilterEl.style.display = val ? 'none' : '';
       document.querySelectorAll('.branch-link').forEach(l => {
         const href = l.getAttribute('href');
         const linkVal = href === '/haberler' ? '' : href.replace('/haberler/', '');
