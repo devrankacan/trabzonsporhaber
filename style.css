@@ -2871,6 +2871,11 @@ img { max-width: 100%; display: block; }
   max-width: 220px;
   object-fit: contain;
   display: block;
+  filter: brightness(0) invert(1);
+}
+
+[data-theme="dark"] .site-logo-header {
+  filter: brightness(0) invert(1);
 }
 
 .settings-logo-preview {
