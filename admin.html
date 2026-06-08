@@ -642,6 +642,27 @@
         </div>
       </div>
 
+      <!-- FAVİCON -->
+      <div class="dash-form-card" style="margin-top:24px">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px">Tarayıcı İkonu (Favicon)</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">URL çubuğunda ve sekme başlığında görünen ikon. PNG veya SVG önerilir.</p>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+          <div id="faviconPreviewWrap" style="width:48px;height:48px;border:2px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--bg-card)">
+            <img id="faviconPreviewImg" src="" alt="" style="display:none;width:32px;height:32px;object-fit:contain" />
+            <span id="faviconPreviewFb" style="font-size:20px">🌐</span>
+          </div>
+          <div style="flex:1">
+            <label class="file-drop-zone" style="height:60px">
+              <input type="file" id="faviconFile" accept="image/*" style="display:none" onchange="handleFaviconFile(this)" />
+              <div class="file-drop-inner"><div class="file-drop-text">Tıkla veya ikonu sürükle</div></div>
+            </label>
+          </div>
+        </div>
+        <div id="faviconRemoveWrap" style="display:none">
+          <button class="btn-secondary btn-sm" onclick="removeFavicon()">× İkonu Kaldır</button>
+        </div>
+      </div>
+
       <!-- TAKIM GÖRSELLERİ -->
       <div class="dash-form-card" style="margin-top:24px">
         <h3 style="font-size:15px;font-weight:700;margin-bottom:4px">Takım Sayfa Görselleri</h3>

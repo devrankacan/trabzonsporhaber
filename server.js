@@ -14,10 +14,10 @@ const API_KEY = 'ee098b74';
 const ALLOWED_KEYS = [
   'ts_haberler', 'ts_transfers', 'ts_standings', 'ts_standings_logo', 'ts_transfers_logo', 'ts_logos',
   'ts_users', 'ts_foreign_logos', 'ts_site_logo', 'ts_team_banners',
-  'ts_comments', 'ts_views', 'ts_wc2026'
+  'ts_comments', 'ts_views', 'ts_wc2026', 'ts_favicon'
 ];
 
-const DISPLAY_KEYS = ['ts_site_logo', 'ts_wc2026', 'ts_standings_logo', 'ts_transfers_logo'];
+const DISPLAY_KEYS = ['ts_site_logo', 'ts_wc2026', 'ts_standings_logo', 'ts_transfers_logo', 'ts_favicon'];
 
 function auth(req, res, next) {
   if (req.headers['x-api-key'] !== API_KEY) return res.status(401).json({ error: 'Unauthorized' });
@@ -46,11 +46,23 @@ function buildBootstrapScript() {
   return lines.join('');
 }
 
+function buildFaviconTag() {
+  const val = readKey('ts_favicon');
+  if (!val) return '';
+  const href = typeof val === 'string' ? val : JSON.stringify(val);
+  const type = href.startsWith('data:image/png') ? 'image/png' : href.startsWith('data:image/svg') ? 'image/svg+xml' : 'image/x-icon';
+  return `<link id="dyn-favicon" rel="icon" type="${type}" href="${href.replace(/"/g, '&quot;')}" />`;
+}
+
 function serveHtml(file) {
   return (req, res) => {
     try {
       let html = fs.readFileSync(path.join(__dirname, file), 'utf8');
       const bootstrap = buildBootstrapScript();
+      const faviconTag = buildFaviconTag();
+      if (faviconTag) {
+        html = html.replace(/<link rel="icon"[^>]*>/, faviconTag);
+      }
       html = html.replace('</head>', bootstrap + '</head>');
       res.setHeader('Content-Type', 'text/html');
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

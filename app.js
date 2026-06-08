@@ -396,8 +396,10 @@ function renderWCPlayers() {
 // ==================== API SYNC ====================
 
 const _API_KEY = 'ee098b74';
+const FAVICON_KEY = 'ts_favicon';
+
 const _SYNC_KEYS = [STORAGE_KEY, TRANSFERS_KEY, STANDINGS_KEY, STANDINGS_LOGO_KEY, TRANSFERS_LOGO_KEY, LOGOS_KEY,
-  USERS_KEY, FOREIGN_LOGOS_KEY, SITE_LOGO_KEY, TEAM_BANNERS_KEY, COMMENTS_KEY, VIEWS_KEY, WC_KEY];
+  USERS_KEY, FOREIGN_LOGOS_KEY, SITE_LOGO_KEY, TEAM_BANNERS_KEY, COMMENTS_KEY, VIEWS_KEY, WC_KEY, FAVICON_KEY];
 
 async function _apiSave(key, data) {
   try {
@@ -2022,6 +2024,7 @@ function initAdmin() {
   initBranchMultiSelect();
   renderAnalytics();
   renderSettingsLogoAdmin();
+  renderFaviconAdmin();
   renderTeamBannersAdmin();
   renderAdminTransfers();
   initTransferForm();
@@ -2771,6 +2774,59 @@ function switchLogoTab(tab) {
   document.getElementById('logoImgTabUrl').style.display  = tab === 'url'  ? 'block' : 'none';
   document.getElementById('logoTabFile').classList.toggle('active', tab === 'file');
   document.getElementById('logoTabUrl').classList.toggle('active', tab === 'url');
+}
+
+// ==================== FAVICON ====================
+
+async function handleFaviconFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const compressed = await compressImage(file, 256, 256, 0.9);
+  localStorage.setItem(FAVICON_KEY, compressed);
+  _apiSave(FAVICON_KEY, compressed);
+  applyFaviconDOM(compressed);
+  renderFaviconAdmin();
+}
+
+function removeFavicon() {
+  localStorage.removeItem(FAVICON_KEY);
+  _apiSave(FAVICON_KEY, null);
+  applyFaviconDOM('');
+  renderFaviconAdmin();
+}
+
+function applyFaviconDOM(src) {
+  let link = document.getElementById('dyn-favicon');
+  if (!link) {
+    link = document.createElement('link');
+    link.id = 'dyn-favicon';
+    link.rel = 'icon';
+    document.head.appendChild(link);
+  }
+  if (src) {
+    link.href = src;
+    link.type = src.startsWith('data:image/svg') ? 'image/svg+xml' : 'image/png';
+  } else {
+    link.href = '/favicon.svg';
+    link.type = 'image/svg+xml';
+  }
+}
+
+function renderFaviconAdmin() {
+  const src = localStorage.getItem(FAVICON_KEY) || '';
+  const img = document.getElementById('faviconPreviewImg');
+  const fb = document.getElementById('faviconPreviewFb');
+  const removeWrap = document.getElementById('faviconRemoveWrap');
+  if (!img) return;
+  if (src) {
+    img.src = src; img.style.display = 'block';
+    if (fb) fb.style.display = 'none';
+    if (removeWrap) removeWrap.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+    if (fb) fb.style.display = '';
+    if (removeWrap) removeWrap.style.display = 'none';
+  }
 }
 
 // ==================== TEAM BANNERS ====================
