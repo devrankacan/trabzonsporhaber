@@ -2866,19 +2866,11 @@ img { max-width: 100%; display: block; }
   display: block;
 }
 
-[data-theme="dark"] .site-logo-header {
-  filter: invert(1) brightness(2);
-}
-
 .site-logo-footer {
   height: 60px;
   max-width: 220px;
   object-fit: contain;
   display: block;
-}
-
-[data-theme="dark"] .site-logo-footer {
-  filter: invert(1) brightness(2);
 }
 
 .settings-logo-preview {

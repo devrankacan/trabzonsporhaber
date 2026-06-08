@@ -2068,7 +2068,7 @@ function compressImage(file, maxW, maxH, quality) {
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+        resolve(canvas.toDataURL('image/png'));
       };
       img.onerror = reject;
       img.src = e.target.result;
