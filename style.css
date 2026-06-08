@@ -558,6 +558,10 @@ img { max-width: 100%; display: block; }
   .transfers-col { width: 100%; display: none; }
 }
 
+@media (min-width: 901px) {
+  .sidebar-transfers-bottom { display: none; }
+}
+
 /* ==================== TICKER ==================== */
 .ticker {
   background: var(--bg);
