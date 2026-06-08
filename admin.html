@@ -474,7 +474,7 @@
     <!-- TAB: DÜNYA KUPASI 2026 -->
     <section class="dash-tab" id="tabWc2026">
       <div class="dash-section-header">
-        <h2 class="dash-section-title">🌍 2026 Dünya Kupası Grupları</h2>
+        <h2 class="dash-section-title">2026 Dünya Kupası Grupları</h2>
         <button class="btn-secondary btn-sm" onclick="resetWC()">↺ Varsayılana Sıfırla</button>
       </div>
       <div id="wcAdminGroups"></div>
@@ -665,17 +665,51 @@
     setTimeout(() => { msg.style.display = 'none'; }, 4000);
   }
 
+  function compressWCImg(file, maxW, maxH, cb) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        cb(canvas.toDataURL('image/webp', 0.85));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
   function renderWCAdmin() {
-    const groups = getWC();
+    const wc = getWC();
+    const groups = wc.groups || [];
     const el = document.getElementById('wcAdminGroups');
     if (!el) return;
-    el.innerHTML = groups.map((g, gi) => `
+
+    const wcLogoSrc = wc.logo || '';
+    el.innerHTML = `
+      <div class="dash-form-card" style="margin-bottom:16px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:10px">Turnuva Logosu</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <img id="wcLogoPreview" src="${escHtml(wcLogoSrc)}" style="max-height:52px;max-width:120px;object-fit:contain;${wcLogoSrc ? '' : 'display:none'}" />
+          <label class="btn-secondary btn-sm" style="cursor:pointer">
+            Logo Yükle
+            <input type="file" accept="image/*" id="wcLogoInput" style="display:none" onchange="handleWCLogoUpload(this)" />
+          </label>
+          ${wcLogoSrc ? `<button class="btn-secondary btn-sm" onclick="removeWCLogo()" style="color:var(--danger)">Kaldır</button>` : ''}
+        </div>
+      </div>
+    ` + groups.map((g, gi) => `
       <div class="dash-form-card" style="margin-bottom:16px">
         <div style="font-weight:700;font-size:15px;margin-bottom:10px;color:var(--primary)">Grup ${g.id}</div>
         <div style="overflow-x:auto">
           <table style="width:100%;border-collapse:collapse;font-size:13px">
             <thead><tr style="background:var(--bg)">
-              <th style="padding:6px 8px;text-align:left">Ülke</th>
+              <th style="padding:6px 8px;text-align:left;min-width:140px">Ülke</th>
+              <th style="padding:6px 4px;white-space:nowrap">Logo</th>
               <th style="padding:6px 4px">O</th><th style="padding:6px 4px">G</th>
               <th style="padding:6px 4px">B</th><th style="padding:6px 4px">M</th>
               <th style="padding:6px 4px">AG</th><th style="padding:6px 4px">YG</th>
@@ -684,9 +718,19 @@
             <tbody>
               ${g.teams.map((t, ti) => `
                 <tr style="border-top:1px solid var(--border)">
-                  <td style="padding:5px 8px;display:flex;align-items:center;gap:6px">
-                    <img src="${flagUrl(t.code)}" style="width:18px;height:13px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'" />
-                    ${escHtml(t.name)}
+                  <td style="padding:5px 8px">
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <img id="wc-team-img-${gi}-${ti}" src="${escHtml(teamImgSrc(t))}" style="width:22px;height:16px;object-fit:cover;border-radius:2px" onerror="this.src='${flagUrl(t.code)}'" />
+                      ${escHtml(t.name)}
+                    </div>
+                  </td>
+                  <td style="padding:4px;text-align:center">
+                    <label style="cursor:pointer;font-size:11px;color:var(--primary);white-space:nowrap">
+                      ${t.logo ? '✓ Değiştir' : 'Yükle'}
+                      <input type="file" accept="image/*" style="display:none"
+                        onchange="handleTeamLogoUpload(this,${gi},${ti})" />
+                    </label>
+                    ${t.logo ? `<button onclick="removeTeamLogo(${gi},${ti})" style="display:block;font-size:10px;color:var(--danger);background:none;border:none;cursor:pointer;padding:0;margin-top:2px">Kaldır</button>` : ''}
                   </td>
                   ${['played','won','drawn','lost','gf','ga','pts'].map(f => `
                     <td style="padding:4px"><input type="number" min="0" max="999" value="${t[f]}"
@@ -702,13 +746,47 @@
     `).join('');
   }
 
+  function handleWCLogoUpload(input) {
+    if (!input.files[0]) return;
+    compressWCImg(input.files[0], 300, 150, b64 => {
+      const wc = getWC(); wc.logo = b64; saveWC(wc);
+      const preview = document.getElementById('wcLogoPreview');
+      if (preview) { preview.src = b64; preview.style.display = ''; }
+      renderWCAdmin();
+    });
+  }
+
+  function removeWCLogo() {
+    const wc = getWC(); wc.logo = ''; saveWC(wc);
+    renderWCAdmin();
+  }
+
+  function handleTeamLogoUpload(input, gi, ti) {
+    if (!input.files[0]) return;
+    compressWCImg(input.files[0], 64, 64, b64 => {
+      const wc = getWC();
+      wc.groups[gi].teams[ti].logo = b64;
+      saveWC(wc);
+      const img = document.getElementById(`wc-team-img-${gi}-${ti}`);
+      if (img) img.src = b64;
+      renderWCAdmin();
+    });
+  }
+
+  function removeTeamLogo(gi, ti) {
+    const wc = getWC();
+    wc.groups[gi].teams[ti].logo = '';
+    saveWC(wc);
+    renderWCAdmin();
+  }
+
   function saveWCAdmin() {
-    const groups = getWC();
+    const wc = getWC();
     document.querySelectorAll('.wc-admin-input').forEach(inp => {
       const gi = +inp.dataset.gi, ti = +inp.dataset.ti, f = inp.dataset.field;
-      groups[gi].teams[ti][f] = +inp.value;
+      wc.groups[gi].teams[ti][f] = +inp.value;
     });
-    saveWC(groups);
+    saveWC(wc);
     const msg = document.getElementById('wcSaveMsg');
     msg.textContent = '✓ Kaydedildi!';
     setTimeout(() => { msg.textContent = ''; }, 3000);
@@ -716,7 +794,7 @@
 
   function resetWC() {
     if (!confirm('Tüm veriler varsayılana dönecek. Emin misiniz?')) return;
-    saveWC(WC_DEFAULT_GROUPS);
+    saveWC({ logo: '', groups: WC_DEFAULT_GROUPS });
     renderWCAdmin();
   }
 

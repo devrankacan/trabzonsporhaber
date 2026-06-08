@@ -95,8 +95,12 @@ const WC_DEFAULT_GROUPS = [
 
 function getWC() {
   const stored = localStorage.getItem(WC_KEY);
-  if (stored) try { return JSON.parse(stored); } catch {}
-  return WC_DEFAULT_GROUPS;
+  if (stored) try {
+    const d = JSON.parse(stored);
+    if (Array.isArray(d)) return { logo: '', groups: d };
+    return d;
+  } catch {}
+  return { logo: '', groups: WC_DEFAULT_GROUPS };
 }
 
 function saveWC(data) {
@@ -108,12 +112,18 @@ function flagUrl(code) {
   return `https://flagcdn.com/w32/${code}.png`;
 }
 
+function teamImgSrc(t) {
+  return t.logo || flagUrl(t.code);
+}
+
 function renderWC2026Sidebar() {
   const el = document.getElementById('wc2026Sidebar');
   if (!el) return;
-  const groups = getWC();
+  const wc = getWC();
+  const groups = wc.groups || [];
 
   el.innerHTML = `
+    ${wc.logo ? `<div class="wc-header-logo"><img src="${wc.logo}" alt="2026 Dünya Kupası" /></div>` : ''}
     <div class="wc-groups-scroll" id="wcGroupsScroll">
       ${groups.map(g => `
         <div class="wc-group-card">
@@ -126,7 +136,7 @@ function renderWC2026Sidebar() {
               ${g.teams.map((t, i) => `
                 <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}${i < 2 ? ' wc-qualify' : ''}">
                   <td class="wc-team-cell">
-                    <img src="${flagUrl(t.code)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.style.display='none'" />
+                    <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.src='${flagUrl(t.code)}'" />
                     <span class="wc-team-name">${escHtml(t.name)}</span>
                   </td>
                   <td>${t.played}</td>
