@@ -54,7 +54,7 @@
     <div class="container">
       <div class="branch-nav-inner">
         <a href="/haberler" class="branch-link">Tümü</a>
-        <a href="/dunyakupasi.html" class="branch-link branch-link-wc" id="navWcLink">Dünya Kupası</a>
+        <a href="/dunyakupasi.html" class="branch-link branch-link-wc" id="navWcLink"><img id="wcNavLogoImg" class="_wc-nav-logo" alt="" style="display:none" />Dünya Kupası</a>
         <a href="/haberler/milli-takim" class="branch-link">Milli Takım</a>
         <a href="/haberler/galatasaray" class="branch-link">Galatasaray</a>
         <a href="/haberler/fenerbahce" class="branch-link">Fenerbahçe</a>
@@ -81,14 +81,8 @@
     try {
       var _wcd = JSON.parse(localStorage.getItem('ts_wc2026'));
       if (_wcd && _wcd.logo) {
-        var _l = document.getElementById('navWcLink');
-        if (_l && !_l.querySelector('img._wc-nav-logo')) {
-          var _i = document.createElement('img');
-          _i.className = '_wc-nav-logo';
-          _i.src = _wcd.logo;
-          _i.style.cssText = 'display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0';
-          _l.insertBefore(_i, _l.firstChild);
-        }
+        var _wcimg = document.getElementById('wcNavLogoImg');
+        if (_wcimg) { _wcimg.src = _wcd.logo; _wcimg.style.display = 'inline-block'; }
       }
     } catch(e) {}
   </script>

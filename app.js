@@ -207,23 +207,21 @@ function _wcNav(dir) {
 // ==================== NAV WC LOGO ====================
 
 function renderNavWcLogo() {
-  const link = document.getElementById('navWcLink');
-  if (!link) return;
+  const img = document.getElementById('wcNavLogoImg');
+  if (!img) return;
 
-  function insertLogo(logo) {
-    if (!logo || link.querySelector('img._wc-nav-logo')) return;
-    const img = document.createElement('img');
-    img.className = '_wc-nav-logo';
-    img.alt = 'DK';
-    img.style.cssText = 'display:inline-block;width:auto;height:18px;background:#fff;border-radius:3px;padding:1px 2px;margin-right:5px;vertical-align:middle;flex-shrink:0';
+  function applyLogo(logo) {
+    if (!logo) return;
     img.src = logo;
-    link.insertBefore(img, link.firstChild);
+    img.style.display = 'inline-block';
   }
 
-  insertLogo(getWC().logo);
-  if (!link.querySelector('img._wc-nav-logo')) {
+  const logo = getWC().logo;
+  if (logo) {
+    applyLogo(logo);
+  } else {
     fetch('/api/ts_wc2026').then(r => r.ok ? r.json() : null).then(wc => {
-      if (wc && wc.logo) insertLogo(wc.logo);
+      if (wc && wc.logo) applyLogo(wc.logo);
     }).catch(() => {});
   }
 }

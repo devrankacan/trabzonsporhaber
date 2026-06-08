@@ -3486,7 +3486,7 @@ img { max-width: 100%; display: block; }
   border-radius: 4px;
   padding: 2px 3px;
   height: 18px;
-  width: 28px;
+  width: auto;
   max-width: 60px;
   vertical-align: middle;
   flex-shrink: 0;
