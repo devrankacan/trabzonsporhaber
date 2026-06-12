@@ -539,6 +539,28 @@
         <span id="wcSaveMsg" style="margin-left:12px;font-size:13px;color:var(--success)"></span>
       </div>
 
+      <!-- MAÇ YÖNETİMİ -->
+      <div class="dash-section-header" style="margin-top:32px">
+        <h2 class="dash-section-title" style="font-size:16px">Maç Yönetimi — Canlı Sonuçlar</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="wcMatchGroupFilter" class="form-input" style="width:auto;padding:4px 10px;font-size:13px" onchange="renderWCMatchAdmin()">
+            <option value="D">Grup D (Türkiye)</option>
+            <option value="A">Grup A</option>
+            <option value="B">Grup B</option>
+            <option value="C">Grup C</option>
+            <option value="E">Grup E</option>
+            <option value="F">Grup F</option>
+            <option value="G">Grup G</option>
+            <option value="H">Grup H</option>
+            <option value="I">Grup I</option>
+            <option value="J">Grup J</option>
+            <option value="K">Grup K</option>
+            <option value="L">Grup L</option>
+          </select>
+        </div>
+      </div>
+      <div id="wcMatchAdminList" class="dash-form-card" style="padding:0;overflow-x:auto;margin-bottom:24px"></div>
+
       <!-- OYUNCU İSTATİSTİKLERİ -->
       <div class="dash-section-header" style="margin-top:32px">
         <h2 class="dash-section-title" style="font-size:16px">Oyuncu İstatistikleri</h2>
@@ -1002,8 +1024,120 @@
 
   function resetWC() {
     if (!confirm('Tüm veriler varsayılana dönecek. Emin misiniz?')) return;
-    saveWC({ logo: '', groups: WC_DEFAULT_GROUPS });
+    saveWC({ logo: '', groups: JSON.parse(JSON.stringify(WC_DEFAULT_GROUPS)), matches: JSON.parse(JSON.stringify(WC_DEFAULT_MATCHES)) });
     renderWCAdmin();
+    renderWCMatchAdmin();
+  }
+
+  function renderWCMatchAdmin() {
+    const el = document.getElementById('wcMatchAdminList');
+    if (!el) return;
+    const filterEl = document.getElementById('wcMatchGroupFilter');
+    const group = filterEl ? filterEl.value : 'D';
+    const wc = getWC();
+    const matches = (wc.matches || WC_DEFAULT_MATCHES).filter(m => m.group === group);
+
+    if (!matches.length) {
+      el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted)">Bu grupta maç bulunamadı.</div>';
+      return;
+    }
+
+    el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="background:var(--bg)">
+        <th style="padding:8px;text-align:left">Hafta</th>
+        <th style="padding:8px;text-align:left">Tarih</th>
+        <th style="padding:8px;text-align:left">Maç</th>
+        <th style="padding:8px;text-align:center">İç Saha</th>
+        <th style="padding:8px;text-align:center">Deplasman</th>
+        <th style="padding:8px;text-align:center">Durum</th>
+        <th style="padding:8px;text-align:center">Dakika</th>
+        <th style="padding:8px"></th>
+      </tr></thead>
+      <tbody>
+        ${matches.map(m => {
+          const allMatches = wc.matches || WC_DEFAULT_MATCHES;
+          const idx = allMatches.findIndex(x => x.id === m.id);
+          return `<tr style="border-top:1px solid var(--border)">
+            <td style="padding:6px 8px;color:var(--text-muted)">${m.matchday}</td>
+            <td style="padding:6px 8px;white-space:nowrap">${escHtml(m.date)}<br><span style="color:var(--text-muted);font-size:11px">${escHtml(m.time)}</span></td>
+            <td style="padding:6px 8px">
+              <div style="display:flex;align-items:center;gap:6px">
+                <img src="https://flagcdn.com/w32/${m.homeCode}.png" style="width:20px;height:14px;object-fit:cover;border-radius:2px" />
+                <span style="font-weight:600">${escHtml(m.home)}</span>
+                <span style="color:var(--text-muted)">vs</span>
+                <span style="font-weight:600">${escHtml(m.away)}</span>
+                <img src="https://flagcdn.com/w32/${m.awayCode}.png" style="width:20px;height:14px;object-fit:cover;border-radius:2px" />
+              </div>
+            </td>
+            <td style="padding:6px 4px;text-align:center">
+              <input type="number" min="0" max="99" value="${m.homeScore !== null ? m.homeScore : ''}" placeholder="—"
+                id="wm-home-${idx}" style="width:48px;padding:4px 6px;text-align:center;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text)" />
+            </td>
+            <td style="padding:6px 4px;text-align:center">
+              <input type="number" min="0" max="99" value="${m.awayScore !== null ? m.awayScore : ''}" placeholder="—"
+                id="wm-away-${idx}" style="width:48px;padding:4px 6px;text-align:center;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text)" />
+            </td>
+            <td style="padding:6px 4px;text-align:center">
+              <select id="wm-status-${idx}" style="padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);font-size:12px">
+                <option value="upcoming" ${m.status==='upcoming'?'selected':''}>Yaklaşan</option>
+                <option value="live" ${m.status==='live'?'selected':''}>🔴 Canlı</option>
+                <option value="halftime" ${m.status==='halftime'?'selected':''}>⏸ Devre</option>
+                <option value="finished" ${m.status==='finished'?'selected':''}>✓ Bitti</option>
+              </select>
+            </td>
+            <td style="padding:6px 4px;text-align:center">
+              <input type="number" min="0" max="120" value="${m.minute || 0}"
+                id="wm-min-${idx}" style="width:48px;padding:4px 6px;text-align:center;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text)" />
+            </td>
+            <td style="padding:6px 8px">
+              <button onclick="saveWCMatch(${idx})" class="btn-primary btn-sm">Kaydet</button>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+  }
+
+  function saveWCMatch(idx) {
+    const wc = getWC();
+    if (!wc.matches) wc.matches = JSON.parse(JSON.stringify(WC_DEFAULT_MATCHES));
+    const m = wc.matches[idx];
+    if (!m) return;
+    const homeVal = document.getElementById(`wm-home-${idx}`)?.value;
+    const awayVal = document.getElementById(`wm-away-${idx}`)?.value;
+    m.homeScore = homeVal !== '' && homeVal !== undefined ? parseInt(homeVal) : null;
+    m.awayScore = awayVal !== '' && awayVal !== undefined ? parseInt(awayVal) : null;
+    m.status = document.getElementById(`wm-status-${idx}`)?.value || 'upcoming';
+    m.minute = parseInt(document.getElementById(`wm-min-${idx}`)?.value || 0);
+
+    if (m.status === 'finished' && m.homeScore !== null && m.awayScore !== null) {
+      _wcUpdateStandingsFromMatch(wc, m);
+    }
+
+    saveWC(wc);
+    const btn = event?.target;
+    if (btn) { btn.textContent = '✓'; btn.disabled = true; setTimeout(() => { btn.textContent = 'Kaydet'; btn.disabled = false; }, 2000); }
+  }
+
+  function _wcUpdateStandingsFromMatch(wc, m) {
+    const group = wc.groups.find(g => g.id === m.group);
+    if (!group) return;
+    const home = group.teams.find(t => t.code === m.homeCode);
+    const away = group.teams.find(t => t.code === m.awayCode);
+    if (!home || !away) return;
+
+    home.played++; away.played++;
+    home.gf += m.homeScore; home.ga += m.awayScore;
+    away.gf += m.awayScore; away.ga += m.homeScore;
+
+    if (m.homeScore > m.awayScore) {
+      home.won++; home.pts += 3; away.lost++;
+    } else if (m.homeScore < m.awayScore) {
+      away.won++; away.pts += 3; home.lost++;
+    } else {
+      home.drawn++; home.pts++; away.drawn++; away.pts++;
+    }
+    group.teams.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
   }
 
   let _wcPlayerEditIdx = -1;
@@ -1096,7 +1230,7 @@
     const navEl = document.getElementById('tab-' + name);
     if (navEl) navEl.classList.add('active');
     document.getElementById('dashTopbarTitle').textContent = TAB_TITLES[name] || '';
-    if (name === 'wc2026') { renderWCAdmin(); renderWCPlayersAdmin(); }
+    if (name === 'wc2026') { renderWCAdmin(); renderWCPlayersAdmin(); renderWCMatchAdmin(); }
     if (name === 'standings') { initStandingsLogoPreview(); }
     if (name === 'transfers') { initTransfersLogoPreview(); }
     // Close sidebar on mobile

@@ -101,6 +101,93 @@ const WC_DEFAULT_GROUPS = [
   ]},
 ];
 
+const WC_DEFAULT_MATCHES = [
+  // GRUP D — Türkiye
+  { id:'d1', group:'D', matchday:1, home:'ABD',        homeCode:'us', away:'Paraguay',   awayCode:'py', date:'13.6.2026', day:'Cmt', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'d2', group:'D', matchday:1, home:'Avustralya', homeCode:'au', away:'Türkiye',    awayCode:'tr', date:'14.6.2026', day:'Paz', time:'07:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'d3', group:'D', matchday:2, home:'ABD',        homeCode:'us', away:'Avustralya', awayCode:'au', date:'19.6.2026', day:'Cum', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'d4', group:'D', matchday:2, home:'Türkiye',    homeCode:'tr', away:'Paraguay',   awayCode:'py', date:'20.6.2026', day:'Cmt', time:'06:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'d5', group:'D', matchday:3, home:'Paraguay',   homeCode:'py', away:'Avustralya', awayCode:'au', date:'25.6.2026', day:'Per', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'d6', group:'D', matchday:3, home:'Türkiye',    homeCode:'tr', away:'ABD',        awayCode:'us', date:'26.6.2026', day:'Cum', time:'05:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP A
+  { id:'a1', group:'A', matchday:1, home:'Meksika',      homeCode:'mx', away:'Güney Afrika', awayCode:'za', date:'11.6.2026', day:'Per', time:'22:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'a2', group:'A', matchday:1, home:'Güney Kore',   homeCode:'kr', away:'Çekya',         awayCode:'cz', date:'12.6.2026', day:'Cum', time:'02:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'a3', group:'A', matchday:2, home:'Meksika',      homeCode:'mx', away:'Güney Kore',   awayCode:'kr', date:'17.6.2026', day:'Çar', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'a4', group:'A', matchday:2, home:'Çekya',         homeCode:'cz', away:'Güney Afrika', awayCode:'za', date:'17.6.2026', day:'Çar', time:'03:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'a5', group:'A', matchday:3, home:'Güney Afrika', homeCode:'za', away:'Güney Kore',   awayCode:'kr', date:'22.6.2026', day:'Pzt', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'a6', group:'A', matchday:3, home:'Çekya',         homeCode:'cz', away:'Meksika',      awayCode:'mx', date:'22.6.2026', day:'Pzt', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP B
+  { id:'b1', group:'B', matchday:1, home:'Kanada',       homeCode:'ca', away:'Bosna Hersek', awayCode:'ba', date:'12.6.2026', day:'Cum', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'b2', group:'B', matchday:1, home:'Katar',         homeCode:'qa', away:'İsviçre',      awayCode:'ch', date:'12.6.2026', day:'Cum', time:'22:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'b3', group:'B', matchday:2, home:'Kanada',       homeCode:'ca', away:'Katar',         awayCode:'qa', date:'17.6.2026', day:'Çar', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'b4', group:'B', matchday:2, home:'İsviçre',      homeCode:'ch', away:'Bosna Hersek', awayCode:'ba', date:'18.6.2026', day:'Per', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'b5', group:'B', matchday:3, home:'Bosna Hersek', homeCode:'ba', away:'Katar',         awayCode:'qa', date:'22.6.2026', day:'Pzt', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'b6', group:'B', matchday:3, home:'İsviçre',      homeCode:'ch', away:'Kanada',        awayCode:'ca', date:'22.6.2026', day:'Pzt', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP C
+  { id:'c1', group:'C', matchday:1, home:'Brezilya', homeCode:'br', away:'Haiti',    awayCode:'ht',     date:'13.6.2026', day:'Cmt', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'c2', group:'C', matchday:1, home:'Fas',      homeCode:'ma', away:'İskoçya',  awayCode:'gb-sct', date:'13.6.2026', day:'Cmt', time:'03:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'c3', group:'C', matchday:2, home:'Brezilya', homeCode:'br', away:'Fas',      awayCode:'ma',     date:'18.6.2026', day:'Per', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'c4', group:'C', matchday:2, home:'İskoçya',  homeCode:'gb-sct', away:'Haiti', awayCode:'ht',   date:'18.6.2026', day:'Per', time:'03:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'c5', group:'C', matchday:3, home:'Haiti',    homeCode:'ht', away:'Fas',      awayCode:'ma',     date:'23.6.2026', day:'Sal', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'c6', group:'C', matchday:3, home:'İskoçya',  homeCode:'gb-sct', away:'Brezilya', awayCode:'br', date:'23.6.2026', day:'Sal', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP E
+  { id:'e1', group:'E', matchday:1, home:'Almanya',         homeCode:'de', away:'Curaçao',         awayCode:'cw', date:'14.6.2026', day:'Paz', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'e2', group:'E', matchday:1, home:'Fildişi Sahili', homeCode:'ci', away:'Ekvador',          awayCode:'ec', date:'15.6.2026', day:'Pzt', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'e3', group:'E', matchday:2, home:'Almanya',         homeCode:'de', away:'Fildişi Sahili', awayCode:'ci', date:'19.6.2026', day:'Cum', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'e4', group:'E', matchday:2, home:'Ekvador',         homeCode:'ec', away:'Curaçao',          awayCode:'cw', date:'20.6.2026', day:'Cmt', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'e5', group:'E', matchday:3, home:'Curaçao',         homeCode:'cw', away:'Fildişi Sahili', awayCode:'ci', date:'24.6.2026', day:'Çar', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'e6', group:'E', matchday:3, home:'Ekvador',         homeCode:'ec', away:'Almanya',          awayCode:'de', date:'24.6.2026', day:'Çar', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP F
+  { id:'f1', group:'F', matchday:1, home:'Hollanda', homeCode:'nl', away:'Tunus',   awayCode:'tn', date:'15.6.2026', day:'Pzt', time:'03:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'f2', group:'F', matchday:1, home:'Japonya',  homeCode:'jp', away:'İsveç',   awayCode:'se', date:'15.6.2026', day:'Pzt', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'f3', group:'F', matchday:2, home:'Hollanda', homeCode:'nl', away:'Japonya', awayCode:'jp', date:'20.6.2026', day:'Cmt', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'f4', group:'F', matchday:2, home:'İsveç',    homeCode:'se', away:'Tunus',   awayCode:'tn', date:'21.6.2026', day:'Paz', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'f5', group:'F', matchday:3, home:'Tunus',    homeCode:'tn', away:'Japonya', awayCode:'jp', date:'25.6.2026', day:'Per', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'f6', group:'F', matchday:3, home:'İsveç',    homeCode:'se', away:'Hollanda',awayCode:'nl', date:'25.6.2026', day:'Per', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP G
+  { id:'g1', group:'G', matchday:1, home:'Belçika',      homeCode:'be', away:'Yeni Zelanda', awayCode:'nz', date:'15.6.2026', day:'Pzt', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'g2', group:'G', matchday:1, home:'Mısır',        homeCode:'eg', away:'İran',          awayCode:'ir', date:'16.6.2026', day:'Sal', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'g3', group:'G', matchday:2, home:'Belçika',      homeCode:'be', away:'Mısır',          awayCode:'eg', date:'21.6.2026', day:'Paz', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'g4', group:'G', matchday:2, home:'İran',          homeCode:'ir', away:'Yeni Zelanda', awayCode:'nz', date:'21.6.2026', day:'Paz', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'g5', group:'G', matchday:3, home:'Yeni Zelanda', homeCode:'nz', away:'Mısır',          awayCode:'eg', date:'25.6.2026', day:'Per', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'g6', group:'G', matchday:3, home:'İran',          homeCode:'ir', away:'Belçika',        awayCode:'be', date:'25.6.2026', day:'Per', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP H
+  { id:'h1', group:'H', matchday:1, home:'İspanya',    homeCode:'es', away:'S. Arabistan', awayCode:'sa', date:'16.6.2026', day:'Sal', time:'03:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'h2', group:'H', matchday:1, home:'Cabo Verde', homeCode:'cv', away:'Uruguay',       awayCode:'uy', date:'16.6.2026', day:'Sal', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'h3', group:'H', matchday:2, home:'İspanya',    homeCode:'es', away:'Cabo Verde',   awayCode:'cv', date:'21.6.2026', day:'Paz', time:'03:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'h4', group:'H', matchday:2, home:'Uruguay',    homeCode:'uy', away:'S. Arabistan', awayCode:'sa', date:'21.6.2026', day:'Paz', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'h5', group:'H', matchday:3, home:'S. Arabistan', homeCode:'sa', away:'Cabo Verde', awayCode:'cv', date:'26.6.2026', day:'Cum', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'h6', group:'H', matchday:3, home:'Uruguay',    homeCode:'uy', away:'İspanya',       awayCode:'es', date:'26.6.2026', day:'Cum', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP I
+  { id:'i1', group:'I', matchday:1, home:'Fransa',  homeCode:'fr', away:'Irak',    awayCode:'iq', date:'13.6.2026', day:'Cmt', time:'22:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'i2', group:'I', matchday:1, home:'Norveç',  homeCode:'no', away:'Senegal', awayCode:'sn', date:'14.6.2026', day:'Paz', time:'01:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'i3', group:'I', matchday:2, home:'Fransa',  homeCode:'fr', away:'Norveç',  awayCode:'no', date:'18.6.2026', day:'Per', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'i4', group:'I', matchday:2, home:'Senegal', homeCode:'sn', away:'Irak',    awayCode:'iq', date:'19.6.2026', day:'Cum', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'i5', group:'I', matchday:3, home:'Irak',    homeCode:'iq', away:'Norveç',  awayCode:'no', date:'23.6.2026', day:'Sal', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'i6', group:'I', matchday:3, home:'Senegal', homeCode:'sn', away:'Fransa',  awayCode:'fr', date:'23.6.2026', day:'Sal', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP J
+  { id:'j1', group:'J', matchday:1, home:'Arjantin',  homeCode:'ar', away:'Ürdün',    awayCode:'jo', date:'14.6.2026', day:'Paz', time:'22:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'j2', group:'J', matchday:1, home:'Avusturya', homeCode:'at', away:'Cezayir',  awayCode:'dz', date:'15.6.2026', day:'Pzt', time:'01:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'j3', group:'J', matchday:2, home:'Arjantin',  homeCode:'ar', away:'Avusturya',awayCode:'at', date:'19.6.2026', day:'Cum', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'j4', group:'J', matchday:2, home:'Cezayir',   homeCode:'dz', away:'Ürdün',    awayCode:'jo', date:'20.6.2026', day:'Cmt', time:'03:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'j5', group:'J', matchday:3, home:'Ürdün',     homeCode:'jo', away:'Avusturya',awayCode:'at', date:'24.6.2026', day:'Çar', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'j6', group:'J', matchday:3, home:'Cezayir',   homeCode:'dz', away:'Arjantin', awayCode:'ar', date:'24.6.2026', day:'Çar', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP K
+  { id:'k1', group:'K', matchday:1, home:'Portekiz',   homeCode:'pt', away:'Özbekistan', awayCode:'uz', date:'16.6.2026', day:'Sal', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'k2', group:'K', matchday:1, home:'Kolombiya',  homeCode:'co', away:'K. Kongo',    awayCode:'cd', date:'16.6.2026', day:'Sal', time:'22:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'k3', group:'K', matchday:2, home:'Portekiz',   homeCode:'pt', away:'Kolombiya',  awayCode:'co', date:'21.6.2026', day:'Paz', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'k4', group:'K', matchday:2, home:'K. Kongo',   homeCode:'cd', away:'Özbekistan', awayCode:'uz', date:'22.6.2026', day:'Pzt', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'k5', group:'K', matchday:3, home:'Özbekistan', homeCode:'uz', away:'Kolombiya',  awayCode:'co', date:'26.6.2026', day:'Cum', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'k6', group:'K', matchday:3, home:'K. Kongo',   homeCode:'cd', away:'Portekiz',   awayCode:'pt', date:'26.6.2026', day:'Cum', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  // GRUP L
+  { id:'l1', group:'L', matchday:1, home:'İngiltere',   homeCode:'gb-eng', away:'Panama',     awayCode:'pa', date:'16.6.2026', day:'Sal', time:'03:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'l2', group:'L', matchday:1, home:'Hırvatistan', homeCode:'hr',     away:'Gana',       awayCode:'gh', date:'17.6.2026', day:'Çar', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'l3', group:'L', matchday:2, home:'İngiltere',   homeCode:'gb-eng', away:'Hırvatistan',awayCode:'hr', date:'22.6.2026', day:'Pzt', time:'00:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'l4', group:'L', matchday:2, home:'Gana',         homeCode:'gh',     away:'Panama',     awayCode:'pa', date:'22.6.2026', day:'Pzt', time:'03:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'l5', group:'L', matchday:3, home:'Panama',       homeCode:'pa',     away:'Hırvatistan',awayCode:'hr', date:'26.6.2026', day:'Cum', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+  { id:'l6', group:'L', matchday:3, home:'Gana',         homeCode:'gh',     away:'İngiltere',  awayCode:'gb-eng', date:'26.6.2026', day:'Cum', time:'21:00', homeScore:null, awayScore:null, status:'upcoming', minute:0 },
+];
+
 function getWC() {
   const stored = localStorage.getItem(WC_KEY);
   let data;
@@ -111,6 +198,7 @@ function getWC() {
   if (!data) data = { logo: '', groups: JSON.parse(JSON.stringify(WC_DEFAULT_GROUPS)) };
   if (!data.players) data.players = [];
   if (!data.fixtures) data.fixtures = WC_DEFAULT_FIXTURES;
+  if (!data.matches) data.matches = JSON.parse(JSON.stringify(WC_DEFAULT_MATCHES));
   data.groups.forEach(g => g.teams.forEach(t => {
     if (!t.logo) t.logo = `https://flagcdn.com/w40/${t.code}.png`;
   }));
@@ -391,6 +479,120 @@ function renderWCPlayers() {
       <td style="font-size:12px;color:var(--text-muted)">${p.minutes || 0}'</td>
     </tr>
   `).join('');
+}
+
+// ==================== WC MATCHES ====================
+
+let _wcMatchFilter = 'all';
+let _wcMatchRefreshTimer = null;
+
+function renderWCMatches() {
+  const container = document.getElementById('wcMatchesContainer');
+  if (!container) return;
+  const wc = getWC();
+  const matches = wc.matches || WC_DEFAULT_MATCHES;
+
+  const groups = ['D','A','B','C','E','F','G','H','I','J','K','L'];
+  const filtered = _wcMatchFilter === 'all' ? matches
+    : _wcMatchFilter === 'tr' ? matches.filter(m => m.homeCode === 'tr' || m.awayCode === 'tr')
+    : matches.filter(m => m.group === _wcMatchFilter);
+
+  const liveCount = matches.filter(m => m.status === 'live' || m.status === 'halftime').length;
+  const liveIndicator = document.getElementById('wcMatchesLiveBadge');
+  if (liveIndicator) {
+    liveIndicator.style.display = liveCount > 0 ? 'inline-flex' : 'none';
+    liveIndicator.textContent = liveCount + ' Canlı';
+  }
+
+  const byMatchday = {};
+  filtered.forEach(m => {
+    const key = 'Grup ' + m.group + ' — ' + m.matchday + '. Maç Günü';
+    if (!byMatchday[key]) byMatchday[key] = [];
+    byMatchday[key].push(m);
+  });
+
+  const sortedKeys = Object.keys(byMatchday).sort((a, b) => {
+    const gA = a.match(/Grup (\w+)/)[1], gB = b.match(/Grup (\w+)/)[1];
+    const dA = parseInt(a.match(/(\d+)\. Maç/)[1]), dB = parseInt(b.match(/(\d+)\. Maç/)[1]);
+    if (dA !== dB) return dA - dB;
+    return groups.indexOf(gA) - groups.indexOf(gB);
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Maç bulunamadı.</div>';
+    return;
+  }
+
+  container.innerHTML = sortedKeys.map(key => {
+    const ms = byMatchday[key];
+    return `<div class="wc-match-group">
+      <div class="wc-match-group-title">${escHtml(key)}</div>
+      ${ms.map(m => _renderMatchCard(m)).join('')}
+    </div>`;
+  }).join('');
+}
+
+function _renderMatchCard(m) {
+  const isLive = m.status === 'live' || m.status === 'halftime';
+  const isFinished = m.status === 'finished';
+  const hasTurkey = m.homeCode === 'tr' || m.awayCode === 'tr';
+  const hasScore = m.homeScore !== null && m.awayScore !== null;
+
+  let statusHtml = '';
+  if (m.status === 'live') {
+    statusHtml = `<span class="wc-match-status wc-match-live"><span class="wc-live-dot"></span>${m.minute ? m.minute + "'" : 'CANLI'}</span>`;
+  } else if (m.status === 'halftime') {
+    statusHtml = `<span class="wc-match-status wc-match-halftime">DEVRE</span>`;
+  } else if (m.status === 'finished') {
+    statusHtml = `<span class="wc-match-status wc-match-finished">BİTTİ</span>`;
+  } else {
+    statusHtml = `<span class="wc-match-status wc-match-upcoming">${escHtml(m.time)}</span>`;
+  }
+
+  const scoreHtml = hasScore
+    ? `<div class="wc-match-score${isLive ? ' wc-match-score-live' : ''}">${m.homeScore} <span>:</span> ${m.awayScore}</div>`
+    : `<div class="wc-match-score-dash">—</div>`;
+
+  return `
+    <div class="wc-match-card${isLive ? ' wc-match-card-live' : ''}${isFinished ? ' wc-match-card-finished' : ''}${hasTurkey ? ' wc-match-card-turkey' : ''}">
+      <div class="wc-match-team wc-match-team-home">
+        <img src="https://flagcdn.com/w40/${m.homeCode}.png" class="wc-match-flag" alt="${escHtml(m.home)}" onerror="this.onerror=null;this.style.opacity='0'" />
+        <span class="wc-match-name${m.homeCode === 'tr' ? ' wc-match-tr' : ''}">${escHtml(m.home)}</span>
+      </div>
+      <div class="wc-match-center">
+        ${statusHtml}
+        ${scoreHtml}
+        <div class="wc-match-date">${escHtml(m.date)} · ${escHtml(m.day)}</div>
+      </div>
+      <div class="wc-match-team wc-match-team-away">
+        <span class="wc-match-name${m.awayCode === 'tr' ? ' wc-match-tr' : ''}">${escHtml(m.away)}</span>
+        <img src="https://flagcdn.com/w40/${m.awayCode}.png" class="wc-match-flag" alt="${escHtml(m.away)}" onerror="this.onerror=null;this.style.opacity='0'" />
+      </div>
+    </div>`;
+}
+
+function wcMatchFilter(val) {
+  _wcMatchFilter = val;
+  document.querySelectorAll('.wc-match-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.val === val));
+  renderWCMatches();
+}
+
+function wcStartMatchRefresh() {
+  wcStopMatchRefresh();
+  _wcMatchRefreshTimer = setInterval(() => {
+    fetch('/api/' + WC_KEY).then(r => r.ok ? r.json() : null).then(data => {
+      if (!data) return;
+      localStorage.setItem(WC_KEY, JSON.stringify(data));
+      renderWCMatches();
+      renderWCPage();
+      renderWCStats();
+      renderFixtureTicker();
+    }).catch(() => {});
+  }, 30000);
+}
+
+function wcStopMatchRefresh() {
+  if (_wcMatchRefreshTimer) { clearInterval(_wcMatchRefreshTimer); _wcMatchRefreshTimer = null; }
 }
 
 // ==================== API SYNC ====================
