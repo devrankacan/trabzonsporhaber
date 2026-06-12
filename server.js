@@ -142,10 +142,11 @@ app.get('/api/wc-poll', auth, async (req, res) => {
 app.get('/api/wc-status', auth, async (req, res) => {
   try {
     // Birden fazla sorguyla ara
-    const [r1, r2, r3] = await Promise.all([
+    const [r1, r2, r3, r4] = await Promise.all([
       apiRequest(`/leagues?name=World+Cup&season=${WC_SEASON}`),
       apiRequest(`/leagues?name=FIFA+World+Cup`),
       apiRequest(`/leagues?id=1`),
+      apiRequest(`/fixtures?league=1&season=${WC_SEASON}&last=3`),
     ]);
     const all = [
       ...(r1.response || []),
@@ -166,6 +167,8 @@ app.get('/api/wc-status', auth, async (req, res) => {
       })),
       storedMatches: (wc?.matches || []).length,
       liveMatches: (wc?.matches || []).filter(m => m.status === 'live').length,
+      fixtureTest: { results: r4.results, errors: r4.errors, sample: (r4.response||[]).slice(0,1) },
+      leagueRaw: r3,
     });
   } catch (e) {
     res.json({ ok: false, error: e.message });
