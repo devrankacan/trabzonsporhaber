@@ -1043,7 +1043,7 @@
     const msg = document.getElementById('wcPollMsg');
     msg.textContent = '⏳ Güncelleniyor...';
     try {
-      const r = await fetch('/api/wc-poll', { headers: { 'x-api-key': _API_KEY } });
+      const r = await fetch('/wc/poll', { headers: { 'x-api-key': _API_KEY } });
       const d = await r.json();
       msg.textContent = d.ok ? '✓ Güncelleme tetiklendi! 10 saniye sonra sayfayı yenile.' : '✗ Hata: ' + d.error;
       setTimeout(() => { msg.textContent = ''; }, 8000);
@@ -1058,7 +1058,7 @@
     msg.textContent = '⏳ Kontrol ediliyor...';
     result.style.display = 'none';
     try {
-      const r = await fetch('/api/wc-status', { headers: { 'x-api-key': _API_KEY } });
+      const r = await fetch('/wc/status', { headers: { 'x-api-key': _API_KEY } });
       const d = await r.json();
       msg.textContent = '';
       if (d.ok) {
