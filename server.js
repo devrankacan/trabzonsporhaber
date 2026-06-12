@@ -141,11 +141,29 @@ app.get('/api/wc-poll', auth, async (req, res) => {
 
 app.get('/api/wc-status', auth, async (req, res) => {
   try {
-    const leagues = await apiRequest(`/leagues?name=World+Cup&season=${WC_SEASON}`);
+    // Birden fazla sorguyla ara
+    const [r1, r2, r3] = await Promise.all([
+      apiRequest(`/leagues?name=World+Cup&season=${WC_SEASON}`),
+      apiRequest(`/leagues?name=FIFA+World+Cup`),
+      apiRequest(`/leagues?id=1`),
+    ]);
+    const all = [
+      ...(r1.response || []),
+      ...(r2.response || []),
+      ...(r3.response || []),
+    ];
+    // Tekrarları kaldır
+    const seen = new Set();
+    const unique = all.filter(l => { const k = l.league.id; return seen.has(k) ? false : (seen.add(k), true); });
     const wc = readKey('ts_wc2026');
     res.json({
       ok: true,
-      leaguesFound: (leagues.response || []).map(l => ({ id: l.league.id, name: l.league.name, season: l.seasons?.find(s => s.year === WC_SEASON) })),
+      leaguesFound: unique.map(l => ({
+        id: l.league.id,
+        name: l.league.name,
+        type: l.league.type,
+        seasons: (l.seasons || []).filter(s => s.year >= 2024).map(s => ({ year: s.year, current: s.current })),
+      })),
       storedMatches: (wc?.matches || []).length,
       liveMatches: (wc?.matches || []).filter(m => m.status === 'live').length,
     });
