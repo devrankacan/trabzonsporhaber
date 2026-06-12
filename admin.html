@@ -1062,12 +1062,12 @@
       const d = await r.json();
       msg.textContent = '';
       if (d.ok) {
-        const leagueRows = (d.leaguesFound || []).map(l =>
-          `<div>• ID: <b>${l.id}</b> — ${l.name} ${l.season ? `(${l.season.year}, aktif: ${l.season.current})` : '(sezon verisi yok)'}</div>`
-        ).join('') || '<div style="color:var(--danger)">⚠ Dünya Kupası 2026 ligine erişilemiyor!</div>';
+        const compInfo = d.competition
+          ? `<div>• <b>${d.competition.name}</b> — Sezon başlangıcı: ${d.competition.currentSeason || 'bilinmiyor'}</div>`
+          : '<div style="color:var(--danger)">⚠ Turnuva bilgisi alınamadı</div>';
         result.innerHTML = `
-          <div style="margin-bottom:6px"><b>API Bağlantısı:</b> ✅ Başarılı</div>
-          <div style="margin-bottom:6px"><b>Bulunan Ligler:</b><br>${leagueRows}</div>
+          <div style="margin-bottom:6px"><b>API Bağlantısı:</b> ✅ Başarılı (football-data.org)</div>
+          <div style="margin-bottom:6px"><b>Turnuva:</b><br>${compInfo}</div>
           <div><b>Kayıtlı maç sayısı:</b> ${d.storedMatches} · <b>Canlı:</b> ${d.liveMatches}</div>`;
       } else {
         result.innerHTML = `<div style="color:var(--danger)">❌ API Hatası: ${d.error}</div>`;
