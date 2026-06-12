@@ -394,17 +394,19 @@ function applyStandingsToWC(wc, standings) {
         wcGroup.teams.push(team);
       }
 
-      team.name   = teamInfo.tr;
-      team.code   = teamInfo.code;
-      team.played = row.playedGames  || 0;
-      team.won    = row.won          || 0;
-      team.drawn  = row.draw         || 0;
-      team.lost   = row.lost         || 0;
-      team.gf     = row.goalsFor     || 0;
-      team.ga     = row.goalsAgainst || 0;
-      team.pts    = row.points       || 0;
+      team.name     = teamInfo.tr;
+      team.code     = teamInfo.code;
+      team.position = row.position   || 99;
+      team.played   = row.playedGames|| 0;
+      team.won      = row.won        || 0;
+      team.drawn    = row.draw       || 0;
+      team.lost     = row.lost       || 0;
+      team.gf       = row.goalsFor   || 0;
+      team.ga       = row.goalsAgainst || 0;
+      team.pts      = row.points     || 0;
     }
-    wcGroup.teams.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+    // API'nin verdiği sırayı kullan (position alanı)
+    wcGroup.teams.sort((a, b) => (a.position || 99) - (b.position || 99));
   }
 
   // Grupları alfabetik sırala
