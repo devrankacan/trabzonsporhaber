@@ -162,7 +162,7 @@ app.get('/api/wc-status', auth, async (req, res) => {
         id: l.league.id,
         name: l.league.name,
         type: l.league.type,
-        seasons: (l.seasons || []).filter(s => s.year >= 2024).map(s => ({ year: s.year, current: s.current })),
+        seasons: (l.seasons || []).map(s => ({ year: s.year, current: s.current })),
       })),
       storedMatches: (wc?.matches || []).length,
       liveMatches: (wc?.matches || []).filter(m => m.status === 'live').length,
