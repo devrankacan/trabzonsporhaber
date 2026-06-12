@@ -3690,6 +3690,43 @@ img { max-width: 100%; display: block; }
   line-height: 1.5;
   letter-spacing: 0.5px;
 }
+.fixture-score-live {
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+.fixture-score-finished {
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+.fixture-badge-live {
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  background: #e8000d;
+  border-radius: 3px;
+  padding: 1px 5px;
+  letter-spacing: 0.5px;
+  animation: wcPulse 1.2s infinite;
+}
+.fixture-badge-finished {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+  padding: 1px 5px;
+  letter-spacing: 0.5px;
+}
+.fixture-item-live {
+  background: rgba(232,0,13,0.12);
+  border-radius: 6px;
+}
 .fixture-sep {
   width: 1px;
   height: 20px;

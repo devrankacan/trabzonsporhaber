@@ -320,26 +320,52 @@ function renderNavWcLogo() {
 function renderFixtureTicker() {
   const el = document.getElementById('fixtureTicker');
   if (!el) return;
-  const fixtures = getWC().fixtures || WC_DEFAULT_FIXTURES;
+  const wc = getWC();
+  // Use wc.matches filtered to Turkey; fall back to old fixtures if no matches yet
+  let fixtures = [];
+  if (wc.matches && wc.matches.length) {
+    fixtures = wc.matches.filter(m => m.homeCode === 'tr' || m.awayCode === 'tr');
+  }
+  if (!fixtures.length) fixtures = wc.fixtures || WC_DEFAULT_FIXTURES;
   if (!fixtures.length) { el.closest('.fixture-bar')?.style && (el.closest('.fixture-bar').style.display = 'none'); return; }
 
-  const itemHtml = fixtures.map(f => `
-    <div class="fixture-item">
+  const itemHtml = fixtures.map(f => {
+    const isLive = f.status === 'live' || f.status === 'halftime';
+    const isFinished = f.status === 'finished';
+    const hasScore = f.homeScore !== null && f.homeScore !== undefined && f.awayScore !== null && f.awayScore !== undefined;
+
+    let midHtml;
+    if (isLive && hasScore) {
+      const badge = f.status === 'halftime' ? 'DEVRE' : (f.minute ? `${f.minute}'` : 'CANLI');
+      midHtml = `
+        <div class="fixture-date">${escHtml(f.date)} · ${escHtml(f.day)}</div>
+        <div class="fixture-score-live">${f.homeScore} - ${f.awayScore}</div>
+        <div class="fixture-badge-live">${badge}</div>`;
+    } else if (isFinished && hasScore) {
+      midHtml = `
+        <div class="fixture-date">${escHtml(f.date)} · ${escHtml(f.day)}</div>
+        <div class="fixture-score-finished">${f.homeScore} - ${f.awayScore}</div>
+        <div class="fixture-badge-finished">BİTTİ</div>`;
+    } else {
+      midHtml = `
+        <div class="fixture-date">${escHtml(f.date)} · ${escHtml(f.day)}</div>
+        <div class="fixture-time">${escHtml(f.time)}</div>`;
+    }
+
+    return `
+    <div class="fixture-item${isLive ? ' fixture-item-live' : ''}">
       <div class="fixture-team-wrap">
         <img src="https://flagcdn.com/w40/${f.homeCode}.png" class="fixture-flag" alt="${escHtml(f.home)}" onerror="this.onerror=null;this.style.opacity='0'">
         <span class="fixture-team ${f.homeCode==='tr'?'fixture-tr':''}">${escHtml(f.home)}</span>
       </div>
-      <div class="fixture-mid">
-        <div class="fixture-date">${escHtml(f.date)} · ${escHtml(f.day)}</div>
-        <div class="fixture-time">${escHtml(f.time)}</div>
-      </div>
+      <div class="fixture-mid">${midHtml}</div>
       <div class="fixture-team-wrap">
         <span class="fixture-team ${f.awayCode==='tr'?'fixture-tr':''}">${escHtml(f.away)}</span>
         <img src="https://flagcdn.com/w40/${f.awayCode}.png" class="fixture-flag" alt="${escHtml(f.away)}" onerror="this.onerror=null;this.style.opacity='0'">
       </div>
     </div>
-    <div class="fixture-sep">·</div>
-  `).join('');
+    <div class="fixture-sep">·</div>`;
+  }).join('');
 
   el.innerHTML = itemHtml + itemHtml;
   el.style.animation = 'none';
