@@ -258,10 +258,10 @@ function mapFdStatus(status) {
   }
 }
 
-// Grup harfini çıkar: "GROUP_D" → "D"
+// Grup harfini çıkar: "GROUP_D" veya "Group D" → "D"
 function extractGroupFd(groupStr) {
   if (!groupStr) return null;
-  const m = groupStr.match(/GROUP_([A-L])/i);
+  const m = groupStr.match(/[Gg]roup[_ ]([A-L])/);
   return m ? m[1].toUpperCase() : null;
 }
 
