@@ -468,6 +468,28 @@ function scheduleNext() {
   console.log(`[WC-Poll] Next poll in ${Math.round(delay/1000)}s`);
 }
 
+// Manuel poll tetikleyici — admin kullanımı
+app.get('/api/wc-poll', auth, async (req, res) => {
+  res.json({ ok: true, message: 'Poll başlatıldı...' });
+  try { await runPoll(false); } catch (e) { console.error('[WC-Poll] Manuel poll hatası:', e.message); }
+});
+
+// API bağlantı testi + leagues listesi
+app.get('/api/wc-status', auth, async (req, res) => {
+  try {
+    const leagues = await apiRequest(`/leagues?name=World+Cup&season=${WC_SEASON}`);
+    const wc = readKey('ts_wc2026');
+    res.json({
+      ok: true,
+      leaguesFound: (leagues.response || []).map(l => ({ id: l.league.id, name: l.league.name, season: l.seasons?.find(s => s.year === WC_SEASON) })),
+      storedMatches: (wc?.matches || []).length,
+      liveMatches: (wc?.matches || []).filter(m => m.status === 'live').length,
+    });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
 // Sunucu başlarken ilk tam çekimi yap
 setTimeout(() => runPoll(false), 5000);
 

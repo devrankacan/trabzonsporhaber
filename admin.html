@@ -533,6 +533,16 @@
         <h2 class="dash-section-title">2026 Dünya Kupası Grupları</h2>
         <button class="btn-secondary btn-sm" onclick="resetWC()">↺ Varsayılana Sıfırla</button>
       </div>
+      <!-- API DURUM PANELI -->
+      <div class="dash-form-card" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-primary btn-sm" onclick="wcPollNow()">🔄 API'den Şimdi Güncelle</button>
+          <button class="btn-secondary btn-sm" onclick="wcCheckStatus()">📡 API Durumunu Kontrol Et</button>
+          <span id="wcPollMsg" style="font-size:13px;color:var(--success)"></span>
+        </div>
+        <div id="wcStatusResult" style="margin-top:10px;font-size:13px;display:none"></div>
+      </div>
+
       <div id="wcAdminGroups"></div>
       <div style="margin-top:16px">
         <button class="btn-primary" onclick="saveWCAdmin()">💾 Grupları Kaydet</button>
@@ -1027,6 +1037,45 @@
     saveWC({ logo: '', groups: JSON.parse(JSON.stringify(WC_DEFAULT_GROUPS)), matches: JSON.parse(JSON.stringify(WC_DEFAULT_MATCHES)) });
     renderWCAdmin();
     renderWCMatchAdmin();
+  }
+
+  async function wcPollNow() {
+    const msg = document.getElementById('wcPollMsg');
+    msg.textContent = '⏳ Güncelleniyor...';
+    try {
+      const r = await fetch('/api/wc-poll', { headers: { 'x-api-key': _API_KEY } });
+      const d = await r.json();
+      msg.textContent = d.ok ? '✓ Güncelleme tetiklendi! 10 saniye sonra sayfayı yenile.' : '✗ Hata: ' + d.error;
+      setTimeout(() => { msg.textContent = ''; }, 8000);
+    } catch (e) {
+      msg.textContent = '✗ Bağlantı hatası';
+    }
+  }
+
+  async function wcCheckStatus() {
+    const msg = document.getElementById('wcPollMsg');
+    const result = document.getElementById('wcStatusResult');
+    msg.textContent = '⏳ Kontrol ediliyor...';
+    result.style.display = 'none';
+    try {
+      const r = await fetch('/api/wc-status', { headers: { 'x-api-key': _API_KEY } });
+      const d = await r.json();
+      msg.textContent = '';
+      if (d.ok) {
+        const leagueRows = (d.leaguesFound || []).map(l =>
+          `<div>• ID: <b>${l.id}</b> — ${l.name} ${l.season ? `(${l.season.year}, aktif: ${l.season.current})` : '(sezon verisi yok)'}</div>`
+        ).join('') || '<div style="color:var(--danger)">⚠ Dünya Kupası 2026 ligine erişilemiyor!</div>';
+        result.innerHTML = `
+          <div style="margin-bottom:6px"><b>API Bağlantısı:</b> ✅ Başarılı</div>
+          <div style="margin-bottom:6px"><b>Bulunan Ligler:</b><br>${leagueRows}</div>
+          <div><b>Kayıtlı maç sayısı:</b> ${d.storedMatches} · <b>Canlı:</b> ${d.liveMatches}</div>`;
+      } else {
+        result.innerHTML = `<div style="color:var(--danger)">❌ API Hatası: ${d.error}</div>`;
+      }
+      result.style.display = '';
+    } catch (e) {
+      msg.textContent = '✗ Bağlantı hatası: ' + e.message;
+    }
   }
 
   function renderWCMatchAdmin() {
