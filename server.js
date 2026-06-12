@@ -133,14 +133,13 @@ app.get('/api/all', (req, res) => {
   res.json(result);
 });
 
-// Manuel poll tetikleyici — /wc/ prefix ile /api/:key çakışması yok
-app.get('/wc/poll', auth, async (req, res) => {
+// Bu iki rota /api/:key'den ÖNCE tanımlanmak zorunda
+app.get('/api/wc-poll', auth, async (req, res) => {
   res.json({ ok: true, message: 'Poll başlatıldı...' });
   try { await runPoll(false); } catch (e) { console.error('[WC-Poll] Manuel poll hatası:', e.message); }
 });
 
-// API bağlantı testi + leagues listesi
-app.get('/wc/status', auth, async (req, res) => {
+app.get('/api/wc-status', auth, async (req, res) => {
   try {
     const leagues = await apiRequest(`/leagues?name=World+Cup&season=${WC_SEASON}`);
     const wc = readKey('ts_wc2026');
