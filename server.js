@@ -370,27 +370,45 @@ function applyMatchesToWC(wc, matches) {
 }
 
 function applyStandingsToWC(wc, standings) {
+  if (!wc.groups) wc.groups = [];
+
   for (const s of standings) {
     if (s.type !== 'TOTAL') continue;
     const group = extractGroupFd(s.group);
     if (!group) continue;
-    const wcGroup = (wc.groups || []).find(g => g.id === group);
-    if (!wcGroup) continue;
+
+    // Grup yoksa oluştur
+    let wcGroup = wc.groups.find(g => g.id === group);
+    if (!wcGroup) {
+      wcGroup = { id: group, teams: [] };
+      wc.groups.push(wcGroup);
+    }
 
     for (const row of (s.table || [])) {
       const teamInfo = mapTeam(row.team?.name || row.team?.shortName || '');
-      const team = wcGroup.teams.find(t => t.code === teamInfo.code || t.name === teamInfo.tr);
-      if (!team) continue;
-      team.played = row.playedGames || 0;
-      team.won    = row.won         || 0;
-      team.drawn  = row.draw        || 0;
-      team.lost   = row.lost        || 0;
-      team.gf     = row.goalsFor    || 0;
-      team.ga     = row.goalsAgainst|| 0;
-      team.pts    = row.points      || 0;
+      let team = wcGroup.teams.find(t => t.code === teamInfo.code || t.name === teamInfo.tr);
+
+      // Takım yoksa oluştur
+      if (!team) {
+        team = { name: teamInfo.tr, code: teamInfo.code, played:0,won:0,drawn:0,lost:0,gf:0,ga:0,pts:0 };
+        wcGroup.teams.push(team);
+      }
+
+      team.name   = teamInfo.tr;
+      team.code   = teamInfo.code;
+      team.played = row.playedGames  || 0;
+      team.won    = row.won          || 0;
+      team.drawn  = row.draw         || 0;
+      team.lost   = row.lost         || 0;
+      team.gf     = row.goalsFor     || 0;
+      team.ga     = row.goalsAgainst || 0;
+      team.pts    = row.points       || 0;
     }
     wcGroup.teams.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
   }
+
+  // Grupları alfabetik sırala
+  wc.groups.sort((a, b) => a.id.localeCompare(b.id));
 }
 
 function isMatchWindowActive() {
