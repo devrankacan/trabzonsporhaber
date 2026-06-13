@@ -261,7 +261,7 @@ function mapFdStatus(status) {
 // Grup harfini çıkar: "GROUP_D" veya "Group D" → "D"
 function extractGroupFd(groupStr) {
   if (!groupStr) return null;
-  const m = groupStr.match(/[Gg]roup[_ ]([A-L])/);
+  const m = groupStr.match(/group[_ ]([A-L])/i);
   return m ? m[1].toUpperCase() : null;
 }
 
