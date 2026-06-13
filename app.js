@@ -373,6 +373,19 @@ function renderFixtureTicker() {
   el.style.animation = '';
 }
 
+// Ticker bağımsız refresh — her sayfada çalışır, tab açık olmak gerekmez
+let _tickerRefreshTimer = null;
+function startTickerRefresh() {
+  if (_tickerRefreshTimer) return;
+  _tickerRefreshTimer = setInterval(() => {
+    fetch('/api/ts_wc2026').then(r => r.ok ? r.json() : null).then(data => {
+      if (!data) return;
+      localStorage.setItem(WC_KEY, JSON.stringify(data));
+      renderFixtureTicker();
+    }).catch(() => {});
+  }, 60000);
+}
+
 // ==================== WC PAGE ====================
 
 function renderWCPage() {
@@ -652,6 +665,7 @@ async function _apiSyncAll() {
     }
     renderNavWcLogo();
     renderFixtureTicker();
+    startTickerRefresh();
     fetchAndApplyStandingsLogo();
     fetchAndApplyTransfersLogo();
     applySiteLogo(getSiteLogo());
