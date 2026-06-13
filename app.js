@@ -618,7 +618,8 @@ function wcMatchFilter(val) {
 
 function wcStartMatchRefresh() {
   wcStopMatchRefresh();
-  _wcMatchRefreshTimer = setInterval(() => {
+  // Hemen bir kez çek, sonra her 30s tekrarla
+  function _doRefresh() {
     fetch('/api/' + WC_KEY).then(r => r.ok ? r.json() : null).then(data => {
       if (!data) return;
       localStorage.setItem(WC_KEY, JSON.stringify(data));
@@ -627,7 +628,9 @@ function wcStartMatchRefresh() {
       renderWCStats();
       renderFixtureTicker();
     }).catch(() => {});
-  }, 30000);
+  }
+  _doRefresh();
+  _wcMatchRefreshTimer = setInterval(_doRefresh, 30000);
 }
 
 function wcStopMatchRefresh() {

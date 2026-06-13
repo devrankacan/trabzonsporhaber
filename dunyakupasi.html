@@ -12,7 +12,7 @@
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1243468369473646" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/style.css?v=4" />
+  <link rel="stylesheet" href="/style.css?v=5" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
@@ -269,7 +269,7 @@
     </div>
   </footer>
 
-  <script src="/app.js?v=4"></script>
+  <script src="/app.js?v=5"></script>
   <script>
     initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo(); initHeaderSearch(); initDragScroll();
     renderWCPage(); renderWCStats(); renderWCPlayers();
@@ -308,10 +308,9 @@
       document.getElementById('wctab-' + name).classList.add('active');
       if (name === 'matches') {
         renderWCMatches();
-        wcStartMatchRefresh();
-      } else {
-        wcStopMatchRefresh();
       }
+      // Tüm sekmelerde otomatik güncelleme — her 30s sunucudan çek
+      wcStartMatchRefresh();
     }
   </script>
 </body>
