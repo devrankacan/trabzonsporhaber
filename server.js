@@ -429,8 +429,17 @@ function isMatchWindowActive() {
 }
 
 let _pollTimer = null;
+let _liveOnlyCount = 0;
 
 async function runPoll(liveOnly = false) {
+  // Her 5 canlı poll'dan sonra bir tam güncelleme yap (biten maçları da yakala)
+  if (liveOnly) {
+    _liveOnlyCount++;
+    if (_liveOnlyCount >= 5) { liveOnly = false; _liveOnlyCount = 0; }
+  } else {
+    _liveOnlyCount = 0;
+  }
+
   try {
     console.log(`[WC-Poll] football-data.org: ${liveOnly ? 'canlı' : 'tüm'} maçlar çekiliyor...`);
     const matches = liveOnly ? await fetchLiveMatches() : await fetchAllMatches();
