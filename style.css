@@ -2452,7 +2452,7 @@ img { max-width: 100%; display: block; }
   .news-card-image .category-badge { font-size: 9px; padding: 2px 6px; }
   .news-card-body { padding: 10px 12px; justify-content: center; }
   .news-card-title { font-size: 13px; -webkit-line-clamp: 3; }
-  .news-card-summary { display: none; }
+  .news-card-summary { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; font-size: 11px; }
   .news-card-footer { margin-top: 6px; padding-top: 6px; }
 
   /* Section header */
