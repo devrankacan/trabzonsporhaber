@@ -3270,6 +3270,33 @@ function renderOgImageAdmin() {
   if (removeBtn) removeBtn.style.display = val ? 'inline-block' : 'none';
 }
 
+async function uploadOgImageFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('ogUploadStatus');
+  if (status) { status.textContent = '⏳ Yükleniyor...'; }
+  try {
+    const compressed = await compressImage(file, 1200, 630, 0.85);
+    const uploadRes = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': _API_KEY },
+      body: JSON.stringify({ data: compressed, ext: 'webp' })
+    });
+    if (!uploadRes.ok) throw new Error('Upload başarısız');
+    const { url } = await uploadRes.json();
+    const fullUrl = location.origin + url;
+    document.getElementById('ogImageUrl').value = fullUrl;
+    _serverData[OG_IMAGE_KEY] = fullUrl;
+    localStorage.setItem(OG_IMAGE_KEY, fullUrl);
+    _apiSave(OG_IMAGE_KEY, fullUrl);
+    renderOgImageAdmin();
+    if (status) { status.textContent = '✅ Yüklendi ve kaydedildi'; setTimeout(() => { status.textContent = ''; }, 3000); }
+  } catch(e) {
+    if (status) { status.textContent = '❌ Hata oluştu'; }
+  }
+  input.value = '';
+}
+
 function saveOgImage() {
   const val = (document.getElementById('ogImageUrl')?.value || '').trim();
   if (val && !val.startsWith('http')) { alert('Lütfen https:// ile başlayan bir URL girin.'); return; }
