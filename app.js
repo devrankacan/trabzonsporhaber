@@ -2494,11 +2494,10 @@ function initAdminForm() {
     const selected = ta.value.slice(start, end);
     const map = { bold: ['**','**'], italic: ['*','*'], underline: ['__','__'], strike: ['~~','~~'] };
     const [open, close] = map[type] || ['',''];
-    const replacement = open + (selected || 'metin') + close;
+    const replacement = open + (selected || '') + close;
     ta.setRangeText(replacement, start, end, 'select');
     if (!selected) {
-      ta.selectionStart = start + open.length;
-      ta.selectionEnd = start + open.length + 5;
+      ta.selectionStart = ta.selectionEnd = start + open.length;
     }
     ta.focus();
   };
