@@ -2173,7 +2173,11 @@ function renderArticle() {
     ? `<img class="article-image" src="${escAttr(news.image)}" alt="${escAttr(news.title)}" />`
     : `<div style="height:300px;background:${buildBgStyle(news.image).replace('background-image:url(','').replace(');','')};background:linear-gradient(135deg,#6b0000,#003478);"></div>`;
 
-  const contentHtml = news.content.split('\n').filter(p => p.trim()).map(p => `<p>${escHtml(p)}</p>`).join('');
+  const contentHtml = news.content.split('\n').filter(p => p.trim()).map(p => {
+    const imgMatch = p.trim().match(/^\[IMG:(.+?)\]$/);
+    if (imgMatch) return `<img src="${escAttr(imgMatch[1])}" alt="" style="width:100%;border-radius:10px;margin:8px 0" loading="lazy" />`;
+    return `<p>${escHtml(p)}</p>`;
+  }).join('');
 
   const views = incrementViews(news.id);
   const teams = getTeams(news);
@@ -2474,6 +2478,40 @@ function initAdminForm() {
       document.getElementById('imagePreview').style.display = 'none';
     }
   });
+
+  // İçeriğe görsel ekle
+  window.insertContentImage = function() {
+    const fileInput = document.getElementById('contentImageFile');
+    fileInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const status = document.getElementById('contentImgStatus');
+      status.textContent = '⏳ Yükleniyor...';
+      try {
+        const compressed = await compressImage(file, 900, 600, 0.75);
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': _API_KEY },
+          body: JSON.stringify({ data: compressed, ext: 'webp' })
+        });
+        if (!uploadRes.ok) throw new Error('Upload başarısız');
+        const { url } = await uploadRes.json();
+        const textarea = document.getElementById('newsContent');
+        const pos = textarea.selectionStart;
+        const val = textarea.value;
+        const tag = `\n[IMG:${url}]\n`;
+        textarea.value = val.slice(0, pos) + tag + val.slice(pos);
+        textarea.selectionStart = textarea.selectionEnd = pos + tag.length;
+        textarea.focus();
+        status.textContent = '✅ Eklendi';
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      } catch(e) {
+        status.textContent = '❌ Hata oluştu';
+      }
+      fileInput.value = '';
+    };
+    fileInput.click();
+  };
 
   async function handleFileSelect(file) {
     if (!file || !file.type.startsWith('image/')) return;
