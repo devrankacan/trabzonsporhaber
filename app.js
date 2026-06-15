@@ -2173,10 +2173,17 @@ function renderArticle() {
     ? `<img class="article-image" src="${escAttr(news.image)}" alt="${escAttr(news.title)}" />`
     : `<div style="height:300px;background:${buildBgStyle(news.image).replace('background-image:url(','').replace(');','')};background:linear-gradient(135deg,#6b0000,#003478);"></div>`;
 
+  function renderInline(text) {
+    return escHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/__(.+?)__/g, '<u>$1</u>')
+      .replace(/~~(.+?)~~/g, '<s>$1</s>');
+  }
   const contentHtml = news.content.split('\n').filter(p => p.trim()).map(p => {
     const imgMatch = p.trim().match(/^\[IMG:(.+?)\]$/);
     if (imgMatch) return `<img src="${escAttr(imgMatch[1])}" alt="" style="width:100%;border-radius:10px;margin:8px 0" loading="lazy" />`;
-    return `<p>${escHtml(p)}</p>`;
+    return `<p>${renderInline(p)}</p>`;
   }).join('');
 
   const views = incrementViews(news.id);
@@ -2480,6 +2487,22 @@ function initAdminForm() {
   });
 
   // İçeriğe görsel ekle
+  window.fmtContent = function(type) {
+    const ta = document.getElementById('newsContent');
+    if (!ta) return;
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const selected = ta.value.slice(start, end);
+    const map = { bold: ['**','**'], italic: ['*','*'], underline: ['__','__'], strike: ['~~','~~'] };
+    const [open, close] = map[type] || ['',''];
+    const replacement = open + (selected || 'metin') + close;
+    ta.setRangeText(replacement, start, end, 'select');
+    if (!selected) {
+      ta.selectionStart = start + open.length;
+      ta.selectionEnd = start + open.length + 5;
+    }
+    ta.focus();
+  };
+
   window.insertContentImage = function() {
     const fileInput = document.getElementById('contentImageFile');
     fileInput.onchange = async (e) => {

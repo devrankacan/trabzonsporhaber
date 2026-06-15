@@ -198,8 +198,13 @@
 
         <div class="form-group">
           <label class="form-label">Haber İçeriği *</label>
-          <div style="display:flex;gap:8px;margin-bottom:6px">
-            <button type="button" onclick="insertContentImage()" style="font-size:12px;padding:5px 12px;background:var(--ts-red);color:#fff;border:none;border-radius:6px;cursor:pointer">🖼️ İçeriğe Görsel Ekle</button>
+          <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center">
+            <button type="button" onclick="fmtContent('bold')" title="Kalın" style="font-size:13px;font-weight:700;padding:4px 10px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:6px;cursor:pointer;color:var(--ts-text)"><b>K</b></button>
+            <button type="button" onclick="fmtContent('italic')" title="İtalik" style="font-size:13px;padding:4px 10px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:6px;cursor:pointer;color:var(--ts-text)"><i>İ</i></button>
+            <button type="button" onclick="fmtContent('underline')" title="Altı Çizili" style="font-size:13px;padding:4px 10px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:6px;cursor:pointer;color:var(--ts-text)"><u>A</u></button>
+            <button type="button" onclick="fmtContent('strike')" title="Üstü Çizili" style="font-size:13px;padding:4px 10px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:6px;cursor:pointer;color:var(--ts-text)"><s>S</s></button>
+            <div style="width:1px;height:20px;background:var(--ts-border);margin:0 2px"></div>
+            <button type="button" onclick="insertContentImage()" style="font-size:12px;padding:5px 10px;background:var(--ts-red);color:#fff;border:none;border-radius:6px;cursor:pointer">🖼️ Görsel</button>
             <input type="file" id="contentImageFile" accept="image/*" style="display:none" />
             <span id="contentImgStatus" style="font-size:12px;color:var(--ts-muted);align-self:center"></span>
           </div>
