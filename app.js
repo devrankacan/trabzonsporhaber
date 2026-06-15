@@ -368,9 +368,11 @@ function renderFixtureTicker() {
   }).join('');
 
   el.innerHTML = itemHtml + itemHtml;
+  // Hız: maç başına 5s — az maç = daha hızlı döngü
+  const duration = Math.max(8, fixtures.length * 5);
   el.style.animation = 'none';
   void el.offsetWidth;
-  el.style.animation = '';
+  el.style.animation = `fixtureTicker ${duration}s linear infinite`;
 }
 
 // Ticker bağımsız refresh — her sayfada çalışır, tab açık olmak gerekmez

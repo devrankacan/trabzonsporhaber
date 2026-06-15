@@ -3647,7 +3647,7 @@ img { max-width: 100%; display: block; }
   display: flex;
   align-items: center;
   white-space: nowrap;
-  animation: fixtureTicker 30s linear infinite;
+  animation: fixtureTicker 20s linear infinite;
   will-change: transform;
 }
 .fixture-track:hover { animation-play-state: paused; }
