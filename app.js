@@ -2418,7 +2418,7 @@ function initAdminForm() {
   cancelBtn?.addEventListener('click', resetForm);
 }
 
-function handleSubmit() {
+async function handleSubmit() {
   const title = document.getElementById('newsTitle').value.trim();
   const branch = getSelectedBranches();
   const category = document.getElementById('newsCategory').value;
@@ -2434,7 +2434,19 @@ function handleSubmit() {
     return;
   }
 
-  const list = getNews();
+  // Her zaman sunucudan taze listeyi çek — localStorage'a güvenme
+  let list;
+  try {
+    const res = await fetch('/api/' + STORAGE_KEY);
+    if (res.ok) {
+      const serverList = await res.json();
+      if (Array.isArray(serverList)) {
+        list = serverList;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(serverList.map(n => n.image?.startsWith('data:') ? { ...n, image: '' } : n)));
+      }
+    }
+  } catch {}
+  if (!list) list = getNews();
 
   if (editingId !== null) {
     const idx = list.findIndex(n => n.id === editingId);
