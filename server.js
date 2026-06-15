@@ -543,18 +543,85 @@ function applyStandingsToWC(wc, standings) {
   wc.groups.sort((a, b) => a.id.localeCompare(b.id));
 }
 
-// ─── API-Football poll sistemi ───────────────────────────────────────────────
-// Bütçe: 100 istek/gün
-//   • Tam sync (fixtures+standings): günde 2 istek (startup + gece yarısı reset)
-//   • Maç günü canlı poll: kalan 96 istek ÷ toplam maç dakikası = dinamik interval
-//   • Maç olmayan günler: 0 istek
+// ─── football-data.org poll sistemi ─────────────────────────────────────────
+let _pollTimer = null;
+let _liveOnlyCount = 0;
 
-let _afLivePollTimer = null;
-let _afDailyTimer   = null;
-let _afDailyBudget  = 96; // günlük kalan canlı poll hakkı
-let _afPollInterval = 4 * 60 * 1000; // default 4dk (dinamik hesaplanır)
+async function runPoll(liveOnly = false) {
+  if (liveOnly) {
+    _liveOnlyCount++;
+    if (_liveOnlyCount >= 5) { liveOnly = false; _liveOnlyCount = 0; }
+  } else {
+    _liveOnlyCount = 0;
+  }
+  try {
+    console.log(`[WC-Poll] football-data.org: ${liveOnly ? 'canlı' : 'tüm'} maçlar çekiliyor...`);
+    const matches = liveOnly ? await fetchLiveMatches() : await fetchAllMatches();
+    const wc = readKey('ts_wc2026') || { logo: '', groups: [], matches: [], players: [] };
+    applyMatchesToWC(wc, matches);
+    if (!liveOnly) {
+      try {
+        const standings = await fetchStandings();
+        if (standings.length) applyStandingsToWC(wc, standings);
+      } catch (e) { console.warn('[WC-Poll] Standings hatası:', e.message); }
+    }
+    writeKey('ts_wc2026', wc);
+    console.log(`[WC-Poll] Güncellendi. Maç: ${(wc.matches||[]).length}, Canlı: ${(wc.matches||[]).filter(m=>m.status==='live').length}`);
+  } catch (e) {
+    console.error('[WC-Poll] Hata:', e.message);
+  }
+  scheduleNext();
+}
 
-// API-Football'dan tüm WC fikstür + standings → ts_wc2026 güncelle
+function getTodayMatchWindow() {
+  const wc = readKey('ts_wc2026');
+  if (!wc?.matches) return null;
+  const nowUtc = Date.now();
+  const todayTr = new Date(nowUtc + 3 * 3600000);
+  const todayStr = `${String(todayTr.getUTCDate()).padStart(2,'0')}.${String(todayTr.getUTCMonth()+1).padStart(2,'0')}.${todayTr.getUTCFullYear()}`;
+  const todayMatches = wc.matches.filter(m => m.date === todayStr && m.status !== 'finished');
+  if (!todayMatches.length) return null;
+
+  let earliestMs = Infinity, latestMs = -Infinity;
+  for (const m of todayMatches) {
+    try {
+      const [hh, mn] = m.time.split(':').map(Number);
+      const [dd, mo, yy] = m.date.split('.').map(Number);
+      const utcMs = Date.UTC(yy, mo - 1, dd, hh - 3, mn);
+      if (utcMs < earliestMs) earliestMs = utcMs;
+      if (utcMs > latestMs) latestMs = utcMs;
+    } catch {}
+  }
+  if (earliestMs === Infinity) return null;
+  return { start: earliestMs - 5 * 60000, end: latestMs + 110 * 60000 };
+}
+
+function scheduleNext() {
+  if (_pollTimer) clearTimeout(_pollTimer);
+  const now = Date.now();
+  const win = getTodayMatchWindow();
+  let delay;
+
+  if (win && now >= win.start && now <= win.end) {
+    // Aktif maç penceresi → 60 saniyede bir
+    delay = 60 * 1000;
+  } else if (win && now < win.start) {
+    // Bugün maç var ama henüz başlamadı → ilk maça kadar bekle, tam poll yap
+    delay = win.start - now;
+  } else {
+    // Maç yok veya bitti → 2 saatte bir
+    delay = 2 * 60 * 60 * 1000;
+  }
+
+  const isActive = win && now >= win.start && now <= win.end;
+  _pollTimer = setTimeout(() => runPoll(isActive), delay);
+  console.log(`[WC-Poll] Next poll in ${Math.round(delay/1000)}s (${isActive ? 'canlı' : 'tam'})`);
+}
+
+// Sunucu başlarken ilk tam çekimi yap
+setTimeout(() => runPoll(false), 5000);
+
+/* ── API-Football kodu kaldırıldı (free plan 2026'yı desteklemiyor) ── */
 async function runAfFullSync() {
   try {
     console.log('[AF-Sync] Tüm fikstür + standings çekiliyor...');
@@ -775,13 +842,7 @@ function scheduleMidnightReset() {
   console.log(`[AF-Midnight] Gece yarısı sıfırlama: ${Math.round(delay/3600000)}sa sonra`);
 }
 
-// Sunucu başlarken: tam sync + zamanlayıcıları başlat
-setTimeout(async () => {
-  await runAfFullSync(); // 2 istek (fixtures + standings)
-  _afDailyBudget = 96;
-  scheduleAfNext();
-  scheduleMidnightReset();
-}, 5000);
+// (AF startup kaldırıldı — football-data.org kullanılıyor)
 
 app.listen(3001, '127.0.0.1', () => console.log('API server running on :3001'));
 
