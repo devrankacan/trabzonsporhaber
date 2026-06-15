@@ -18,6 +18,11 @@ const TEAM_BANNERS_KEY = 'ts_team_banners';
 const FOREIGN_LOGOS_KEY = 'ts_foreign_logos';
 const WC_KEY = 'ts_wc2026';
 
+// ==================== SERVER-FIRST IN-MEMORY CACHE ====================
+// Module-level cache populated by _apiSyncAll. All getter functions check this first.
+// localStorage is only a render cache — never a source of truth for write operations.
+let _serverData = {};
+
 // ==================== WC2026 DATA ====================
 
 const WC_DEFAULT_FIXTURES = [
@@ -389,6 +394,7 @@ function startTickerRefresh() {
   _tickerRefreshTimer = setInterval(() => {
     fetch('/api/ts_wc2026').then(r => r.ok ? r.json() : null).then(data => {
       if (!data) return;
+      _serverData[WC_KEY] = data;
       localStorage.setItem(WC_KEY, JSON.stringify(data));
       renderFixtureTicker();
     }).catch(() => {});
@@ -607,6 +613,7 @@ function wcStartMatchRefresh() {
   function _doRefresh() {
     fetch('/api/' + WC_KEY).then(r => r.ok ? r.json() : null).then(data => {
       if (!data) return;
+      _serverData[WC_KEY] = data;
       localStorage.setItem(WC_KEY, JSON.stringify(data));
       renderWCMatches();
       renderWCPage();
@@ -622,11 +629,7 @@ function wcStopMatchRefresh() {
   if (_wcMatchRefreshTimer) { clearInterval(_wcMatchRefreshTimer); _wcMatchRefreshTimer = null; }
 }
 
-// ==================== SERVER-FIRST IN-MEMORY CACHE ====================
-
-// Module-level in-memory cache populated by _apiSyncAll.
-// Getters check this first so localStorage is only a render cache, never a source of truth.
-let _serverData = {};
+// (See _serverData declaration at top of file, after storage key constants)
 
 // ==================== API SYNC ====================
 
@@ -2001,6 +2004,7 @@ function editStanding(id) {
 
 function resetAllStandings() {
   if (!confirm('Tüm takım istatistikleri sıfırlanacak. Emin misiniz?')) return;
+  delete _serverData[STANDINGS_KEY];
   localStorage.removeItem(STANDINGS_KEY);
   renderAdminStandings();
 }
@@ -2995,6 +2999,10 @@ function applyTheme(theme) {
 // ==================== SITE LOGO ====================
 
 function getSiteLogo() {
+  if (_serverData[SITE_LOGO_KEY] !== undefined) {
+    const v = _serverData[SITE_LOGO_KEY];
+    return typeof v === 'string' ? v : '';
+  }
   const raw = localStorage.getItem(SITE_LOGO_KEY);
   if (!raw) return '';
   try { const p = JSON.parse(raw); return typeof p === 'string' ? p : raw; } catch { return raw; }
@@ -3056,6 +3064,7 @@ async function handleSiteLogoFile(input) {
   if (inner) inner.innerHTML = '<div class="file-drop-text">Yükleniyor...</div>';
   try {
     const compressed = await compressImage(file, 600, 300, 0.95);
+    _serverData[SITE_LOGO_KEY] = compressed;
     localStorage.setItem(SITE_LOGO_KEY, compressed);
     _apiSave(SITE_LOGO_KEY, compressed);
     applySiteLogo(compressed);
@@ -3067,6 +3076,7 @@ async function handleSiteLogoFile(input) {
 function saveSiteLogoFromUrl() {
   const url = document.getElementById('siteLogoUrl')?.value.trim();
   if (!url) return;
+  _serverData[SITE_LOGO_KEY] = url;
   localStorage.setItem(SITE_LOGO_KEY, url);
   _apiSave(SITE_LOGO_KEY, url);
   applySiteLogo(url);
@@ -3074,6 +3084,7 @@ function saveSiteLogoFromUrl() {
 }
 
 function removeSiteLogo() {
+  _serverData[SITE_LOGO_KEY] = '';
   localStorage.removeItem(SITE_LOGO_KEY);
   applySiteLogo('');
   renderSettingsLogoAdmin();
@@ -3091,7 +3102,7 @@ function switchLogoTab(tab) {
 // ==================== OG IMAGE ====================
 
 function renderOgImageAdmin() {
-  const val = localStorage.getItem(OG_IMAGE_KEY) || '';
+  const val = (_serverData[OG_IMAGE_KEY] !== undefined ? _serverData[OG_IMAGE_KEY] : localStorage.getItem(OG_IMAGE_KEY)) || '';
   const input = document.getElementById('ogImageUrl');
   const preview = document.getElementById('ogImagePreview');
   const removeBtn = document.getElementById('ogImageRemoveBtn');
@@ -3103,12 +3114,13 @@ function renderOgImageAdmin() {
 function saveOgImage() {
   const val = (document.getElementById('ogImageUrl')?.value || '').trim();
   if (val && !val.startsWith('http')) { alert('Lütfen https:// ile başlayan bir URL girin.'); return; }
-  if (val) { localStorage.setItem(OG_IMAGE_KEY, val); _apiSave(OG_IMAGE_KEY, val); }
-  else { localStorage.removeItem(OG_IMAGE_KEY); _apiSave(OG_IMAGE_KEY, null); }
+  if (val) { _serverData[OG_IMAGE_KEY] = val; localStorage.setItem(OG_IMAGE_KEY, val); _apiSave(OG_IMAGE_KEY, val); }
+  else { delete _serverData[OG_IMAGE_KEY]; localStorage.removeItem(OG_IMAGE_KEY); _apiSave(OG_IMAGE_KEY, null); }
   renderOgImageAdmin();
 }
 
 function removeOgImage() {
+  delete _serverData[OG_IMAGE_KEY];
   localStorage.removeItem(OG_IMAGE_KEY);
   _apiSave(OG_IMAGE_KEY, null);
   renderOgImageAdmin();
@@ -3120,6 +3132,7 @@ async function handleFaviconFile(input) {
   const file = input.files[0];
   if (!file) return;
   const compressed = await compressImage(file, 256, 256, 0.9);
+  _serverData[FAVICON_KEY] = compressed;
   localStorage.setItem(FAVICON_KEY, compressed);
   _apiSave(FAVICON_KEY, compressed);
   applyFaviconDOM(compressed);
@@ -3127,6 +3140,7 @@ async function handleFaviconFile(input) {
 }
 
 function removeFavicon() {
+  delete _serverData[FAVICON_KEY];
   localStorage.removeItem(FAVICON_KEY);
   _apiSave(FAVICON_KEY, null);
   applyFaviconDOM('');
@@ -3151,7 +3165,7 @@ function applyFaviconDOM(src) {
 }
 
 function renderFaviconAdmin() {
-  const src = localStorage.getItem(FAVICON_KEY) || '';
+  const src = (_serverData[FAVICON_KEY] !== undefined ? _serverData[FAVICON_KEY] : localStorage.getItem(FAVICON_KEY)) || '';
   const img = document.getElementById('faviconPreviewImg');
   const fb = document.getElementById('faviconPreviewFb');
   const removeWrap = document.getElementById('faviconRemoveWrap');
@@ -3170,6 +3184,7 @@ function renderFaviconAdmin() {
 // ==================== TEAM BANNERS ====================
 
 function getTeamBanners() {
+  if (_serverData[TEAM_BANNERS_KEY] !== undefined) return _serverData[TEAM_BANNERS_KEY];
   return JSON.parse(localStorage.getItem(TEAM_BANNERS_KEY) || '{}');
 }
 
@@ -3177,6 +3192,7 @@ function saveTeamBanner(teamKey, src) {
   const banners = getTeamBanners();
   if (src) banners[teamKey] = src;
   else delete banners[teamKey];
+  _serverData[TEAM_BANNERS_KEY] = banners;
   localStorage.setItem(TEAM_BANNERS_KEY, JSON.stringify(banners));
   _apiSave(TEAM_BANNERS_KEY, banners);
 }
