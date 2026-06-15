@@ -179,6 +179,9 @@ app.post('/api/sync', auth, (req, res) => {
 // =============================================
 
 const FD_TOKEN = '874185d4207d4d6c9feb844b6de91be2';
+const AF_TOKEN = 'b4e3847303d94fa1333c1dbee3785e36'; // api-football.com
+const AF_WC_LEAGUE = 1; // FIFA World Cup league id
+const AF_WC_SEASON = 2026;
 
 // Takım adı eşleme (football-data.org İngilizce → Türkçe + bayrak kodu)
 const TEAM_NAME_MAP = {
@@ -310,6 +313,133 @@ async function fetchAllMatches() {
   return data.matches || [];
 }
 
+// --- API-Football (api-football.com) ---
+function afRequest(urlPath) {
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'v3.football.api-sports.io',
+      path: urlPath,
+      method: 'GET',
+      headers: { 'x-apisports-key': AF_TOKEN },
+    }, res => {
+      let body = '';
+      res.on('data', d => body += d);
+      res.on('end', () => {
+        try { resolve(JSON.parse(body)); }
+        catch { reject(new Error('AF JSON parse error')); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(15000, () => { req.destroy(); reject(new Error('AF timeout')); });
+    req.end();
+  });
+}
+
+function mapAfStatus(s) {
+  const st = s?.short;
+  if (st === '1H' || st === '2H' || st === 'ET' || st === 'P') return 'live';
+  if (st === 'HT') return 'halftime';
+  if (st === 'FT' || st === 'AET' || st === 'PEN') return 'finished';
+  return 'upcoming';
+}
+
+async function fetchAfLiveToday() {
+  // Bugünkü canlı maçları çek (WC league)
+  const data = await afRequest(`/fixtures?live=all&league=${AF_WC_LEAGUE}&season=${AF_WC_SEASON}`);
+  return data.response || [];
+}
+
+async function fetchAfTodayFixtures() {
+  // Bugünkü tüm maçları çek — maç zamanlaması için
+  const today = new Date();
+  const yyyy = today.getUTCFullYear();
+  const mm = String(today.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(today.getUTCDate()).padStart(2, '0');
+  const data = await afRequest(`/fixtures?date=${yyyy}-${mm}-${dd}&league=${AF_WC_LEAGUE}&season=${AF_WC_SEASON}`);
+  return data.response || [];
+}
+
+function applyAfFixturesToWC(wc, fixtures) {
+  if (!wc.matches) wc.matches = [];
+  let changed = false;
+  for (const f of fixtures) {
+    const fix = f.fixture;
+    const teams = f.teams;
+    const goals = f.goals;
+    const score = f.score;
+    if (!fix || !teams) continue;
+
+    const homeInfo = mapTeam(teams.home?.name || '');
+    const awayInfo = mapTeam(teams.away?.name || '');
+    const status = mapAfStatus(fix.status);
+    const minute = fix.status?.elapsed || 0;
+    const homeScore = goals?.home ?? null;
+    const awayScore = goals?.away ?? null;
+    const afId = String(fix.id);
+
+    // Yarı skoru
+    const htHome = score?.halftime?.home ?? null;
+    const htAway = score?.halftime?.away ?? null;
+
+    let existing = wc.matches.find(x => x.afId === afId);
+    if (!existing) {
+      // football-data maçıyla eşleştir
+      existing = wc.matches.find(x =>
+        (x.homeCode === homeInfo.code || x.home === homeInfo.tr) &&
+        (x.awayCode === awayInfo.code || x.away === awayInfo.tr)
+      );
+    }
+
+    if (existing) {
+      existing.afId      = afId;
+      existing.homeScore = homeScore;
+      existing.awayScore = awayScore;
+      existing.status    = status;
+      existing.minute    = minute;
+      if (htHome !== null) existing.htHome = htHome;
+      if (htAway !== null) existing.htAway = htAway;
+    } else {
+      // Fikstürde yoksa ekle
+      const utcDate = fix.date;
+      wc.matches.push({
+        id: `af_${afId}`, afId,
+        group: '', matchday: f.league?.round?.replace(/\D/g, '') || 1,
+        home: homeInfo.tr, homeCode: homeInfo.code,
+        away: awayInfo.tr, awayCode: awayInfo.code,
+        date: formatDate(utcDate), day: formatDay(utcDate), time: formatTime(utcDate),
+        homeScore, awayScore, status, minute,
+        htHome, htAway,
+      });
+    }
+    changed = true;
+  }
+  return changed;
+}
+
+// Bugün maç var mı ve ne zaman? (TR saati UTC+3)
+function getTodayMatchWindow() {
+  const wc = readKey('ts_wc2026');
+  if (!wc?.matches) return null;
+  const nowUtc = Date.now();
+  const todayTr = new Date(nowUtc + 3 * 3600000);
+  const todayStr = `${String(todayTr.getUTCDate()).padStart(2,'0')}.${String(todayTr.getUTCMonth()+1).padStart(2,'0')}.${todayTr.getUTCFullYear()}`;
+
+  const todayMatches = wc.matches.filter(m => m.date === todayStr && m.status !== 'finished');
+  if (!todayMatches.length) return null;
+
+  // En erken ve en geç maç saatini bul
+  let earliest = Infinity, latest = -Infinity;
+  for (const m of todayMatches) {
+    try {
+      const [hh, mn] = m.time.split(':').map(Number);
+      const ms = hh * 3600000 + mn * 60000;
+      if (ms < earliest) earliest = ms;
+      if (ms > latest) latest = ms;
+    } catch {}
+  }
+  return { earliest, latest }; // ms cinsinden günün başından
+}
+
 async function fetchLiveMatches() {
   const data = await fdRequest('/v4/competitions/WC/matches?status=IN_PLAY,PAUSED');
   return data.matches || [];
@@ -413,64 +543,121 @@ function applyStandingsToWC(wc, standings) {
   wc.groups.sort((a, b) => a.id.localeCompare(b.id));
 }
 
-function isMatchWindowActive() {
-  // Türkiye saati (UTC+3) ile 22:00-07:00 arası maç penceresi
-  const nowUtc = new Date();
-  const trHour = (nowUtc.getUTCHours() + 3) % 24;
-  return trHour >= 22 || trHour < 7;
-}
-
 let _pollTimer = null;
-let _liveOnlyCount = 0;
+let _afLivePollTimer = null;
 
-async function runPoll(liveOnly = false) {
-  // Her 5 canlı poll'dan sonra bir tam güncelleme yap (biten maçları da yakala)
-  if (liveOnly) {
-    _liveOnlyCount++;
-    if (_liveOnlyCount >= 5) { liveOnly = false; _liveOnlyCount = 0; }
-  } else {
-    _liveOnlyCount = 0;
-  }
-
+// football-data.org: tüm fikstür + standings güncellemesi (saatte bir)
+async function runFdPoll() {
   try {
-    console.log(`[WC-Poll] football-data.org: ${liveOnly ? 'canlı' : 'tüm'} maçlar çekiliyor...`);
-    const matches = liveOnly ? await fetchLiveMatches() : await fetchAllMatches();
+    console.log('[FD-Poll] Tüm maçlar + standings çekiliyor...');
+    const [matches, standings] = await Promise.all([
+      fetchAllMatches(),
+      fetchStandings().catch(() => []),
+    ]);
     const wc = readKey('ts_wc2026') || { logo: '', groups: [], matches: [], players: [] };
-
     applyMatchesToWC(wc, matches);
-
-    if (!liveOnly) {
-      try {
-        const standings = await fetchStandings();
-        if (standings.length) applyStandingsToWC(wc, standings);
-      } catch (e) { console.warn('[WC-Poll] Standings hatası:', e.message); }
-    }
-
+    if (standings.length) applyStandingsToWC(wc, standings);
     writeKey('ts_wc2026', wc);
-    console.log(`[WC-Poll] Güncellendi. Maç: ${(wc.matches||[]).length}, Canlı: ${(wc.matches||[]).filter(m=>m.status==='live').length}`);
+    console.log(`[FD-Poll] Güncellendi. Toplam maç: ${(wc.matches||[]).length}`);
   } catch (e) {
-    console.error('[WC-Poll] Hata:', e.message);
+    console.error('[FD-Poll] Hata:', e.message);
   }
-  scheduleNext();
+  // Her saat tekrarla
+  _pollTimer = setTimeout(runFdPoll, 60 * 60 * 1000);
 }
 
-function scheduleNext() {
-  if (_pollTimer) clearTimeout(_pollTimer);
-
-  let delay;
-  if (isMatchWindowActive()) {
-    // 22:00-07:00 TR saati → 3 dakikada bir sorgula
-    delay = 3 * 60 * 1000;
-  } else {
-    // Gündüz → 2 saatte bir güncelle
-    delay = 2 * 60 * 60 * 1000;
+// API-Football: sadece maç olan günlerde, maç saatlerinde 3dk'da bir canlı skor
+async function runAfLivePoll() {
+  try {
+    const fixtures = await fetchAfLiveToday();
+    if (fixtures.length > 0) {
+      const wc = readKey('ts_wc2026') || { logo: '', groups: [], matches: [], players: [] };
+      applyAfFixturesToWC(wc, fixtures);
+      writeKey('ts_wc2026', wc);
+      const live = fixtures.filter(f => {
+        const st = f.fixture?.status?.short;
+        return st === '1H' || st === '2H' || st === 'ET' || st === 'P' || st === 'HT';
+      }).length;
+      console.log(`[AF-Poll] Canlı: ${live}/${fixtures.length} maç güncellendi.`);
+    } else {
+      console.log('[AF-Poll] Şu an canlı maç yok.');
+    }
+  } catch (e) {
+    console.error('[AF-Poll] Hata:', e.message);
   }
-  _pollTimer = setTimeout(() => runPoll(isMatchWindowActive()), delay);
-  console.log(`[WC-Poll] Next poll in ${Math.round(delay/1000)}s`);
+  scheduleAfNext();
 }
 
-// Sunucu başlarken ilk tam çekimi yap
-setTimeout(() => runPoll(false), 5000);
+function getTodayMatchTimesMs() {
+  // Bugün TR saatinde maç var mı? Varsa [başlangıç, bitiş] UTC ms döner
+  const wc = readKey('ts_wc2026');
+  if (!wc?.matches) return null;
+  const nowUtc = Date.now();
+  const todayTr = new Date(nowUtc + 3 * 3600000);
+  const todayStr = `${String(todayTr.getUTCDate()).padStart(2,'0')}.${String(todayTr.getUTCMonth()+1).padStart(2,'0')}.${todayTr.getUTCFullYear()}`;
+  const todayMatches = wc.matches.filter(m => m.date === todayStr);
+  if (!todayMatches.length) return null;
+
+  let earliestMs = Infinity, latestMs = -Infinity;
+  for (const m of todayMatches) {
+    try {
+      const [hh, mn] = m.time.split(':').map(Number);
+      // TR saatini UTC'ye çevir
+      const [dd, mo, yy] = m.date.split('.').map(Number);
+      const matchUtcMs = Date.UTC(yy, mo - 1, dd, hh - 3, mn);
+      if (matchUtcMs < earliestMs) earliestMs = matchUtcMs;
+      if (matchUtcMs > latestMs) latestMs = matchUtcMs;
+    } catch {}
+  }
+  if (earliestMs === Infinity) return null;
+  return {
+    start: earliestMs - 5 * 60000,       // ilk maçtan 5dk önce
+    end:   latestMs  + 110 * 60000,      // son maçtan 110dk sonra (maç süresi)
+  };
+}
+
+function scheduleAfNext() {
+  if (_afLivePollTimer) clearTimeout(_afLivePollTimer);
+  const now = Date.now();
+  const window = getTodayMatchTimesMs();
+
+  if (!window) {
+    // Bugün maç yok — yarın gece yarısından 30dk sonra tekrar kontrol et
+    const tomorrowMidnightTr = (() => {
+      const d = new Date(now + 3 * 3600000);
+      d.setUTCHours(0, 0, 0, 0);
+      return d.getTime() - 3 * 3600000 + 24 * 3600000 + 30 * 60000; // yarın 00:30 TR
+    })();
+    const delay = Math.max(60000, tomorrowMidnightTr - now);
+    console.log(`[AF-Poll] Bugün maç yok. ${Math.round(delay/60000)}dk sonra tekrar kontrol.`);
+    _afLivePollTimer = setTimeout(scheduleAfNext, delay);
+    return;
+  }
+
+  if (now < window.start) {
+    // Maç henüz başlamadı — ilk maça kadar bekle
+    const delay = window.start - now;
+    console.log(`[AF-Poll] İlk maça ${Math.round(delay/60000)}dk kaldı, o zaman başlıyorum.`);
+    _afLivePollTimer = setTimeout(runAfLivePoll, delay);
+    return;
+  }
+
+  if (now > window.end) {
+    // Maçlar bitti — yarın kontrol et
+    scheduleAfNext(); // window null dönecek ve yarına ayarlayacak (bugünkü tarihi geçtik)
+    return;
+  }
+
+  // Aktif maç penceresi → 3 dakikada bir
+  _afLivePollTimer = setTimeout(runAfLivePoll, 3 * 60 * 1000);
+  console.log(`[AF-Poll] Maç penceresi aktif. 3dk sonra tekrar.`);
+}
+
+// Sunucu başlarken
+setTimeout(async () => {
+  await runFdPoll(); // football-data ile fikstür + standings
+  scheduleAfNext(); // API-Football zamanlayıcısını başlat
+}, 5000);
 
 app.listen(3001, '127.0.0.1', () => console.log('API server running on :3001'));
 
