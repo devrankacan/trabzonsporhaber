@@ -2359,7 +2359,9 @@ img { max-width: 100%; display: block; }
   .slider-btn { width: 36px; height: 36px; font-size: 18px; }
   .slider-btn.prev { left: 10px; }
   .slider-btn.next { right: 10px; }
-  .slider-dots { bottom: 12px; right: 16px; }
+  .slider-dots { bottom: 8px; right: 10px; gap: 5px; }
+  .slider-dots .dot { width: 5px; height: 5px; }
+  .slider-dots .dot.active { width: 14px; border-radius: 3px; }
 
   /* Ticker */
   .ticker-label { padding: 0 12px; font-size: 9px; letter-spacing: 1.5px; }
