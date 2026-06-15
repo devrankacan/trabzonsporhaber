@@ -124,8 +124,7 @@
           Maçlar &amp; Canlı
           <span class="wc-live-tab-badge" id="wcMatchesLiveBadge" style="display:none"></span>
         </button>
-        <button class="wc-tab" onclick="wcShowTab('stats')" id="wctab-stats">Takım İstatistikleri</button>
-        <button class="wc-tab" onclick="wcShowTab('players')" id="wctab-players">Golcüler &amp; İstatistikler</button>
+        <button class="wc-tab" onclick="wcShowTab('stats')" id="wctab-stats">En İyi 3.'ler</button>
       </div>
     </div>
   </div>
@@ -171,14 +170,11 @@
     <section class="wc-tab-content" id="wc-tab-stats">
       <div class="wc-page-card">
         <div class="wc-page-card-header">
-          <span>Tüm Takımlar — Puan Durumu</span>
-          <div class="seg-ctrl" id="wcStatSort">
-            <button class="seg-btn active" data-val="pts" onclick="segSelect(this,'wcStatSort',renderWCStats)">Puan</button>
-            <button class="seg-btn" data-val="gf" onclick="segSelect(this,'wcStatSort',renderWCStats)">Gol</button>
-            <button class="seg-btn" data-val="gd" onclick="segSelect(this,'wcStatSort',renderWCStats)">Averaj</button>
-            <button class="seg-btn" data-val="won" onclick="segSelect(this,'wcStatSort',renderWCStats)">Galibiyet</button>
-            <span class="seg-slider"></span>
-          </div>
+          <span>En İyi 3.'ler — Gruptan Çıkma Durumu</span>
+        </div>
+        <div class="wc-thirds-legend">
+          <span class="wc-thirds-badge wc-thirds-pass">İlk 8 → Gruptan Çıkar</span>
+          <span class="wc-thirds-badge wc-thirds-out">Son 4 → Elenir</span>
         </div>
         <div style="overflow-x:auto">
           <table class="wc-stats-table" id="wcStatsTable">
@@ -186,42 +182,12 @@
               <tr>
                 <th>#</th>
                 <th style="text-align:left">Takım</th>
+                <th style="text-align:left">Grup</th>
                 <th>O</th><th>G</th><th>B</th><th>M</th>
                 <th>AG</th><th>YG</th><th>Av</th><th>P</th>
               </tr>
             </thead>
             <tbody id="wcStatsBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB: OYUNCU İSTATİSTİKLERİ -->
-    <section class="wc-tab-content" id="wc-tab-players">
-      <div class="wc-page-card">
-        <div class="wc-page-card-header">
-          <span>Golcüler & İstatistikler</span>
-          <div class="seg-ctrl" id="wcPlayerSort">
-            <button class="seg-btn active" data-val="goals" onclick="segSelect(this,'wcPlayerSort',renderWCPlayers)">Gol</button>
-            <button class="seg-btn" data-val="assists" onclick="segSelect(this,'wcPlayerSort',renderWCPlayers)">Asist</button>
-            <button class="seg-btn" data-val="minutes" onclick="segSelect(this,'wcPlayerSort',renderWCPlayers)">Dakika</button>
-            <span class="seg-slider"></span>
-          </div>
-        </div>
-        <div id="wcPlayersEmpty" style="display:none;padding:40px;text-align:center;color:var(--text-muted)">
-          Henüz oyuncu istatistiği eklenmedi.
-        </div>
-        <div style="overflow-x:auto">
-          <table class="wc-stats-table" id="wcPlayersTable" style="display:none">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th style="text-align:left">Oyuncu</th>
-                <th style="text-align:left">Ülke</th>
-                <th>Gol</th><th>Asist</th><th>Sarı</th><th>Kırmızı</th><th>Dk.</th>
-              </tr>
-            </thead>
-            <tbody id="wcPlayersBody"></tbody>
           </table>
         </div>
       </div>

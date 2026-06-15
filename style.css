@@ -3365,6 +3365,28 @@ img { max-width: 100%; display: block; }
 }
 .wc-stats-table tr:last-child td { border-bottom: none; }
 .wc-stats-table tr:hover td { background: var(--bg); }
+.wc-thirds-legend {
+  display: flex;
+  gap: 12px;
+  padding: 10px 16px 4px;
+  flex-wrap: wrap;
+}
+.wc-thirds-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+.wc-thirds-pass {
+  background: rgba(39,174,96,0.15);
+  color: #27ae60;
+  border: 1px solid rgba(39,174,96,0.35);
+}
+.wc-thirds-out {
+  background: rgba(231,76,60,0.12);
+  color: #e74c3c;
+  border: 1px solid rgba(231,76,60,0.3);
+}
 
 /* ===== WC LIVE TAB BADGE ===== */
 .wc-live-tab-badge {

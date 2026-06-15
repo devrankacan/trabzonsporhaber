@@ -441,83 +441,59 @@ const _WC_GROUP_COLORS = [
 ];
 
 function renderWCStats() {
-  const wc = getWC();
-  const sortEl = document.getElementById('wcStatSort');
-  const sortBy = sortEl ? (sortEl.querySelector('.seg-btn.active')?.dataset.val || sortEl.value || 'pts') : 'pts';
   const body = document.getElementById('wcStatsBody');
   if (!body) return;
-
+  const wc = getWC();
   const groups = wc.groups || [];
-  const groupColorMap = {};
-  groups.forEach((g, i) => { groupColorMap[g.id] = _WC_GROUP_COLORS[i % _WC_GROUP_COLORS.length]; });
 
-  const allTeams = [];
-  groups.forEach(g => g.teams.forEach(t => allTeams.push({ ...t, group: g.id })));
+  // Her gruptan 3. sıradaki takımı al
+  const thirds = [];
+  for (const g of groups) {
+    const sorted = (g.teams || []).slice().sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
+      if (gdB !== gdA) return gdB - gdA;
+      return b.gf - a.gf;
+    });
+    if (sorted[2]) thirds.push({ ...sorted[2], group: g.id });
+  }
 
-  allTeams.sort((a, b) => {
-    if (sortBy === 'gd') return (b.gf - b.ga) - (a.gf - a.ga);
-    return (b[sortBy] || 0) - (a[sortBy] || 0);
+  // Puan → averaj → gol sırasıyla sırala
+  thirds.sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
+    if (gdB !== gdA) return gdB - gdA;
+    return b.gf - a.gf;
   });
 
-  body.innerHTML = allTeams.map((t, i) => {
-    const rgb = groupColorMap[t.group] || '100,100,100';
-    const bg = `rgba(${rgb},0.08)`;
-    const border = `rgba(${rgb},0.35)`;
+  body.innerHTML = thirds.map((t, i) => {
+    const pass = i < 8;
+    const rowClass = t.code === 'tr' ? 'wc-turkey-row' : '';
+    const indicator = pass
+      ? 'border-left:3px solid #27ae60'
+      : 'border-left:3px solid #e74c3c';
+    const rankBg = pass ? 'color:#27ae60;font-weight:800' : 'color:#e74c3c;font-weight:800';
+    const gd = t.gf - t.ga;
     return `
-    <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}" style="background:${bg}">
-      <td style="color:var(--text-muted);font-size:12px;border-left:3px solid ${border}">${i + 1}</td>
+    <tr class="${rowClass}">
+      <td style="${indicator};${rankBg};font-size:13px">${i + 1}</td>
       <td>
         <div style="display:flex;align-items:center;gap:7px">
           <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.onerror=null;this.style.display='none'" />
           <span>${escHtml(t.name)}</span>
-          <span style="font-size:11px;color:var(--text-muted);margin-left:2px">Gr.${t.group}</span>
         </div>
       </td>
+      <td><span style="background:rgba(100,100,100,0.15);border-radius:4px;padding:1px 7px;font-size:12px;font-weight:700">Gr.${escHtml(t.group)}</span></td>
       <td>${t.played}</td><td>${t.won}</td><td>${t.drawn}</td><td>${t.lost}</td>
       <td>${t.gf}</td><td>${t.ga}</td>
-      <td style="font-size:12px">${t.gf - t.ga > 0 ? '+' : ''}${t.gf - t.ga}</td>
-      <td class="wc-pts">${t.pts}</td>
-    </tr>
-  `;
+      <td style="font-size:12px">${gd > 0 ? '+' : ''}${gd}</td>
+      <td class="wc-pts" style="${pass ? 'color:#27ae60' : 'color:#e74c3c'}">${t.pts}</td>
+    </tr>`;
   }).join('');
-}
 
-function renderWCPlayers() {
-  const wc = getWC();
-  const sortEl = document.getElementById('wcPlayerSort');
-  const sortBy = sortEl ? (sortEl.querySelector('.seg-btn.active')?.dataset.val || sortEl.value || 'goals') : 'goals';
-  const players = (wc.players || []).slice();
-  const empty = document.getElementById('wcPlayersEmpty');
-  const table = document.getElementById('wcPlayersTable');
-  if (!empty || !table) return;
-
-  if (!players.length) {
-    empty.style.display = '';
-    table.style.display = 'none';
-    return;
+  if (!thirds.length) {
+    body.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-muted)">Henüz grup sonuçları oluşmadı.</td></tr>';
   }
-
-  players.sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
-  empty.style.display = 'none';
-  table.style.display = '';
-
-  document.getElementById('wcPlayersBody').innerHTML = players.map((p, i) => `
-    <tr class="${p.countryCode === 'tr' ? 'wc-turkey-row' : ''}">
-      <td style="color:var(--text-muted);font-size:12px">${i + 1}</td>
-      <td style="font-weight:600">${escHtml(p.name)}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:6px">
-          <img src="https://flagcdn.com/w32/${p.countryCode || ''}.png" class="wc-flag" alt="${escHtml(p.country || '')}" onerror="this.onerror=null;this.style.display='none'" />
-          <span>${escHtml(p.country || '')}</span>
-        </div>
-      </td>
-      <td class="wc-pts">${p.goals || 0}</td>
-      <td>${p.assists || 0}</td>
-      <td style="color:#e67e22">${p.yellowCards || 0}</td>
-      <td style="color:var(--ts-red)">${p.redCards || 0}</td>
-      <td style="font-size:12px;color:var(--text-muted)">${p.minutes || 0}'</td>
-    </tr>
-  `).join('');
 }
 
 // ==================== WC MATCHES ====================
