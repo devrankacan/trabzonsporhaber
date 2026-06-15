@@ -189,12 +189,18 @@ const WC_DEFAULT_MATCHES = [
 ];
 
 function getWC() {
-  const stored = localStorage.getItem(WC_KEY);
+  // Server cache first (populated by _apiSyncAll), then localStorage, then default
   let data;
-  if (stored) try {
-    const d = JSON.parse(stored);
+  if (_serverData[WC_KEY] !== undefined) {
+    const d = _serverData[WC_KEY];
     data = Array.isArray(d) ? { logo: '', groups: d } : d;
-  } catch {}
+  } else {
+    const stored = localStorage.getItem(WC_KEY);
+    if (stored) try {
+      const d = JSON.parse(stored);
+      data = Array.isArray(d) ? { logo: '', groups: d } : d;
+    } catch {}
+  }
   if (!data) data = { logo: '', groups: JSON.parse(JSON.stringify(WC_DEFAULT_GROUPS)) };
   if (!data.players) data.players = [];
   if (!data.fixtures) data.fixtures = WC_DEFAULT_FIXTURES;
@@ -206,6 +212,7 @@ function getWC() {
 }
 
 function saveWC(data) {
+  _serverData[WC_KEY] = data;
   localStorage.setItem(WC_KEY, JSON.stringify(data));
   _apiSave(WC_KEY, data);
 }
@@ -615,6 +622,12 @@ function wcStopMatchRefresh() {
   if (_wcMatchRefreshTimer) { clearInterval(_wcMatchRefreshTimer); _wcMatchRefreshTimer = null; }
 }
 
+// ==================== SERVER-FIRST IN-MEMORY CACHE ====================
+
+// Module-level in-memory cache populated by _apiSyncAll.
+// Getters check this first so localStorage is only a render cache, never a source of truth.
+let _serverData = {};
+
 // ==================== API SYNC ====================
 
 const _API_KEY = 'ee098b74';
@@ -641,6 +654,8 @@ async function _apiSyncAll() {
     const serverData = await res.json();
     for (const [key, val] of Object.entries(serverData)) {
       if (val === null || val === undefined) continue;
+      // Populate in-memory server cache — this is now the source of truth
+      _serverData[key] = val;
       try {
         localStorage.setItem(key, JSON.stringify(val));
       } catch {
@@ -1030,15 +1045,18 @@ const SAMPLE_NEWS = [
 ];
 
 function getNews() {
+  // Server cache first (populated by _apiSyncAll), then localStorage, then empty list
+  if (_serverData[STORAGE_KEY] !== undefined) return _serverData[STORAGE_KEY];
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return JSON.parse(stored);
   } catch (e) {}
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE_NEWS));
-  return SAMPLE_NEWS;
+  return [];
 }
 
 function saveNews(list) {
+  // Update in-memory server cache immediately
+  _serverData[STORAGE_KEY] = list;
   // Görselsiz (base64 hariç) versiyonu localStorage'a kaydet — quota aşımını önle
   const slim = list.map(n => {
     if (n.image && n.image.startsWith('data:')) {
@@ -1282,24 +1300,29 @@ const TRANSFER_STATUS = {
 };
 
 function getTransfers() {
+  if (_serverData[TRANSFERS_KEY] !== undefined) return _serverData[TRANSFERS_KEY];
   return JSON.parse(localStorage.getItem(TRANSFERS_KEY) || '[]');
 }
 
 function saveTransfers(list) {
+  _serverData[TRANSFERS_KEY] = list;
   localStorage.setItem(TRANSFERS_KEY, JSON.stringify(list));
   _apiSave(TRANSFERS_KEY, list);
 }
 
 function getLogos() {
+  if (_serverData[LOGOS_KEY] !== undefined) return _serverData[LOGOS_KEY];
   return JSON.parse(localStorage.getItem(LOGOS_KEY) || '{}');
 }
 
 function saveLogos(obj) {
+  _serverData[LOGOS_KEY] = obj;
   localStorage.setItem(LOGOS_KEY, JSON.stringify(obj));
   _apiSave(LOGOS_KEY, obj);
 }
 
 function getForeignLogos() {
+  if (_serverData[FOREIGN_LOGOS_KEY] !== undefined) return _serverData[FOREIGN_LOGOS_KEY];
   return JSON.parse(localStorage.getItem(FOREIGN_LOGOS_KEY) || '{}');
 }
 function getForeignLogo(name) {
@@ -1311,6 +1334,7 @@ function saveForeignLogo(name, src) {
   const key = name.toLowerCase().trim();
   if (src) logos[key] = src;
   else delete logos[key];
+  _serverData[FOREIGN_LOGOS_KEY] = logos;
   localStorage.setItem(FOREIGN_LOGOS_KEY, JSON.stringify(logos));
   _apiSave(FOREIGN_LOGOS_KEY, logos);
 }
@@ -1709,25 +1733,34 @@ const DEFAULT_STANDINGS = [
 ].map((team, i) => ({ id: i + 1, team, played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 }));
 
 function getStandings() {
-  const stored = localStorage.getItem(STANDINGS_KEY);
-  if (stored) {
-    let parsed = JSON.parse(stored);
-    if (parsed.length > 0) {
-      const keyMap = { amed: 'diyarbakir', chorumfk: 'corum' };
-      let changed = false;
-      parsed = parsed.map(r => {
-        if (keyMap[r.team]) { changed = true; return { ...r, team: keyMap[r.team] }; }
-        return r;
-      });
-      if (changed) localStorage.setItem(STANDINGS_KEY, JSON.stringify(parsed));
-      return parsed;
+  // Server cache first (populated by _apiSyncAll), then localStorage, then default
+  let parsed;
+  if (_serverData[STANDINGS_KEY] !== undefined) {
+    parsed = _serverData[STANDINGS_KEY];
+  } else {
+    const stored = localStorage.getItem(STANDINGS_KEY);
+    if (stored) {
+      try { parsed = JSON.parse(stored); } catch {}
     }
   }
-  localStorage.setItem(STANDINGS_KEY, JSON.stringify(DEFAULT_STANDINGS));
+  if (parsed && parsed.length > 0) {
+    const keyMap = { amed: 'diyarbakir', chorumfk: 'corum' };
+    let changed = false;
+    parsed = parsed.map(r => {
+      if (keyMap[r.team]) { changed = true; return { ...r, team: keyMap[r.team] }; }
+      return r;
+    });
+    if (changed) {
+      _serverData[STANDINGS_KEY] = parsed;
+      localStorage.setItem(STANDINGS_KEY, JSON.stringify(parsed));
+    }
+    return parsed;
+  }
   return DEFAULT_STANDINGS;
 }
 
 function saveStandings(list) {
+  _serverData[STANDINGS_KEY] = list;
   localStorage.setItem(STANDINGS_KEY, JSON.stringify(list));
   _apiSave(STANDINGS_KEY, list);
 }
@@ -1743,11 +1776,16 @@ function sortedStandings() {
 }
 
 function getStandingsLogo() {
+  if (_serverData[STANDINGS_LOGO_KEY] !== undefined) {
+    const v = _serverData[STANDINGS_LOGO_KEY];
+    return typeof v === 'string' ? v : '';
+  }
   const raw = localStorage.getItem(STANDINGS_LOGO_KEY);
   if (!raw) return '';
   try { const p = JSON.parse(raw); return typeof p === 'string' ? p : raw; } catch { return raw; }
 }
 function saveStandingsLogo(logo) {
+  _serverData[STANDINGS_LOGO_KEY] = logo;
   localStorage.setItem(STANDINGS_LOGO_KEY, logo);
   _apiSave(STANDINGS_LOGO_KEY, logo);
 }
@@ -1776,11 +1814,16 @@ function fetchAndApplyStandingsLogo() {
 }
 
 function getTransfersLogo() {
+  if (_serverData[TRANSFERS_LOGO_KEY] !== undefined) {
+    const v = _serverData[TRANSFERS_LOGO_KEY];
+    return typeof v === 'string' ? v : '';
+  }
   const raw = localStorage.getItem(TRANSFERS_LOGO_KEY);
   if (!raw) return '';
   try { const p = JSON.parse(raw); return typeof p === 'string' ? p : raw; } catch { return raw; }
 }
 function saveTransfersLogo(logo) {
+  _serverData[TRANSFERS_LOGO_KEY] = logo;
   localStorage.setItem(TRANSFERS_LOGO_KEY, logo);
   _apiSave(TRANSFERS_LOGO_KEY, logo);
 }
@@ -2434,15 +2477,20 @@ async function handleSubmit() {
     return;
   }
 
-  // Her zaman sunucudan taze listeyi çek — localStorage'a güvenme
+  // Her zaman sunucu önbelleğini kullan — localStorage'a güvenme
   let list;
   try {
-    const res = await fetch('/api/' + STORAGE_KEY);
-    if (res.ok) {
-      const serverList = await res.json();
-      if (Array.isArray(serverList)) {
-        list = serverList;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(serverList.map(n => n.image?.startsWith('data:') ? { ...n, image: '' } : n)));
+    if (_serverData[STORAGE_KEY] !== undefined) {
+      list = _serverData[STORAGE_KEY];
+    } else {
+      const res = await fetch('/api/' + STORAGE_KEY);
+      if (res.ok) {
+        const serverList = await res.json();
+        if (Array.isArray(serverList)) {
+          list = serverList;
+          _serverData[STORAGE_KEY] = serverList;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(serverList.map(n => n.image?.startsWith('data:') ? { ...n, image: '' } : n)));
+        }
       }
     }
   } catch {}
@@ -2715,8 +2763,11 @@ function hashPassword(str) {
   return h.toString(16).padStart(8, '0');
 }
 
-function getUsers() { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
-function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); _apiSave(USERS_KEY, u); }
+function getUsers() {
+  if (_serverData[USERS_KEY] !== undefined) return _serverData[USERS_KEY];
+  return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+}
+function saveUsers(u) { _serverData[USERS_KEY] = u; localStorage.setItem(USERS_KEY, JSON.stringify(u)); _apiSave(USERS_KEY, u); }
 
 function getCurrentUser() {
   const s = sessionStorage.getItem(USER_SESSION_KEY);
