@@ -126,6 +126,7 @@
       <button class="dash-hamburger" id="dashHamburger">☰</button>
       <div class="dash-topbar-title" id="dashTopbarTitle">İstatistikler</div>
       <div class="dash-topbar-right">
+        <button onclick="migrateImages()" style="font-size:11px;padding:4px 10px;background:#27ae60;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-right:8px" title="Mevcut base64 görselleri sunucu dosyasına taşı">Görselleri Migrate Et</button>
         <span id="syncStatus" style="font-size:12px;margin-right:16px;font-weight:600"></span>
         <span class="dash-topbar-date" id="dashDate"></span>
       </div>
@@ -1038,6 +1039,25 @@
     saveWC({ logo: '', groups: JSON.parse(JSON.stringify(WC_DEFAULT_GROUPS)), matches: JSON.parse(JSON.stringify(WC_DEFAULT_MATCHES)) });
     renderWCAdmin();
     renderWCMatchAdmin();
+  }
+
+  async function migrateImages() {
+    const el = document.getElementById('syncStatus');
+    if (el) { el.textContent = '⏳ Görseller taşınıyor...'; el.style.color = '#f39c12'; }
+    try {
+      const r = await fetch('/api/migrate-images', {
+        method: 'POST',
+        headers: { 'x-api-key': _API_KEY, 'Content-Type': 'application/json' }
+      });
+      const d = await r.json();
+      if (el) {
+        el.textContent = d.error ? `❌ ${d.error}` : `✅ ${d.migrated}/${d.total} görsel taşındı`;
+        el.style.color = d.error ? '#e74c3c' : '#27ae60';
+      }
+      if (!d.error) await _apiSyncAll();
+    } catch(e) {
+      if (el) { el.textContent = '❌ Bağlantı hatası'; el.style.color = '#e74c3c'; }
+    }
   }
 
   async function wcPollNow() {

@@ -2477,11 +2477,19 @@ function initAdminForm() {
       alert('Görsel 10 MB\'dan büyük olamaz.'); return;
     }
     const dropInner = document.getElementById('fileDropInner');
-    if (dropInner) dropInner.innerHTML = '<div class="file-drop-text">Sıkıştırılıyor...</div>';
+    if (dropInner) dropInner.innerHTML = '<div class="file-drop-text">Yükleniyor...</div>';
     try {
       const compressed = await compressImage(file, 900, 600, 0.75);
-      currentImageData = compressed;
-      showImagePreview(compressed);
+      // Sunucuya yükle, URL al
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': _API_KEY },
+        body: JSON.stringify({ data: compressed, ext: 'webp' })
+      });
+      if (!uploadRes.ok) throw new Error('Upload başarısız');
+      const { url } = await uploadRes.json();
+      currentImageData = url;
+      showImagePreview(url);
       if (dropInner) dropInner.innerHTML = `<div class="file-drop-text" style="color:var(--ts-red);font-weight:700">✓ ${escHtml(file.name)}</div>`;
     } catch(e) {
       if (dropInner) dropInner.innerHTML = '<div class="file-drop-text" style="color:red">Hata oluştu, tekrar deneyin.</div>';

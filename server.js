@@ -10,6 +10,9 @@ app.use(express.json({ limit: '150mb', strict: false }));
 const DATA_DIR = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
+const UPLOADS_DIR = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
 const API_KEY = 'ee098b74';
 
 const ALLOWED_KEYS = [
@@ -126,6 +129,47 @@ app.get('/admin.html', serveHtml('admin.html'));
 app.get('/hakkimizda.html', serveHtml('hakkimizda.html'));
 app.get('/gizlilik.html', serveHtml('gizlilik.html'));
 app.get('/iletisim.html', serveHtml('iletisim.html'));
+
+// Statik görsel servisi
+app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '30d' }));
+
+// Görsel yükleme: base64 → dosyaya kaydet → URL döner
+app.post('/api/upload', auth, (req, res) => {
+  try {
+    const { data, ext } = req.body; // data: base64 string (data:image/... prefix olmadan veya tam), ext: 'webp'
+    if (!data) return res.status(400).json({ error: 'data gerekli' });
+    const base64 = data.replace(/^data:image\/\w+;base64,/, '');
+    const extension = ext || 'webp';
+    const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${extension}`;
+    const filepath = path.join(UPLOADS_DIR, filename);
+    fs.writeFileSync(filepath, Buffer.from(base64, 'base64'));
+    res.json({ url: `/uploads/${filename}` });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Mevcut base64 görselleri dosyaya migrate et
+app.post('/api/migrate-images', auth, (req, res) => {
+  try {
+    const news = readKey('ts_haberler');
+    if (!Array.isArray(news)) return res.json({ migrated: 0 });
+    let migrated = 0;
+    const updated = news.map(n => {
+      if (!n.image || !n.image.startsWith('data:')) return n;
+      const ext = n.image.match(/data:image\/(\w+);/)?.[1] || 'webp';
+      const base64 = n.image.replace(/^data:image\/\w+;base64,/, '');
+      const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      fs.writeFileSync(path.join(UPLOADS_DIR, filename), Buffer.from(base64, 'base64'));
+      migrated++;
+      return { ...n, image: `/uploads/${filename}` };
+    });
+    writeKey('ts_haberler', updated);
+    res.json({ migrated, total: news.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 app.get('/api/all', (req, res) => {
   const result = {};
