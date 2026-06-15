@@ -2406,7 +2406,7 @@ function compressImage(file, maxW, maxH, quality) {
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/png'));
+        resolve(canvas.toDataURL('image/webp', quality));
       };
       img.onerror = reject;
       img.src = e.target.result;
@@ -2479,7 +2479,7 @@ function initAdminForm() {
     const dropInner = document.getElementById('fileDropInner');
     if (dropInner) dropInner.innerHTML = '<div class="file-drop-text">Sıkıştırılıyor...</div>';
     try {
-      const compressed = await compressImage(file, 1200, 800, 0.82);
+      const compressed = await compressImage(file, 900, 600, 0.75);
       currentImageData = compressed;
       showImagePreview(compressed);
       if (dropInner) dropInner.innerHTML = `<div class="file-drop-text" style="color:var(--ts-red);font-weight:700">✓ ${escHtml(file.name)}</div>`;
