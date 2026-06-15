@@ -651,23 +651,37 @@ async function _apiSave(key, data) {
 }
 
 async function _apiSyncAll() {
-  // Fetch news with images separately (may be large, keep isolated)
+  // /api/ts_haberler ve /api/all paralel çek
   const newsPromise = fetch('/api/' + STORAGE_KEY)
     .then(r => r.ok ? r.json() : null)
     .catch(() => null);
 
+  const allPromise = fetch('/api/all')
+    .then(r => r.ok ? r.json() : null)
+    .catch(() => null);
+
+  // News gelir gelmez _serverData'ya yaz (render tetiklenir)
+  newsPromise.then(newsData => {
+    if (Array.isArray(newsData) && newsData.length > 0) {
+      _serverData[STORAGE_KEY] = newsData;
+      try {
+        const slim = newsData.map(n => (n.image && n.image.startsWith('data:')) ? { ...n, image: '' } : n);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
+      } catch {}
+    }
+  }).catch(() => {});
+
+  // /api/all tamamlanınca geri kalanını işle
   try {
-    const res = await fetch('/api/all');
-    if (!res.ok) return;
-    const serverData = await res.json();
+    const serverData = await allPromise;
+    if (!serverData) return;
     for (const [key, val] of Object.entries(serverData)) {
       if (val === null || val === undefined) continue;
-      // Populate in-memory server cache — this is now the source of truth
+      if (key === STORAGE_KEY) continue; // news zaten ayrı çekildi
       _serverData[key] = val;
       try {
         localStorage.setItem(key, JSON.stringify(val));
       } catch {
-        // Görseller varsa görselsiz kaydet
         if (Array.isArray(val)) {
           try {
             const slim = val.map(n => (n && n.image && n.image.startsWith('data:')) ? { ...n, image: '' } : n);
@@ -684,18 +698,8 @@ async function _apiSyncAll() {
     applySiteLogo(getSiteLogo());
   } catch {}
 
-  // Override news from dedicated fetch to ensure images are present
-  try {
-    const newsData = await newsPromise;
-    if (Array.isArray(newsData) && newsData.length > 0) {
-      _serverData[STORAGE_KEY] = newsData;
-      // Also try to update localStorage slim version
-      try {
-        const slim = newsData.map(n => (n.image && n.image.startsWith('data:')) ? { ...n, image: '' } : n);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
-      } catch {}
-    }
-  } catch {}
+  // Her ikisinin de tamamlanmasını bekle
+  await Promise.allSettled([newsPromise, allPromise]);
 }
 
 async function _apiSyncAndRender(renderFn) {

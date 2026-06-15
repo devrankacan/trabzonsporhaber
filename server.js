@@ -46,6 +46,17 @@ function buildBootstrapScript() {
       lines.push(`localStorage.setItem(${JSON.stringify(key)},${JSON.stringify(JSON.stringify(val))});`);
     }
   }
+  // Haberleri de inject et (görseller URL olduğu için küçük)
+  const news = readKey('ts_haberler');
+  if (Array.isArray(news) && news.length > 0) {
+    // base64 varsa strip et (migrate öncesi güvenlik)
+    const slim = news.map(n => (n.image && n.image.startsWith('data:')) ? { ...n, image: '' } : n);
+    lines.push(`localStorage.setItem('ts_haberler',${JSON.stringify(JSON.stringify(slim))});`);
+  }
+  const transfers = readKey('ts_transfers');
+  if (Array.isArray(transfers) && transfers.length > 0) {
+    lines.push(`localStorage.setItem('ts_transfers',${JSON.stringify(JSON.stringify(transfers))});`);
+  }
   lines.push('}catch(e){}</script>');
   return lines.join('');
 }
