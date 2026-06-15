@@ -2314,6 +2314,8 @@ function updateBranchTrigger() {
 }
 
 function initAdmin() {
+  // Admin açılınca localStorage'daki tüm veriyi sunucuya gönder
+  _apiSyncAll().then(() => _apiPushAll());
   renderAdminList();
   initAdminForm();
   initBranchMultiSelect();
