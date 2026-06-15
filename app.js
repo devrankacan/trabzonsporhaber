@@ -2326,8 +2326,14 @@ function updateBranchTrigger() {
 }
 
 function initAdmin() {
-  // Admin açılınca localStorage'daki tüm veriyi sunucuya gönder
-  _apiSyncAll().then(() => _apiPushAll());
+  // Oturum başında sadece bir kez tam sync yap
+  if (!sessionStorage.getItem('_adminSynced')) {
+    _apiSyncAll().then(() => _apiPushAll().then(() => {
+      sessionStorage.setItem('_adminSynced', '1');
+    }));
+  } else {
+    _apiSyncAll(); // Sadece sunucudan çek, geri gönderme
+  }
   renderAdminList();
   initAdminForm();
   initBranchMultiSelect();
