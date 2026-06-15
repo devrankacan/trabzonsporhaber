@@ -414,18 +414,10 @@ function applyStandingsToWC(wc, standings) {
 }
 
 function isMatchWindowActive() {
-  const wc = readKey('ts_wc2026');
-  if (!wc?.matches) return false;
-  const now = Date.now();
-  return wc.matches.some(m => {
-    if (m.status === 'finished') return false;
-    try {
-      const [day, month, year] = m.date.split('.').map(Number);
-      const [hh, mm] = m.time.split(':').map(Number);
-      const trMs = Date.UTC(year, month - 1, day, hh - 3, mm);
-      return now >= trMs - 5 * 60000 && now <= trMs + 115 * 60000;
-    } catch { return false; }
-  });
+  // Türkiye saati (UTC+3) ile 22:00-07:00 arası maç penceresi
+  const nowUtc = new Date();
+  const trHour = (nowUtc.getUTCHours() + 3) % 24;
+  return trHour >= 22 || trHour < 7;
 }
 
 let _pollTimer = null;
@@ -467,11 +459,11 @@ function scheduleNext() {
 
   let delay;
   if (isMatchWindowActive()) {
-    // Aktif maç penceresi → 60 saniyede bir sorgula (canlı skorlar)
-    delay = 60 * 1000;
+    // 22:00-07:00 TR saati → 3 dakikada bir sorgula
+    delay = 3 * 60 * 1000;
   } else {
-    // Maç yok → 60 dakikada bir güncelle (günlük 24 istek)
-    delay = 60 * 60 * 1000;
+    // Gündüz → 2 saatte bir güncelle
+    delay = 2 * 60 * 60 * 1000;
   }
   _pollTimer = setTimeout(() => runPoll(isMatchWindowActive()), delay);
   console.log(`[WC-Poll] Next poll in ${Math.round(delay/1000)}s`);
