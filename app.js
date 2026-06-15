@@ -640,8 +640,17 @@ async function _apiSyncAll() {
     if (!res.ok) return;
     const serverData = await res.json();
     for (const [key, val] of Object.entries(serverData)) {
-      if (val !== null && val !== undefined) {
+      if (val === null || val === undefined) continue;
+      try {
         localStorage.setItem(key, JSON.stringify(val));
+      } catch {
+        // Görseller varsa görselsiz kaydet
+        if (Array.isArray(val)) {
+          try {
+            const slim = val.map(n => (n && n.image && n.image.startsWith('data:')) ? { ...n, image: '' } : n);
+            localStorage.setItem(key, JSON.stringify(slim));
+          } catch {}
+        }
       }
     }
     renderNavWcLogo();
@@ -1030,7 +1039,22 @@ function getNews() {
 }
 
 function saveNews(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  // Görselsiz (base64 hariç) versiyonu localStorage'a kaydet — quota aşımını önle
+  const slim = list.map(n => {
+    if (n.image && n.image.startsWith('data:')) {
+      return { ...n, image: '' };
+    }
+    return n;
+  });
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
+  } catch (e) {
+    // Hâlâ doluysa en eski 20 haberi at ve tekrar dene
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(slim.slice(0, 50)));
+    } catch {}
+  }
+  // Tam veriyi (görsellerle) sunucuya gönder
   _apiSave(STORAGE_KEY, list);
 }
 
