@@ -1290,7 +1290,7 @@ function renderHomePage() {
   const empty = document.getElementById('newsEmpty');
   if (!grid) return;
 
-  const news = getNews().slice(0, 6);
+  const news = getNews().slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
   if (news.length === 0) {
     grid.style.display = 'none';
     if (empty) empty.style.display = 'block';
@@ -2107,7 +2107,7 @@ function renderAllNews(reset) {
   const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
   const teamFilter = document.getElementById('teamFilter')?.value || '';
 
-  let news = getNews();
+  let news = getNews().slice().sort((a, b) => new Date(b.date) - new Date(a.date));
   if (query) news = news.filter(n => n.title.toLowerCase().includes(query) || n.summary.toLowerCase().includes(query));
   if (teamFilter) news = news.filter(n => getTeams(n).includes(teamFilter));
 
