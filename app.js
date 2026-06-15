@@ -1167,7 +1167,7 @@ let slideTimer = null;
 let slides = [];
 
 function buildSlides() {
-  const list = getNews().filter(n => n.slider);
+  const list = getNews().filter(n => n.slider).sort((a, b) => (a.sliderOrder || 0) - (b.sliderOrder || 0));
   slides = list;
   const track = document.getElementById('sliderTrack');
   const dots = document.getElementById('sliderDots');
@@ -2643,6 +2643,77 @@ function renderAdminList() {
       </div>
     </div>
   `).join('');
+
+  renderSliderOrder();
+}
+
+let _dragSrcId = null;
+
+function renderSliderOrder() {
+  const el = document.getElementById('sliderOrderList');
+  if (!el) return;
+  const sliders = getNews().filter(n => n.slider).sort((a, b) => (a.sliderOrder || 0) - (b.sliderOrder || 0));
+
+  if (!sliders.length) {
+    el.innerHTML = '<p class="no-news-text" style="font-size:13px">Slider\'a eklenmiş haber yok.</p>';
+    return;
+  }
+
+  el.innerHTML = sliders.map((n, i) => `
+    <div class="slider-order-item" draggable="true" data-id="${n.id}"
+      style="display:flex;align-items:center;gap:10px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;padding:10px 14px;cursor:grab">
+      <span style="font-size:18px;color:var(--ts-muted);cursor:grab">⠿</span>
+      <div style="width:40px;height:40px;border-radius:6px;flex-shrink:0;${buildBgStyle(n.image)}"></div>
+      <div style="flex:1;font-size:13px;font-weight:600;color:var(--ts-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(n.title)}</div>
+      <input type="number" min="1" max="${sliders.length}" value="${i + 1}"
+        style="width:52px;padding:4px 6px;border:1px solid var(--ts-border);border-radius:6px;background:var(--ts-bg);color:var(--ts-text);font-size:13px;text-align:center"
+        onchange="sliderMoveToPos(${n.id}, this.value, ${sliders.length})"
+        onclick="this.select()" />
+    </div>
+  `).join('');
+
+  // Drag & drop event'leri
+  el.querySelectorAll('.slider-order-item').forEach(row => {
+    row.addEventListener('dragstart', e => {
+      _dragSrcId = parseInt(row.dataset.id);
+      e.dataTransfer.effectAllowed = 'move';
+      row.style.opacity = '0.5';
+    });
+    row.addEventListener('dragend', () => { row.style.opacity = ''; });
+    row.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; row.style.outline = '2px solid var(--ts-red)'; });
+    row.addEventListener('dragleave', () => { row.style.outline = ''; });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      row.style.outline = '';
+      const targetId = parseInt(row.dataset.id);
+      if (_dragSrcId === targetId) return;
+      sliderSwapOrder(_dragSrcId, targetId);
+    });
+  });
+}
+
+function sliderMoveToPos(id, newPos, total) {
+  newPos = Math.max(1, Math.min(total, parseInt(newPos) || 1));
+  const list = getNews();
+  const sliders = list.filter(n => n.slider).sort((a, b) => (a.sliderOrder || 0) - (b.sliderOrder || 0));
+  const idx = sliders.findIndex(n => n.id === id);
+  if (idx === -1) return;
+  sliders.splice(newPos - 1, 0, sliders.splice(idx, 1)[0]);
+  sliders.forEach((n, i) => { const item = list.find(x => x.id === n.id); if (item) item.sliderOrder = i; });
+  saveNews(list);
+  renderSliderOrder();
+}
+
+function sliderSwapOrder(srcId, dstId) {
+  const list = getNews();
+  const sliders = list.filter(n => n.slider).sort((a, b) => (a.sliderOrder || 0) - (b.sliderOrder || 0));
+  const srcIdx = sliders.findIndex(n => n.id === srcId);
+  const dstIdx = sliders.findIndex(n => n.id === dstId);
+  if (srcIdx === -1 || dstIdx === -1) return;
+  sliders.splice(dstIdx, 0, sliders.splice(srcIdx, 1)[0]);
+  sliders.forEach((n, i) => { const item = list.find(x => x.id === n.id); if (item) item.sliderOrder = i; });
+  saveNews(list);
+  renderSliderOrder();
 }
 
 function editNews(id) {
