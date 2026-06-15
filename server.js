@@ -543,44 +543,140 @@ function applyStandingsToWC(wc, standings) {
   wc.groups.sort((a, b) => a.id.localeCompare(b.id));
 }
 
-let _pollTimer = null;
-let _afLivePollTimer = null;
+// ─── API-Football poll sistemi ───────────────────────────────────────────────
+// Bütçe: 100 istek/gün
+//   • Tam sync (fixtures+standings): günde 2 istek (startup + gece yarısı reset)
+//   • Maç günü canlı poll: kalan 96 istek ÷ toplam maç dakikası = dinamik interval
+//   • Maç olmayan günler: 0 istek
 
-// football-data.org: tüm fikstür + standings güncellemesi (saatte bir)
-async function runFdPoll() {
+let _afLivePollTimer = null;
+let _afDailyTimer   = null;
+let _afDailyBudget  = 96; // günlük kalan canlı poll hakkı
+let _afPollInterval = 4 * 60 * 1000; // default 4dk (dinamik hesaplanır)
+
+// API-Football'dan tüm WC fikstür + standings → ts_wc2026 güncelle
+async function runAfFullSync() {
   try {
-    console.log('[FD-Poll] Tüm maçlar + standings çekiliyor...');
-    const [matches, standings] = await Promise.all([
-      fetchAllMatches(),
-      fetchStandings().catch(() => []),
+    console.log('[AF-Sync] Tüm fikstür + standings çekiliyor...');
+    const [fixRes, stdRes] = await Promise.all([
+      afRequest(`/fixtures?league=${AF_WC_LEAGUE}&season=${AF_WC_SEASON}`),
+      afRequest(`/standings?league=${AF_WC_LEAGUE}&season=${AF_WC_SEASON}`),
     ]);
+
     const wc = readKey('ts_wc2026') || { logo: '', groups: [], matches: [], players: [] };
-    applyMatchesToWC(wc, matches);
-    if (standings.length) applyStandingsToWC(wc, standings);
+
+    // Standings → gruplar
+    const standingsArr = stdRes?.response?.[0]?.league?.standings || [];
+    wc.groups = [];
+    const teamGroupMap = {}; // team name → group letter
+    for (const group of standingsArr) {
+      if (!group.length) continue;
+      const groupName = group[0]?.group || '';
+      const letter = groupName.replace(/^Group\s*/i, '').trim();
+      if (!letter) continue;
+      const wcGroup = { id: letter, teams: [] };
+      for (const row of group) {
+        const teamInfo = mapTeam(row.team?.name || '');
+        teamGroupMap[row.team?.name || ''] = letter;
+        wcGroup.teams.push({
+          name:     teamInfo.tr,
+          code:     teamInfo.code,
+          position: row.rank || 99,
+          played:   row.all?.played || 0,
+          won:      row.all?.win    || 0,
+          drawn:    row.all?.draw   || 0,
+          lost:     row.all?.lose   || 0,
+          gf:       row.all?.goals?.for     || 0,
+          ga:       row.all?.goals?.against || 0,
+          pts:      row.points || 0,
+        });
+      }
+      wcGroup.teams.sort((a, b) => a.position - b.position);
+      wc.groups.push(wcGroup);
+    }
+    wc.groups.sort((a, b) => a.id.localeCompare(b.id));
+
+    // Fixtures → maçlar
+    const fixtures = fixRes?.response || [];
+    wc.matches = wc.matches || [];
+    for (const f of fixtures) {
+      const fix   = f.fixture;
+      const teams = f.teams;
+      const goals = f.goals;
+      const score = f.score;
+      if (!fix || !teams) continue;
+
+      const homeInfo = mapTeam(teams.home?.name || '');
+      const awayInfo = mapTeam(teams.away?.name || '');
+      const status   = mapAfStatus(fix.status);
+      const minute   = fix.status?.elapsed || 0;
+      const afId     = String(fix.id);
+      const group    = teamGroupMap[teams.home?.name] || teamGroupMap[teams.away?.name] || '';
+
+      let existing = wc.matches.find(x => x.afId === afId);
+      if (!existing) {
+        existing = wc.matches.find(x =>
+          (x.homeCode === homeInfo.code || x.home === homeInfo.tr) &&
+          (x.awayCode === awayInfo.code || x.away === awayInfo.tr)
+        );
+      }
+
+      const matchday = parseInt((f.league?.round || '').replace(/\D/g, '')) || 1;
+
+      if (existing) {
+        existing.afId      = afId;
+        existing.group     = group || existing.group;
+        existing.homeScore = goals?.home ?? null;
+        existing.awayScore = goals?.away ?? null;
+        existing.status    = status;
+        existing.minute    = minute;
+        existing.htHome    = score?.halftime?.home ?? null;
+        existing.htAway    = score?.halftime?.away ?? null;
+        existing.date      = formatDate(fix.date);
+        existing.day       = formatDay(fix.date);
+        existing.time      = formatTime(fix.date);
+        existing.matchday  = matchday;
+      } else {
+        wc.matches.push({
+          id: `af_${afId}`, afId, group, matchday,
+          home: homeInfo.tr, homeCode: homeInfo.code,
+          away: awayInfo.tr, awayCode: awayInfo.code,
+          date: formatDate(fix.date), day: formatDay(fix.date), time: formatTime(fix.date),
+          homeScore: goals?.home ?? null,
+          awayScore: goals?.away ?? null,
+          htHome: score?.halftime?.home ?? null,
+          htAway: score?.halftime?.away ?? null,
+          status, minute,
+        });
+      }
+    }
+
     writeKey('ts_wc2026', wc);
-    console.log(`[FD-Poll] Güncellendi. Toplam maç: ${(wc.matches||[]).length}`);
+    console.log(`[AF-Sync] Tamamlandı. Grup: ${wc.groups.length}, Maç: ${wc.matches.length}`);
   } catch (e) {
-    console.error('[FD-Poll] Hata:', e.message);
+    console.error('[AF-Sync] Hata:', e.message);
   }
-  // Her saat tekrarla
-  _pollTimer = setTimeout(runFdPoll, 60 * 60 * 1000);
 }
 
-// API-Football: sadece maç olan günlerde, maç saatlerinde 3dk'da bir canlı skor
+// Canlı maçları çek ve güncelle (1 istek)
 async function runAfLivePoll() {
+  if (_afDailyBudget <= 0) {
+    console.log('[AF-Poll] Günlük bütçe tükendi, poll durduruldu.');
+    scheduleAfNext();
+    return;
+  }
+  _afDailyBudget--;
   try {
-    const fixtures = await fetchAfLiveToday();
+    const data = await afRequest(`/fixtures?live=all&league=${AF_WC_LEAGUE}&season=${AF_WC_SEASON}`);
+    const fixtures = data?.response || [];
     if (fixtures.length > 0) {
       const wc = readKey('ts_wc2026') || { logo: '', groups: [], matches: [], players: [] };
       applyAfFixturesToWC(wc, fixtures);
       writeKey('ts_wc2026', wc);
-      const live = fixtures.filter(f => {
-        const st = f.fixture?.status?.short;
-        return st === '1H' || st === '2H' || st === 'ET' || st === 'P' || st === 'HT';
-      }).length;
-      console.log(`[AF-Poll] Canlı: ${live}/${fixtures.length} maç güncellendi.`);
+      const liveCount = fixtures.filter(f => ['1H','2H','ET','P','HT'].includes(f.fixture?.status?.short)).length;
+      console.log(`[AF-Poll] Canlı: ${liveCount}/${fixtures.length}  Kalan bütçe: ${_afDailyBudget}`);
     } else {
-      console.log('[AF-Poll] Şu an canlı maç yok.');
+      console.log(`[AF-Poll] Canlı maç yok. Kalan bütçe: ${_afDailyBudget}`);
     }
   } catch (e) {
     console.error('[AF-Poll] Hata:', e.message);
@@ -588,75 +684,103 @@ async function runAfLivePoll() {
   scheduleAfNext();
 }
 
-function getTodayMatchTimesMs() {
-  // Bugün TR saatinde maç var mı? Varsa [başlangıç, bitiş] UTC ms döner
+// Bugünkü maç penceresini hesapla
+function getTodayMatchWindow() {
   const wc = readKey('ts_wc2026');
   if (!wc?.matches) return null;
   const nowUtc = Date.now();
   const todayTr = new Date(nowUtc + 3 * 3600000);
   const todayStr = `${String(todayTr.getUTCDate()).padStart(2,'0')}.${String(todayTr.getUTCMonth()+1).padStart(2,'0')}.${todayTr.getUTCFullYear()}`;
-  const todayMatches = wc.matches.filter(m => m.date === todayStr);
+  const todayMatches = wc.matches.filter(m => m.date === todayStr && m.status !== 'finished');
   if (!todayMatches.length) return null;
 
   let earliestMs = Infinity, latestMs = -Infinity;
   for (const m of todayMatches) {
     try {
       const [hh, mn] = m.time.split(':').map(Number);
-      // TR saatini UTC'ye çevir
       const [dd, mo, yy] = m.date.split('.').map(Number);
-      const matchUtcMs = Date.UTC(yy, mo - 1, dd, hh - 3, mn);
-      if (matchUtcMs < earliestMs) earliestMs = matchUtcMs;
-      if (matchUtcMs > latestMs) latestMs = matchUtcMs;
+      const utcMs = Date.UTC(yy, mo - 1, dd, hh - 3, mn);
+      if (utcMs < earliestMs) earliestMs = utcMs;
+      if (utcMs > latestMs) latestMs = utcMs;
     } catch {}
   }
   if (earliestMs === Infinity) return null;
+
+  // Bugün kaç dakika maç var? (ilk başlangıç → son maç bitiş)
+  const totalMinutes = Math.ceil((latestMs + 110 * 60000 - earliestMs) / 60000);
+  // Kalan bütçeden dinamik interval hesapla (en az 3dk, en fazla 5dk)
+  const interval = Math.max(3, Math.min(5, Math.ceil(totalMinutes / Math.max(_afDailyBudget, 1))));
+
   return {
-    start: earliestMs - 5 * 60000,       // ilk maçtan 5dk önce
-    end:   latestMs  + 110 * 60000,      // son maçtan 110dk sonra (maç süresi)
+    start:    earliestMs - 5 * 60000,
+    end:      latestMs  + 110 * 60000,
+    interval: interval * 60 * 1000,
   };
 }
 
 function scheduleAfNext() {
   if (_afLivePollTimer) clearTimeout(_afLivePollTimer);
   const now = Date.now();
-  const window = getTodayMatchTimesMs();
+  const win = getTodayMatchWindow();
 
-  if (!window) {
-    // Bugün maç yok — yarın gece yarısından 30dk sonra tekrar kontrol et
-    const tomorrowMidnightTr = (() => {
-      const d = new Date(now + 3 * 3600000);
-      d.setUTCHours(0, 0, 0, 0);
-      return d.getTime() - 3 * 3600000 + 24 * 3600000 + 30 * 60000; // yarın 00:30 TR
-    })();
-    const delay = Math.max(60000, tomorrowMidnightTr - now);
-    console.log(`[AF-Poll] Bugün maç yok. ${Math.round(delay/60000)}dk sonra tekrar kontrol.`);
+  if (!win) {
+    // Bugün maç yok veya bitti — yarın 00:30 TR'de tekrar bak
+    const d = new Date(now + 3 * 3600000);
+    d.setUTCHours(0, 0, 0, 0);
+    const tomorrowUtc = d.getTime() - 3 * 3600000 + 24 * 3600000 + 30 * 60000;
+    const delay = Math.max(60000, tomorrowUtc - now);
+    console.log(`[AF-Poll] Maç yok. ${Math.round(delay/60000)}dk sonra kontrol.`);
     _afLivePollTimer = setTimeout(scheduleAfNext, delay);
     return;
   }
 
-  if (now < window.start) {
-    // Maç henüz başlamadı — ilk maça kadar bekle
-    const delay = window.start - now;
-    console.log(`[AF-Poll] İlk maça ${Math.round(delay/60000)}dk kaldı, o zaman başlıyorum.`);
+  if (now < win.start) {
+    const delay = win.start - now;
+    _afPollInterval = win.interval;
+    console.log(`[AF-Poll] İlk maça ${Math.round(delay/60000)}dk kaldı. Poll aralığı: ${win.interval/60000}dk`);
     _afLivePollTimer = setTimeout(runAfLivePoll, delay);
     return;
   }
 
-  if (now > window.end) {
-    // Maçlar bitti — yarın kontrol et
-    scheduleAfNext(); // window null dönecek ve yarına ayarlayacak (bugünkü tarihi geçtik)
+  if (now > win.end) {
+    // Bitti, yarına ayarla
+    const d = new Date(now + 3 * 3600000);
+    d.setUTCHours(0, 0, 0, 0);
+    const tomorrowUtc = d.getTime() - 3 * 3600000 + 24 * 3600000 + 30 * 60000;
+    const delay = Math.max(60000, tomorrowUtc - now);
+    _afLivePollTimer = setTimeout(scheduleAfNext, delay);
     return;
   }
 
-  // Aktif maç penceresi → 3 dakikada bir
-  _afLivePollTimer = setTimeout(runAfLivePoll, 3 * 60 * 1000);
-  console.log(`[AF-Poll] Maç penceresi aktif. 3dk sonra tekrar.`);
+  // Aktif pencere
+  _afPollInterval = win.interval;
+  _afLivePollTimer = setTimeout(runAfLivePoll, win.interval);
+  console.log(`[AF-Poll] Aktif. ${win.interval/60000}dk'da bir poll. Kalan bütçe: ${_afDailyBudget}`);
 }
 
-// Sunucu başlarken
+// Gece yarısı TR saatinde bütçeyi sıfırla + tam sync yap
+function scheduleMidnightReset() {
+  const now = Date.now();
+  const d = new Date(now + 3 * 3600000);
+  d.setUTCHours(0, 0, 0, 0);
+  const midnightUtc = d.getTime() - 3 * 3600000 + 24 * 3600000;
+  const delay = midnightUtc - now + 5000; // gece yarısı + 5sn
+  _afDailyTimer = setTimeout(async () => {
+    console.log('[AF-Midnight] Gün sıfırlandı. Bütçe yenileniyor, tam sync başlıyor...');
+    _afDailyBudget = 96;
+    await runAfFullSync();
+    scheduleAfNext();
+    scheduleMidnightReset();
+  }, delay);
+  console.log(`[AF-Midnight] Gece yarısı sıfırlama: ${Math.round(delay/3600000)}sa sonra`);
+}
+
+// Sunucu başlarken: tam sync + zamanlayıcıları başlat
 setTimeout(async () => {
-  await runFdPoll(); // football-data ile fikstür + standings
-  scheduleAfNext(); // API-Football zamanlayıcısını başlat
+  await runAfFullSync(); // 2 istek (fixtures + standings)
+  _afDailyBudget = 96;
+  scheduleAfNext();
+  scheduleMidnightReset();
 }, 5000);
 
 app.listen(3001, '127.0.0.1', () => console.log('API server running on :3001'));
