@@ -687,6 +687,8 @@ async function _apiSyncAndRender(renderFn) {
 
 async function _apiPushAll() {
   let anyFail = false;
+  const el = document.getElementById('syncStatus');
+  if (el) { el.textContent = '⏳ Sunucuya yükleniyor...'; el.style.color = '#f39c12'; }
   for (const key of _SYNC_KEYS) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -700,6 +702,16 @@ async function _apiPushAll() {
       });
       if (!res.ok) anyFail = true;
     } catch { anyFail = true; }
+  }
+  if (el) {
+    const now = new Date().toLocaleTimeString('tr-TR');
+    if (anyFail) {
+      el.textContent = `❌ Sync hatası — ${now}`;
+      el.style.color = '#e74c3c';
+    } else {
+      el.textContent = `✅ Sunucuya yüklendi — ${now}`;
+      el.style.color = '#27ae60';
+    }
   }
   return !anyFail;
 }
