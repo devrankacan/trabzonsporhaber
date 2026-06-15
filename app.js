@@ -651,6 +651,11 @@ async function _apiSave(key, data) {
 }
 
 async function _apiSyncAll() {
+  // Fetch news with images separately (may be large, keep isolated)
+  const newsPromise = fetch('/api/' + STORAGE_KEY)
+    .then(r => r.ok ? r.json() : null)
+    .catch(() => null);
+
   try {
     const res = await fetch('/api/all');
     if (!res.ok) return;
@@ -677,6 +682,19 @@ async function _apiSyncAll() {
     fetchAndApplyStandingsLogo();
     fetchAndApplyTransfersLogo();
     applySiteLogo(getSiteLogo());
+  } catch {}
+
+  // Override news from dedicated fetch to ensure images are present
+  try {
+    const newsData = await newsPromise;
+    if (Array.isArray(newsData) && newsData.length > 0) {
+      _serverData[STORAGE_KEY] = newsData;
+      // Also try to update localStorage slim version
+      try {
+        const slim = newsData.map(n => (n.image && n.image.startsWith('data:')) ? { ...n, image: '' } : n);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
+      } catch {}
+    }
   } catch {}
 }
 
