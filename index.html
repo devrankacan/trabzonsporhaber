@@ -156,10 +156,20 @@
         <!-- Rüya Takımı -->
         <div class="rt-home-section">
           <div class="rt-hero">
-            <div class="rt-hero-badge">FIFA 2026</div>
-            <h2 class="rt-hero-h2">⭐ Rüya Takımını Kur &amp; Paylaş</h2>
+            <img id="rtHeroWcLogo" src="" alt="WC 2026" style="height:48px;width:auto;margin-bottom:10px;display:none;" />
+            <h2 class="rt-hero-h2">Rüya Takımını Kur &amp; Paylaş</h2>
             <p class="rt-hero-p">48 takımın kadrosundan en iyi 11'ini seç, arkadaşlarınla paylaş!</p>
           </div>
+          <script>
+            try {
+              var _rtWc = localStorage.getItem('ts_wc2026');
+              if (_rtWc) { try { _rtWc = JSON.parse(_rtWc); } catch(e){} }
+              if (_rtWc && typeof _rtWc === 'string' && _rtWc.length > 4) {
+                var _rtEl = document.getElementById('rtHeroWcLogo');
+                if (_rtEl) { _rtEl.src = _rtWc; _rtEl.style.display = 'block'; }
+              }
+            } catch(e) {}
+          </script>
           <div class="rt-controls">
             <select class="rt-select" id="rtFormation" onchange="rtSetFormation(this.value)">
               <option value="4-3-3">4-3-3</option>
