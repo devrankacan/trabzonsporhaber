@@ -238,6 +238,10 @@ function renderPlayerList() {
     team.players.forEach(p => players.push({ ...p, teamCode: code, teamName: team.name, teamFlag: team.flag }));
   });
 
+  if (_pickerPos) {
+    players = players.filter(p => p.pos === _pickerPos);
+  }
+
   if (_searchQ) {
     players = players.filter(p => p.name.toLowerCase().includes(_searchQ) || p.club.toLowerCase().includes(_searchQ) || p.teamName.toLowerCase().includes(_searchQ));
   }
