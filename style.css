@@ -3814,17 +3814,17 @@ img { max-width: 100%; display: block; }
 }
 
 /* Rüya Takımı ana sayfa section */
-.rt-section { background: var(--ts-bg); padding: 40px 0 48px; border-top: 1px solid var(--ts-border); }
+.rt-section { background: var(--bg); padding: 40px 0 48px; border-top: 1px solid var(--border); }
 .rt-hero { text-align: center; margin-bottom: 24px; }
 .rt-hero-badge { display: inline-block; background: var(--ts-red); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
-.rt-hero-h2 { font-size: clamp(20px, 4vw, 30px); font-weight: 800; color: var(--ts-text); margin: 0 0 6px; }
-.rt-hero-p { color: var(--ts-muted); font-size: 13px; margin: 0; }
+.rt-hero-h2 { font-size: clamp(20px, 4vw, 30px); font-weight: 800; color: var(--text); margin: 0 0 6px; }
+.rt-hero-p { color: var(--text-muted); font-size: 13px; margin: 0; }
 
-.rt-home-section { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--ts-border); }
+.rt-home-section { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--border); }
 
 /* ── Rüya Takımı Pitch & Modal (shared across index + ruyatakimi pages) ── */
 .rt-controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
-.rt-select { padding: 8px 14px; border: 1.5px solid var(--ts-border); border-radius: 8px; background: var(--ts-card); color: var(--ts-text); font-size: 13px; font-weight: 600; cursor: pointer; }
+.rt-select { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; }
 .rt-pitch-wrap { position: relative; width: 100%; max-width: 480px; margin: 0 auto; }
 .rt-pitch { position: relative; width: 100%; padding-bottom: 110%; background: linear-gradient(180deg, #2d7a2d 0%, #1e5c1e 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
 .rt-pitch-lines { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 40px 80px, 40px 80px; }
@@ -3840,20 +3840,20 @@ img { max-width: 100%; display: block; }
 .rt-player-slot.empty .rt-player-avatar { background: rgba(255,255,255,0.1); border: 2px dashed rgba(255,255,255,0.4); }
 .rt-player-slot.empty .rt-player-name { color: rgba(255,255,255,0.5); }
 .rt-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
-.rt-modal { background: var(--ts-card); border-radius: 16px; width: 100%; max-width: 480px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-.rt-modal-header { padding: 16px 20px; border-bottom: 1px solid var(--ts-border); display: flex; align-items: center; justify-content: space-between; }
-.rt-modal-title { font-size: 15px; font-weight: 700; color: var(--ts-text); }
-.rt-modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ts-muted); }
-.rt-modal-search { padding: 12px 16px; border-bottom: 1px solid var(--ts-border); }
-.rt-modal-search input { width: 100%; padding: 8px 12px; border: 1.5px solid var(--ts-border); border-radius: 8px; background: var(--ts-bg); color: var(--ts-text); font-size: 13px; box-sizing: border-box; }
-.rt-team-tabs { display: flex; gap: 6px; padding: 10px 16px; overflow-x: auto; border-bottom: 1px solid var(--ts-border); }
-.rt-team-tab { flex-shrink: 0; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--ts-border); background: var(--ts-card); color: var(--ts-text); white-space: nowrap; }
+.rt-modal { background: var(--bg-card); border-radius: 16px; width: 100%; max-width: 480px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+.rt-modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.rt-modal-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.rt-modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); }
+.rt-modal-search { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.rt-modal-search input { width: 100%; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; box-sizing: border-box; }
+.rt-team-tabs { display: flex; gap: 6px; padding: 10px 16px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+.rt-team-tab { flex-shrink: 0; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: var(--bg-card); color: var(--text); white-space: nowrap; }
 .rt-team-tab.active { background: var(--ts-red); color: #fff; border-color: var(--ts-red); }
 .rt-player-list { overflow-y: auto; flex: 1; }
 .rt-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
 .rt-btn { padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: opacity 0.2s; }
 .rt-btn:hover { opacity: 0.85; }
 .rt-btn-share { background: var(--ts-red); color: #fff; }
-.rt-btn-clear { background: var(--ts-card); border: 1.5px solid var(--ts-border); color: var(--ts-text); }
+.rt-btn-clear { background: var(--bg-card); border: 1.5px solid var(--border); color: var(--text); }
 .rt-btn-copy { background: #27ae60; color: #fff; }
 @media (max-width: 480px) { .rt-player-avatar { width: 42px; height: 42px; } .rt-player-name { font-size: 9px; max-width: 52px; } }

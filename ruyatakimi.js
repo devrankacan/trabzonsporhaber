@@ -243,7 +243,7 @@ function renderPlayerList() {
   }
 
   if (!players.length) {
-    container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--ts-muted);font-size:14px;">Oyuncu bulunamadı</div>';
+    container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">Oyuncu bulunamadı</div>';
     return;
   }
 
@@ -396,21 +396,21 @@ function injectStyles() {
   const s = document.createElement('style');
   s.id = 'rt-css';
   s.textContent = `
-    .rt-player-row { display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ts-border);cursor:pointer;transition:background 0.12s; }
+    .rt-player-row { display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s; }
     .rt-player-row:hover { background:rgba(0,0,0,0.04); }
     @media(prefers-color-scheme:dark){.rt-player-row:hover{background:rgba(255,255,255,0.05);}}
     .rt-used { opacity:0.4;cursor:not-allowed; }
     .rt-pr-flag { width:32px;height:22px;object-fit:cover;border-radius:3px;flex-shrink:0; }
     .rt-pr-info { flex:1;min-width:0; }
-    .rt-pr-name { font-size:13px;font-weight:600;color:var(--ts-text); }
-    .rt-pr-sub { font-size:11px;color:var(--ts-muted);margin-top:2px; }
-    .rt-pr-no { font-size:13px;font-weight:700;color:var(--ts-muted); }
+    .rt-pr-name { font-size:13px;font-weight:600;color:var(--text); }
+    .rt-pr-sub { font-size:11px;color:var(--text-muted);margin-top:2px; }
+    .rt-pr-no { font-size:13px;font-weight:700;color:var(--text-muted); }
     .rt-pos-badge { font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px; }
     .rt-pos-GK  { background:#fef3c7;color:#d97706; }
     .rt-pos-DEF { background:#dbeafe;color:#1d4ed8; }
     .rt-pos-MID { background:#d1fae5;color:#059669; }
     .rt-pos-FWD { background:#fee2e2;color:#dc2626; }
-    .rt-action-btn { display:block;padding:12px 20px;border-radius:10px;border:1.5px solid var(--ts-border);background:var(--ts-card);color:var(--ts-text);font-size:14px;font-weight:600;cursor:pointer;transition:opacity 0.15s; }
+    .rt-action-btn { display:block;padding:12px 20px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg-card);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:opacity 0.15s; }
     .rt-action-btn:hover { opacity:0.8; }
     .rt-action-btn.danger { background:var(--ts-red);color:#fff;border-color:var(--ts-red); }
     #rt-toast { transition:opacity 0.4s; }
