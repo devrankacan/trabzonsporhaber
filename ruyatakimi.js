@@ -116,7 +116,7 @@ function renderPitch() {
       // MID satırları: ri=2..total-2 arası, 55%→42% arasında dağıt
       const midCount = total - 3;
       const midIdx = ri - 2;
-      topPct = 55 - midIdx * (13 / Math.max(midCount, 1));
+      topPct = 50 - midIdx * (10 / Math.max(midCount, 1));
     }
     el.style.top = topPct + '%';
     inner.appendChild(el);
