@@ -107,16 +107,16 @@ function renderPitch() {
     const el = rowEls[total - 1 - ri]; // reversed index
     let topPct;
     if (ri === 0) {
-      topPct = 84;                         // GK — kale önü
+      topPct = 87;                         // GK — kale önü
     } else if (ri === 1) {
-      topPct = 65;                         // DEF — kendi yarısı
+      topPct = 69;                         // DEF — kendi yarısı
     } else if (ri === total - 1) {
-      topPct = 13;                         // FWD — rakip yarısı
+      topPct = 28;                         // FWD — rakip yarısı
     } else {
-      // MID satırları: ri=2..total-2 arası, 48%→33% arasında dağıt
+      // MID satırları: ri=2..total-2 arası, 55%→42% arasında dağıt
       const midCount = total - 3;
       const midIdx = ri - 2;
-      topPct = 48 - midIdx * (15 / Math.max(midCount, 1));
+      topPct = 55 - midIdx * (13 / Math.max(midCount, 1));
     }
     el.style.top = topPct + '%';
     inner.appendChild(el);
