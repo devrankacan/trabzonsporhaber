@@ -323,20 +323,39 @@ window.rtFilterTeamChange = function (code) {
 };
 
 // ── Actions ────────────────────────────────────────────────────────────────
+async function imgToDataURL(img) {
+  try {
+    const resp = await fetch(img.src, { mode: 'cors' });
+    const blob = await resp.blob();
+    return new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
+  } catch { return null; }
+}
+
 window.rtShare = async function () {
-  const pitch = document.querySelector('.rt-pitch');
-  if (!pitch || typeof html2canvas === 'undefined') { showToast('Görsel oluşturulamadı'); return; }
+  const wrap = document.querySelector('.rt-pitch-wrap');
+  if (!wrap || typeof html2canvas === 'undefined') { showToast('Görsel oluşturulamadı'); return; }
 
   showToast('Görsel hazırlanıyor…');
   try {
-    const canvas = await html2canvas(pitch, { useCORS: true, scale: 2, backgroundColor: null });
+    // Bayrak görsellerini data URL'ye çevir (CORS bypass)
+    const imgs = [...wrap.querySelectorAll('img[src*="flagcdn"]')];
+    const origSrcs = imgs.map(i => i.src);
+    await Promise.all(imgs.map(async (img) => {
+      const dataUrl = await imgToDataURL(img);
+      if (dataUrl) img.src = dataUrl;
+    }));
+
+    const canvas = await html2canvas(wrap, { useCORS: true, scale: 2, backgroundColor: '#1a1a2e' });
+
+    // Orijinal src'leri geri yükle
+    imgs.forEach((img, i) => { img.src = origSrcs[i]; });
+
     canvas.toBlob(async (blob) => {
       if (!blob) { showToast('Görsel oluşturulamadı'); return; }
       const file = new File([blob], 'ruya-takim.png', { type: 'image/png' });
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ title: 'WC 2026 Rüya Takımım', files: [file] });
       } else {
-        // Fallback: direkt indir
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = 'ruya-takim.png';
