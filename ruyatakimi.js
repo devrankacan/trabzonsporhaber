@@ -13,6 +13,8 @@ const FORMATIONS = {
   '4-5-1':   { rows: [[1],[4],[5],[1]] },
 };
 
+const POS_TR = { GK: 'Kaleci', DEF: 'Defans', MID: 'Orta Saha', FWD: 'Forvet' };
+
 function rowPos(ri, total) {
   if (ri === 0) return 'GK';
   if (ri === total - 1) return 'FWD';
@@ -137,11 +139,11 @@ function makeSlotEl(slotId, pos) {
 
   const name = document.createElement('div');
   name.className = 'rt-player-name';
-  name.textContent = player ? shortName(player.name) : pos;
+  name.textContent = player ? shortName(player.name) : (POS_TR[pos] || pos);
 
   const posEl = document.createElement('div');
   posEl.className = 'rt-player-pos';
-  posEl.textContent = player ? pos : '';
+  posEl.textContent = player ? (POS_TR[pos] || pos) : '';
 
   div.appendChild(avatar);
   div.appendChild(name);
@@ -184,7 +186,7 @@ function openPicker(slotId, pos) {
   _filterTeam = 'all';
   _searchQ = '';
 
-  document.getElementById('rtModalTitle').textContent = `Oyuncu Seç — ${pos}`;
+  document.getElementById('rtModalTitle').textContent = `Oyuncu Seç — ${POS_TR[pos] || pos}`;
   document.getElementById('rtSearchInput').style.display = '';
   document.getElementById('rtSearchInput').value = '';
   document.getElementById('rtTeamTabs').style.display = '';
@@ -263,7 +265,7 @@ function renderPlayerList() {
       <img class="rt-pr-flag" src="${FLAG_URL(p.teamFlag)}" alt="${p.teamName}" />
       <div class="rt-pr-info">
         <div class="rt-pr-name">${p.name}</div>
-        <div class="rt-pr-sub">${p.club} · <span class="rt-pos-badge rt-pos-${p.pos}">${p.pos}</span></div>
+        <div class="rt-pr-sub">${p.club} · <span class="rt-pos-badge rt-pos-${p.pos}">${POS_TR[p.pos] || p.pos}</span></div>
       </div>
       <span class="rt-pr-no">#${p.no}</span>
     `;
