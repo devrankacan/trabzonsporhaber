@@ -112,7 +112,7 @@ function renderPitch() {
       slotEl.style.transform = 'translate(-50%, -50%)';
 
       // Yatay konum: oyuncu sayısına göre padding ayarla
-      const pad = n <= 1 ? 50 : n === 2 ? 25 : n === 3 ? 15 : n === 4 ? 8 : 4;
+      const pad = n <= 1 ? 50 : n === 2 ? 25 : n === 3 ? 15 : n === 4 ? 10 : 10;
       const leftPct = n === 1 ? 50 : pad + (i / (n - 1)) * (100 - 2 * pad);
       slotEl.style.left = leftPct + '%';
 
