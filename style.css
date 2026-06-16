@@ -3851,7 +3851,7 @@ img { max-width: 100%; display: block; }
 .rt-team-tab.active { background: var(--ts-red); color: #fff; border-color: var(--ts-red); }
 .rt-player-list { overflow-y: auto; flex: 1; }
 .rt-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-.rt-btn { padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: opacity 0.2s; }
+.rt-btn { display:inline-flex; align-items:center; gap:7px; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: opacity 0.2s; }
 .rt-btn:hover { opacity: 0.85; }
 .rt-btn-share { background: var(--ts-red); color: #fff; }
 .rt-btn-clear { background: var(--bg-card); border: 1.5px solid var(--border); color: var(--text); }
