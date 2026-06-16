@@ -3791,3 +3791,24 @@ img { max-width: 100%; display: block; }
   color: #fff !important;
   border-color: rgba(255,255,255,0.35) !important;
 }
+
+/* Rüya Takımı Banner */
+.rt-banner-link { text-decoration: none; display: block; margin: 0 0 24px; }
+.rt-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-radius: 14px; padding: 20px 24px; gap: 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.rt-banner:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+.rt-banner-left { flex: 1; }
+.rt-banner-badge { display: inline-block; background: var(--ts-red); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; }
+.rt-banner-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.rt-banner-sub { font-size: 13px; color: rgba(255,255,255,0.65); }
+.rt-banner-right { font-size: 28px; color: rgba(255,255,255,0.5); font-weight: 300; }
+@media (max-width: 480px) {
+  .rt-banner { padding: 16px 18px; }
+  .rt-banner-title { font-size: 15px; }
+  .rt-banner-sub { font-size: 12px; }
+}
