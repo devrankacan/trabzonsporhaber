@@ -152,6 +152,38 @@
             <h3>Henüz haber bulunmuyor</h3>
           </div>
         </div>
+
+        <!-- Rüya Takımı -->
+        <div class="rt-home-section">
+          <div class="rt-hero">
+            <div class="rt-hero-badge">FIFA 2026</div>
+            <h2 class="rt-hero-h2">⭐ Rüya Takımını Kur &amp; Paylaş</h2>
+            <p class="rt-hero-p">48 takımın kadrosundan en iyi 11'ini seç, arkadaşlarınla paylaş!</p>
+          </div>
+          <div class="rt-controls">
+            <select class="rt-select" id="rtFormation" onchange="rtSetFormation(this.value)">
+              <option value="4-3-3">4-3-3</option>
+              <option value="4-4-2">4-4-2</option>
+              <option value="4-2-3-1">4-2-3-1</option>
+              <option value="3-5-2">3-5-2</option>
+              <option value="3-4-3">3-4-3</option>
+              <option value="5-3-2">5-3-2</option>
+              <option value="4-5-1">4-5-1</option>
+            </select>
+            <span id="rt-counter" style="font-size:12px;font-weight:700;color:var(--ts-muted);background:var(--ts-card);padding:4px 14px;border-radius:20px;border:1px solid var(--ts-border);"></span>
+          </div>
+          <div class="rt-pitch-wrap">
+            <div class="rt-pitch">
+              <div class="rt-pitch-lines"></div>
+              <div class="rt-pitch-inner" id="rtPitchInner"></div>
+            </div>
+          </div>
+          <div class="rt-actions">
+            <button class="rt-btn rt-btn-share" onclick="rtShare()">📤 Paylaş</button>
+            <button class="rt-btn rt-btn-copy" onclick="rtCopyLink()">🔗 Linki Kopyala</button>
+            <button class="rt-btn rt-btn-clear" onclick="rtClear()">🗑 Temizle</button>
+          </div>
+        </div>
       </section>
 
       <aside class="sidebar">
@@ -189,43 +221,6 @@
       </aside>
     </div>
   </main>
-
-  <!-- Rüya Takımı Section -->
-  <section class="rt-section">
-    <div class="container">
-      <div class="rt-hero">
-        <div class="rt-hero-badge">FIFA 2026</div>
-        <h2 class="rt-hero-h2">⭐ Rüya Takımını Kur &amp; Paylaş</h2>
-        <p class="rt-hero-p">Dünya Kupası 2026 kadrolarından en iyi 11'ini seç, arkadaşlarınla paylaş!</p>
-      </div>
-
-      <div class="rt-controls">
-        <select class="rt-select" id="rtFormation" onchange="rtSetFormation(this.value)">
-          <option value="4-3-3">4-3-3</option>
-          <option value="4-4-2">4-4-2</option>
-          <option value="4-2-3-1">4-2-3-1</option>
-          <option value="3-5-2">3-5-2</option>
-          <option value="3-4-3">3-4-3</option>
-          <option value="5-3-2">5-3-2</option>
-          <option value="4-5-1">4-5-1</option>
-        </select>
-        <span id="rt-counter" style="font-size:12px;font-weight:700;color:var(--ts-muted);background:var(--ts-card);padding:4px 14px;border-radius:20px;border:1px solid var(--ts-border);"></span>
-      </div>
-
-      <div class="rt-pitch-wrap">
-        <div class="rt-pitch">
-          <div class="rt-pitch-lines"></div>
-          <div class="rt-pitch-inner" id="rtPitchInner"></div>
-        </div>
-      </div>
-
-      <div class="rt-actions">
-        <button class="rt-btn rt-btn-share" onclick="rtShare()">📤 Paylaş</button>
-        <button class="rt-btn rt-btn-copy" onclick="rtCopyLink()">🔗 Linki Kopyala</button>
-        <button class="rt-btn rt-btn-clear" onclick="rtClear()">🗑 Temizle</button>
-      </div>
-    </div>
-  </section>
 
   <!-- Oyuncu seçici modal -->
   <div class="rt-modal-overlay" id="rtModal" style="display:none" onclick="rtModalBgClick(event)">

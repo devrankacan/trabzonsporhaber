@@ -3819,3 +3819,5 @@ img { max-width: 100%; display: block; }
 .rt-hero-badge { display: inline-block; background: var(--ts-red); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
 .rt-hero-h2 { font-size: clamp(20px, 4vw, 30px); font-weight: 800; color: var(--ts-text); margin: 0 0 6px; }
 .rt-hero-p { color: var(--ts-muted); font-size: 13px; margin: 0; }
+
+.rt-home-section { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--ts-border); }
