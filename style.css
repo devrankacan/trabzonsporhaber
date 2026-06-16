@@ -3826,7 +3826,7 @@ img { max-width: 100%; display: block; }
 .rt-controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
 .rt-select { padding: 8px 14px; border: 1.5px solid var(--ts-border); border-radius: 8px; background: var(--ts-card); color: var(--ts-text); font-size: 13px; font-weight: 600; cursor: pointer; }
 .rt-pitch-wrap { position: relative; width: 100%; max-width: 480px; margin: 0 auto; }
-.rt-pitch { position: relative; width: 100%; padding-bottom: 140%; background: linear-gradient(180deg, #2d7a2d 0%, #1e5c1e 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+.rt-pitch { position: relative; width: 100%; padding-bottom: 110%; background: linear-gradient(180deg, #2d7a2d 0%, #1e5c1e 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
 .rt-pitch-lines { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 40px 80px, 40px 80px; }
 .rt-pitch::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 30%; height: 20%; border: 1.5px solid rgba(255,255,255,0.2); border-radius: 50%; }
 .rt-pitch-inner { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 8% 4%; }
