@@ -3845,7 +3845,7 @@ img { max-width: 100%; display: block; }
 .rt-modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); }
 .rt-modal-search { padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .rt-modal-search input { width: 100%; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; box-sizing: border-box; }
-.rt-team-tabs { display: flex; gap: 6px; padding: 10px 16px; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; border-bottom: 1px solid var(--border); scrollbar-width: thin; }
+.rt-team-tabs { display: flex; gap: 6px; padding: 10px 16px; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; border-bottom: 1px solid var(--border); scrollbar-width: thin; flex-shrink: 0; min-height: 52px; align-items: center; }
 .rt-team-tab { flex-shrink: 0; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: var(--bg-card); color: var(--text); white-space: nowrap; }
 .rt-team-tab.active { background: var(--ts-red); color: #fff; border-color: var(--ts-red); }
 .rt-player-list { overflow-y: auto; flex: 1; }
