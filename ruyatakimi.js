@@ -104,7 +104,7 @@ function renderPitch() {
   // Satırları sahada gerçek pozisyonlarına yerleştir (% from top)
   // ri=0:GK(alt), ri=1:DEF, ri=2..n-2:MID, ri=n-1:FWD(üst)
   rows.forEach((r, ri) => {
-    const el = rowEls[total - 1 - ri]; // reversed index
+    const el = rowEls[ri];
     let topPct;
     if (ri === 0) {
       topPct = 87;                         // GK — kale önü
