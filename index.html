@@ -162,11 +162,11 @@
           </div>
           <script>
             try {
-              var _rtWc = localStorage.getItem('ts_wc2026');
-              if (_rtWc) { try { _rtWc = JSON.parse(_rtWc); } catch(e){} }
-              if (_rtWc && typeof _rtWc === 'string' && _rtWc.length > 4) {
+              var _rtWc = JSON.parse(localStorage.getItem('ts_wc2026') || 'null');
+              var _rtLogo = _rtWc && _rtWc.logo ? _rtWc.logo : null;
+              if (_rtLogo && _rtLogo.length > 4) {
                 var _rtEl = document.getElementById('rtHeroWcLogo');
-                if (_rtEl) { _rtEl.src = _rtWc; _rtEl.style.display = 'block'; }
+                if (_rtEl) { _rtEl.src = _rtLogo; _rtEl.style.display = 'block'; }
               }
             } catch(e) {}
           </script>
