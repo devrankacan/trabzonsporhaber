@@ -89,37 +89,42 @@ function renderPitch() {
   const total = rows.length;
   inner.innerHTML = '';
 
-  // Build rows in visual order (attack top → GK bottom)
-  const rowEls = [];
   let idx = 0;
   rows.forEach((r, ri) => {
-    const rowDiv = document.createElement('div');
-    rowDiv.className = 'rt-row';
-    for (let i = 0; i < r[0]; i++, idx++) {
-      rowDiv.appendChild(makeSlotEl(`slot_${idx}`, rowPos(ri, total)));
-    }
-    rowEls.push(rowDiv);
-  });
+    const n = r[0];
+    const pos = rowPos(ri, total);
+    const isMid = ri >= 2 && ri < total - 1;
 
-  // Satırları sahada gerçek pozisyonlarına yerleştir (% from top)
-  // ri=0:GK(alt), ri=1:DEF, ri=2..n-2:MID, ri=n-1:FWD(üst)
-  rows.forEach((r, ri) => {
-    const el = rowEls[ri];
-    let topPct;
-    if (ri === 0) {
-      topPct = 87;                         // GK — kale önü
-    } else if (ri === 1) {
-      topPct = 69;                         // DEF — kendi yarısı
-    } else if (ri === total - 1) {
-      topPct = 28;                         // FWD — rakip yarısı
-    } else {
-      // MID satırları: ri=2..total-2 arası, 55%→42% arasında dağıt
+    // Temel dikey konum
+    let baseTop;
+    if (ri === 0) baseTop = 87;
+    else if (ri === 1) baseTop = 69;
+    else if (ri === total - 1) baseTop = 28;
+    else {
       const midCount = total - 3;
       const midIdx = ri - 2;
-      topPct = 50 - midIdx * (10 / Math.max(midCount, 1));
+      baseTop = 50 - midIdx * (10 / Math.max(midCount, 1));
     }
-    el.style.top = topPct + '%';
-    inner.appendChild(el);
+
+    for (let i = 0; i < n; i++, idx++) {
+      const slotEl = makeSlotEl(`slot_${idx}`, pos);
+      slotEl.style.position = 'absolute';
+      slotEl.style.transform = 'translate(-50%, -50%)';
+
+      // Yatay konum: oyuncuları eşit dağıt
+      const leftPct = n === 1 ? 50 : 5 + (i / (n - 1)) * 90;
+      slotEl.style.left = leftPct + '%';
+
+      // Dikey konum: MID'de kenar oyuncular ileride (kanat gibi)
+      let topPct = baseTop;
+      if (isMid && n >= 3) {
+        const isWing = (i === 0 || i === n - 1);
+        if (isWing) topPct = baseTop - 8; // kanatlara 8% daha ileri
+      }
+      slotEl.style.top = topPct + '%';
+
+      inner.appendChild(slotEl);
+    }
   });
   updateCounter();
 }
