@@ -542,7 +542,7 @@ img { max-width: 100%; display: block; }
 .slider-transfers-row {
   display: flex;
   gap: 20px;
-  align-items: flex-start;
+  align-items: stretch;
 }
 .slider-col {
   flex: 1 1 0;
@@ -551,9 +551,12 @@ img { max-width: 100%; display: block; }
 .transfers-col {
   width: 300px;
   flex-shrink: 0;
+  overflow: hidden;
+  max-height: 380px;
 }
 .transfers-col .sidebar-card {
   height: 100%;
+  max-height: 380px;
   overflow-y: auto;
 }
 @media (max-width: 900px) {
