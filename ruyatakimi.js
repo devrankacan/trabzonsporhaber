@@ -323,12 +323,29 @@ window.rtFilterTeamChange = function (code) {
 };
 
 // ── Actions ────────────────────────────────────────────────────────────────
-window.rtShare = function () {
-  const url = buildShareUrl();
-  if (navigator.share) {
-    navigator.share({ title: 'WC 2026 Rüya Takımım', url }).catch(() => {});
-  } else {
-    rtCopyLink();
+window.rtShare = async function () {
+  const pitch = document.querySelector('.rt-pitch');
+  if (!pitch || typeof html2canvas === 'undefined') { showToast('Görsel oluşturulamadı'); return; }
+
+  showToast('Görsel hazırlanıyor…');
+  try {
+    const canvas = await html2canvas(pitch, { useCORS: true, scale: 2, backgroundColor: null });
+    canvas.toBlob(async (blob) => {
+      if (!blob) { showToast('Görsel oluşturulamadı'); return; }
+      const file = new File([blob], 'ruya-takim.png', { type: 'image/png' });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ title: 'WC 2026 Rüya Takımım', files: [file] });
+      } else {
+        // Fallback: direkt indir
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'ruya-takim.png';
+        a.click();
+        showToast('Görsel indirildi!');
+      }
+    }, 'image/png');
+  } catch (e) {
+    showToast('Hata: ' + e.message);
   }
 };
 
