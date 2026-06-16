@@ -101,7 +101,27 @@ function renderPitch() {
     rowEls.push(rowDiv);
   });
 
-  rowEls.reverse().forEach(el => inner.appendChild(el));
+  rowEls.reverse();
+  // Ağırlıklı boşluklar: [üst, FWD-MID, ..., DEF-GK, alt]
+  // GK ile DEF arasına en fazla alan ver (gerçekçi diziliş)
+  const n = rowEls.length;
+  const spacer = (grow) => {
+    const d = document.createElement('div');
+    d.className = 'rt-spacer';
+    d.style.flexGrow = grow;
+    return d;
+  };
+  rowEls.forEach((el, i) => {
+    // i=0 → FWD (top), i=n-1 → GK (bottom)
+    if (i === 0) inner.appendChild(spacer(1));          // üst boşluk
+    inner.appendChild(el);
+    if (i < n - 1) {
+      const isBeforeGK = (i === n - 2);
+      inner.appendChild(spacer(isBeforeGK ? 5 : 2));    // DEF-GK: 5, diğerleri: 2
+    } else {
+      inner.appendChild(spacer(1));                      // alt boşluk
+    }
+  });
   updateCounter();
 }
 
