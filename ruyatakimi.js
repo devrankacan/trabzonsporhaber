@@ -101,26 +101,25 @@ function renderPitch() {
     rowEls.push(rowDiv);
   });
 
-  rowEls.reverse();
-  // Ağırlıklı boşluklar: [üst, FWD-MID, ..., DEF-GK, alt]
-  // GK ile DEF arasına en fazla alan ver (gerçekçi diziliş)
-  const n = rowEls.length;
-  const spacer = (grow) => {
-    const d = document.createElement('div');
-    d.className = 'rt-spacer';
-    d.style.flexGrow = grow;
-    return d;
-  };
-  rowEls.forEach((el, i) => {
-    // i=0 → FWD (top), i=n-1 → GK (bottom)
-    if (i === 0) inner.appendChild(spacer(1));          // üst boşluk
-    inner.appendChild(el);
-    if (i < n - 1) {
-      const isBeforeGK = (i === n - 2);
-      inner.appendChild(spacer(isBeforeGK ? 5 : 2));    // DEF-GK: 5, diğerleri: 2
+  // Satırları sahada gerçek pozisyonlarına yerleştir (% from top)
+  // ri=0:GK(alt), ri=1:DEF, ri=2..n-2:MID, ri=n-1:FWD(üst)
+  rows.forEach((r, ri) => {
+    const el = rowEls[total - 1 - ri]; // reversed index
+    let topPct;
+    if (ri === 0) {
+      topPct = 84;                         // GK — kale önü
+    } else if (ri === 1) {
+      topPct = 65;                         // DEF — kendi yarısı
+    } else if (ri === total - 1) {
+      topPct = 13;                         // FWD — rakip yarısı
     } else {
-      inner.appendChild(spacer(1));                      // alt boşluk
+      // MID satırları: ri=2..total-2 arası, 48%→33% arasında dağıt
+      const midCount = total - 3;
+      const midIdx = ri - 2;
+      topPct = 48 - midIdx * (15 / Math.max(midCount, 1));
     }
+    el.style.top = topPct + '%';
+    inner.appendChild(el);
   });
   updateCounter();
 }
