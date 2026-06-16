@@ -140,6 +140,8 @@ app.get('/admin.html', serveHtml('admin.html'));
 app.get('/hakkimizda.html', serveHtml('hakkimizda.html'));
 app.get('/gizlilik.html', serveHtml('gizlilik.html'));
 app.get('/iletisim.html', serveHtml('iletisim.html'));
+app.get('/ruyatakimi.html', serveHtml('ruyatakimi.html'));
+app.get('/ruyatakimi', serveHtml('ruyatakimi.html'));
 
 // Statik görsel servisi
 app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '30d' }));
