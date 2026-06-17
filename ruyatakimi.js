@@ -145,8 +145,14 @@ function makeSlotEl(slotId, pos) {
     const img = document.createElement('img');
     img.src = FLAG_URL(flagCode);
     img.alt = '';
-    img.style.cssText = 'opacity:0.85;';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;opacity:0.85;';
     avatar.appendChild(img);
+
+    if (typeof fetchWikiPlayerThumb === 'function') {
+      fetchWikiPlayerThumb(player.name).then(url => {
+        if (url) { img.src = url; img.style.opacity = '1'; }
+      });
+    }
 
     const num = document.createElement('span');
     num.style.cssText = 'position:absolute;font-size:15px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.9);';
@@ -287,10 +293,10 @@ function renderPlayerList() {
     const row = document.createElement('div');
     row.className = 'rt-player-row' + (used ? ' rt-used' : '');
     row.innerHTML = `
-      <img class="rt-pr-flag" src="${FLAG_URL(p.teamFlag)}" alt="${p.teamName}" />
+      <img class="rt-pr-photo" data-player="${p.name}" src="${FLAG_URL(p.teamFlag)}" alt="" />
       <div class="rt-pr-info">
         <div class="rt-pr-name">${p.name}</div>
-        <div class="rt-pr-sub">${p.club} · <span class="rt-pos-badge rt-pos-${p.pos}">${POS_TR[p.pos] || p.pos}</span></div>
+        <div class="rt-pr-sub"><img class="rt-pr-flag" src="${FLAG_URL(p.teamFlag)}" alt="${p.teamName}" />${p.club} · <span class="rt-pos-badge rt-pos-${p.pos}">${POS_TR[p.pos] || p.pos}</span></div>
       </div>
       <span class="rt-pr-no">#${p.no}</span>
     `;
@@ -299,6 +305,12 @@ function renderPlayerList() {
   });
   container.innerHTML = '';
   container.appendChild(frag);
+
+  if (typeof fetchWikiPlayerThumb === 'function') {
+    container.querySelectorAll('.rt-pr-photo').forEach(img => {
+      fetchWikiPlayerThumb(img.dataset.player).then(url => { if (url) img.src = url; });
+    });
+  }
 }
 
 function selectPlayer(player) {
@@ -467,7 +479,8 @@ function injectStyles() {
     .rt-player-row:hover { background:rgba(0,0,0,0.04); }
     @media(prefers-color-scheme:dark){.rt-player-row:hover{background:rgba(255,255,255,0.05);}}
     .rt-used { opacity:0.4;cursor:not-allowed; }
-    .rt-pr-flag { width:32px;height:22px;object-fit:cover;border-radius:3px;flex-shrink:0; }
+    .rt-pr-photo { width:38px;height:38px;object-fit:cover;border-radius:50%;flex-shrink:0;background:var(--bg); }
+    .rt-pr-flag { width:16px;height:11px;object-fit:cover;border-radius:2px;flex-shrink:0;margin-right:4px;vertical-align:middle; }
     .rt-pr-info { flex:1;min-width:0; }
     .rt-pr-name { font-size:13px;font-weight:600;color:var(--text); }
     .rt-pr-sub { font-size:11px;color:var(--text-muted);margin-top:2px; }
