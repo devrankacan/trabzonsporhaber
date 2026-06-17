@@ -3292,6 +3292,9 @@ img { max-width: 100%; display: block; }
 .wc-tabs {
   display: flex;
   gap: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 .wc-tab {
   background: none;
@@ -3889,8 +3892,12 @@ img { max-width: 100%; display: block; }
 .wc-squad-modal-search input { width: 100%; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; box-sizing: border-box; }
 
 /* ==================== WC NOTIF BUTTON ==================== */
-.wc-notif-btn { margin-left: auto; background: var(--bg-card); border: 1.5px solid var(--border); color: var(--text); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.wc-notif-btn { margin-left: auto; background: var(--bg-card); border: 1.5px solid var(--border); color: var(--text); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
 .wc-notif-btn.wc-notif-on { background: var(--ts-red); border-color: var(--ts-red); color: #fff; }
+@media (max-width: 768px) {
+  .wc-notif-btn { display: none; }
+}
+.wc-sim-share-btn { background: var(--ts-red); border: none; color: #fff; border-radius: 8px; padding: 5px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
 
 /* ==================== WC GROUP SIMULATION ==================== */
 .wc-sim-reset-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }

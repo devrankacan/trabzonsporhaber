@@ -862,6 +862,48 @@ function renderWCSim() {
   }).join('');
 }
 
+function wcSimShare() {
+  const wc = getWC();
+  const groups = wc.groups || [];
+  const matches = wc.matches || WC_DEFAULT_MATCHES;
+  const hasPredictions = Object.keys(_wcSimPredictions).length > 0;
+  if (!hasPredictions) { showToast('Önce en az bir maç tahmini yap'); return; }
+
+  const lines = groups.map(g => {
+    const teams = JSON.parse(JSON.stringify(g.teams));
+    const byCode = {};
+    teams.forEach(t => { byCode[t.code] = t; });
+    const groupMatches = matches.filter(m => m.group === g.id);
+    groupMatches.filter(m => m.status !== 'finished').forEach(m => {
+      const pred = _wcSimPredictions[m.id];
+      if (!pred) return;
+      const home = byCode[m.homeCode], away = byCode[m.awayCode];
+      if (!home || !away) return;
+      home.played++; away.played++;
+      if (pred === 'home') { home.won++; away.lost++; home.pts += 3; home.gf += 1; away.ga += 1; }
+      else if (pred === 'away') { away.won++; home.lost++; away.pts += 3; away.gf += 1; home.ga += 1; }
+      else { home.drawn++; away.drawn++; home.pts += 1; away.pts += 1; }
+    });
+    const sorted = teams.slice().sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
+      if (gdB !== gdA) return gdB - gdA;
+      return b.gf - a.gf;
+    });
+    return `Grup ${g.id}: ${sorted[0].name}, ${sorted[1].name}`;
+  });
+
+  const text = `Dunya Kupasi 2026 grup tahminlerim:\n${lines.join('\n')}\n\nSen de tahminini yap:`;
+  const url = `${location.origin}/dunyakupasi.html`;
+  const fullText = `${text}\n${url}`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'WC 2026 Grup Tahminlerim', text: fullText }).catch(() => {});
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
+  }
+}
+
 function wcStopMatchRefresh() {
   if (_wcMatchRefreshTimer) { clearInterval(_wcMatchRefreshTimer); _wcMatchRefreshTimer = null; }
 }

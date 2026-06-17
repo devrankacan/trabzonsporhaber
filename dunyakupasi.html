@@ -200,7 +200,10 @@
       <div class="wc-page-card" style="margin-top:24px">
         <div class="wc-page-card-header">
           <span>Grup Simülasyonu — Kalan Maçları Tahmin Et</span>
-          <button class="wc-sim-reset-btn" onclick="wcSimReset()">Sıfırla</button>
+          <div style="display:flex;gap:8px">
+            <button class="wc-sim-share-btn" onclick="wcSimShare()">Tahminleri Paylaş</button>
+            <button class="wc-sim-reset-btn" onclick="wcSimReset()">Sıfırla</button>
+          </div>
         </div>
         <p class="wc-sim-hint">Oynanmamış maçların sonucunu seç, gruplardan kimlerin çıkacağını anlık gör. Tahminler sadece sende saklanır, gerçek sonuçları etkilemez.</p>
         <div class="wc-sim-grid" id="wcSimGrid"></div>
