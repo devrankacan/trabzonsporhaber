@@ -275,7 +275,7 @@ function makeSlotEl(slotId, pos) {
 
   const posEl = document.createElement('div');
   posEl.className = 'rt-player-pos';
-  posEl.textContent = player ? (POS_TR[player.pos] || player.pos) : '';
+  posEl.textContent = (player && !isFreeFormation()) ? (POS_TR[player.pos] || player.pos) : '';
 
   div.appendChild(avatar);
   div.appendChild(name);
