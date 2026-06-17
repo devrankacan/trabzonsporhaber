@@ -3856,6 +3856,9 @@ img { max-width: 100%; display: block; }
 /* ── Rüya Takımı Pitch & Modal (shared across index + ruyatakimi pages) ── */
 .rt-controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
 .rt-select { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; }
+.rt-name-input { cursor: text; flex: 1 1 220px; max-width: 320px; }
+.rt-name-input::placeholder { color: var(--text-muted); font-weight: 500; }
+.rt-team-name-label { text-align: center; font-size: 17px; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5); margin-bottom: 8px; }
 .rt-pitch-wrap { position: relative; width: 100%; max-width: 480px; margin: 0 auto; }
 .rt-pitch { position: relative; width: 100%; padding-bottom: 130%; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3); background: #267326; }
 .rt-pitch-svg { position: absolute; inset: 0; width: 100%; height: 100%; }

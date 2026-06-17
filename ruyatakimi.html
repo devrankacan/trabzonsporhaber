@@ -87,6 +87,7 @@
     </div>
 
     <div class="rt-controls">
+      <input type="text" class="rt-select rt-name-input" id="rtTeamName" placeholder="Takım adını yaz... (örn: Devran'ın Rüya Kadrosu)" maxlength="40" oninput="rtSetTeamName(this.value)" />
       <select class="rt-select" id="rtFormation" onchange="rtSetFormation(this.value)">
         <option value="4-3-3">4-3-3</option>
         <option value="4-4-2">4-4-2</option>
@@ -102,8 +103,50 @@
     </div>
 
     <div class="rt-pitch-wrap">
+      <div class="rt-team-name-label" id="rtTeamNameLabel" style="display:none"></div>
       <div class="rt-pitch">
-        <div class="rt-pitch-lines"></div>
+        <svg class="rt-pitch-svg" viewBox="0 0 400 520" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Çim şeritleri -->
+          <rect x="0" y="0"   width="400" height="520" fill="#2a7a2a"/>
+          <rect x="0" y="0"   width="400" height="52"  fill="#267326"/>
+          <rect x="0" y="104" width="400" height="52"  fill="#267326"/>
+          <rect x="0" y="208" width="400" height="52"  fill="#267326"/>
+          <rect x="0" y="312" width="400" height="52"  fill="#267326"/>
+          <rect x="0" y="416" width="400" height="52"  fill="#267326"/>
+          <!-- Saha dış çizgisi -->
+          <rect x="10" y="10" width="380" height="500" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5"/>
+          <!-- Orta çizgi -->
+          <line x1="10" y1="260" x2="390" y2="260" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+          <!-- Orta nokta -->
+          <circle cx="200" cy="260" r="3" fill="rgba(255,255,255,0.8)"/>
+          <!-- Orta daire -->
+          <circle cx="200" cy="260" r="60" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+          <!-- Üst ceza sahası -->
+          <rect x="88" y="10" width="224" height="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+          <!-- Üst kaleci alanı -->
+          <rect x="140" y="10" width="120" height="36" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+          <!-- Üst penaltı noktası -->
+          <circle cx="200" cy="70" r="3" fill="rgba(255,255,255,0.7)"/>
+          <!-- Üst penaltı yayı -->
+          <path d="M 150 100 A 60 60 0 0 0 250 100" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+          <!-- Üst kale -->
+          <rect x="160" y="7" width="80" height="8" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+          <!-- Alt ceza sahası -->
+          <rect x="88" y="420" width="224" height="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+          <!-- Alt kaleci alanı -->
+          <rect x="140" y="474" width="120" height="36" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+          <!-- Alt penaltı noktası -->
+          <circle cx="200" cy="450" r="3" fill="rgba(255,255,255,0.7)"/>
+          <!-- Alt penaltı yayı -->
+          <path d="M 150 420 A 60 60 0 0 1 250 420" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+          <!-- Alt kale -->
+          <rect x="160" y="505" width="80" height="8" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+          <!-- Köşe yayları -->
+          <path d="M 10 26 A 16 16 0 0 1 26 10" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+          <path d="M 374 10 A 16 16 0 0 1 390 26" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+          <path d="M 390 494 A 16 16 0 0 1 374 510" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+          <path d="M 26 510 A 16 16 0 0 1 10 494" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+        </svg>
         <div class="rt-pitch-inner" id="rtPitchInner"></div>
       </div>
     </div>

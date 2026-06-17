@@ -24,15 +24,29 @@ function rowPos(ri, total) {
 
 const FLAG_URL = code => `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
 
+// Pitch position zones (top % bands), matching the formation's reference rows.
+const ZONES = [
+  { pos: 'FWD', min: 0,  max: 38 },
+  { pos: 'MID', min: 38, max: 60 },
+  { pos: 'DEF', min: 60, max: 80 },
+  { pos: 'GK',  min: 80, max: 101 },
+];
+function zoneForTop(topPct) {
+  const z = ZONES.find(z => topPct >= z.min && topPct < z.max);
+  return z ? z.pos : 'GK';
+}
+
 // ── State ──────────────────────────────────────────────────────────────────
 let _formation = '4-3-3';
-let _lineup = [];        // [{ slotId, player|null, pos }]
+let _lineup = [];        // [{ slotId, player|null, pos, custom: {top,left}|undefined }]
+let _teamName = '';
 let _pickerSlot = null;
 let _pickerPos = '';
 let _filterTeam = 'all';
 let _searchQ = '';
 let _pickerMode = 'pick'; // 'pick' | 'remove'
 let _removeSlotId = null;
+let _rtSuppressClickUntil = 0;
 
 // ── Slot helpers ───────────────────────────────────────────────────────────
 function getSlotCount() {
@@ -48,7 +62,7 @@ function initLineup() {
     for (let i = 0; i < r[0]; i++, idx++) {
       const slotId = `slot_${idx}`;
       const old = prev.find(e => e.slotId === slotId);
-      _lineup.push({ slotId, pos: rowPos(ri, rows.length), player: old ? old.player : null });
+      _lineup.push({ slotId, pos: rowPos(ri, rows.length), player: old ? old.player : null, custom: old ? old.custom : undefined });
     }
   });
 }
@@ -107,14 +121,15 @@ function renderPitch() {
     }
 
     for (let i = 0; i < n; i++, idx++) {
-      const slotEl = makeSlotEl(`slot_${idx}`, pos);
+      const slotId = `slot_${idx}`;
+      const entry = _lineup.find(e => e.slotId === slotId);
+      const slotEl = makeSlotEl(slotId, entry ? entry.pos : pos);
       slotEl.style.position = 'absolute';
       slotEl.style.transform = 'translate(-50%, -50%)';
 
       // Yatay konum: oyuncu sayısına göre padding ayarla
       const pad = n <= 1 ? 50 : n === 2 ? 25 : n === 3 ? 20 : n === 4 ? 10 : 10;
-      const leftPct = n === 1 ? 50 : pad + (i / (n - 1)) * (100 - 2 * pad);
-      slotEl.style.left = leftPct + '%';
+      let leftPct = n === 1 ? 50 : pad + (i / (n - 1)) * (100 - 2 * pad);
 
       // Dikey konum: MID'de kenar oyuncular ileride (kanat gibi)
       let topPct = baseTop;
@@ -122,12 +137,91 @@ function renderPitch() {
         const isWing = (i === 0 || i === n - 1);
         if (isWing) topPct = baseTop - 8; // kanatlara 8% daha ileri
       }
+
+      if (entry && entry.custom) {
+        topPct = entry.custom.top;
+        leftPct = entry.custom.left;
+      }
+
+      slotEl.style.left = leftPct + '%';
       slotEl.style.top = topPct + '%';
+
+      if (entry && entry.player) attachDrag(slotEl, slotId);
 
       inner.appendChild(slotEl);
     }
   });
   updateCounter();
+}
+
+// ── Drag & drop repositioning ───────────────────────────────────────────────
+function attachDrag(slotEl, slotId) {
+  let dragging = false;
+  let moved = false;
+  let startX = 0, startY = 0;
+
+  slotEl.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    moved = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    slotEl.setPointerCapture(e.pointerId);
+  });
+
+  slotEl.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if (!moved && Math.hypot(dx, dy) < 6) return;
+    moved = true;
+    slotEl.classList.add('rt-dragging');
+    showZoneOverlay();
+
+    const inner = document.getElementById('rtPitchInner');
+    const rect = inner.getBoundingClientRect();
+    const leftPct = Math.min(96, Math.max(4, ((e.clientX - rect.left) / rect.width) * 100));
+    const topPct = Math.min(98, Math.max(2, ((e.clientY - rect.top) / rect.height) * 100));
+    slotEl.style.left = leftPct + '%';
+    slotEl.style.top = topPct + '%';
+    slotEl._dragLeft = leftPct;
+    slotEl._dragTop = topPct;
+  });
+
+  slotEl.addEventListener('pointerup', (e) => {
+    dragging = false;
+    slotEl.classList.remove('rt-dragging');
+    hideZoneOverlay();
+    if (!moved) return;
+    moved = false;
+    _rtSuppressClickUntil = Date.now() + 300;
+
+    const entry = _lineup.find(e => e.slotId === slotId);
+    if (entry) {
+      entry.custom = { top: slotEl._dragTop, left: slotEl._dragLeft };
+      const newPos = zoneForTop(slotEl._dragTop);
+      if (newPos !== entry.pos) entry.pos = newPos;
+      saveState();
+    }
+    renderPitch();
+  });
+}
+
+function showZoneOverlay() {
+  const pitch = document.querySelector('.rt-pitch');
+  if (!pitch || document.getElementById('rtZoneOverlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'rtZoneOverlay';
+  overlay.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:5;';
+  ZONES.forEach(z => {
+    if (z.max >= 100) return;
+    const line = document.createElement('div');
+    line.style.cssText = `position:absolute;left:0;right:0;top:${z.max}%;border-top:1.5px dashed rgba(255,255,255,0.55);`;
+    overlay.appendChild(line);
+  });
+  pitch.appendChild(overlay);
+}
+
+function hideZoneOverlay() {
+  document.getElementById('rtZoneOverlay')?.remove();
 }
 
 function makeSlotEl(slotId, pos) {
@@ -159,7 +253,7 @@ function makeSlotEl(slotId, pos) {
     num.textContent = player.no || '';
     avatar.appendChild(num);
 
-    div.addEventListener('click', () => openRemoveMenu(slotId, player, pos));
+    div.addEventListener('click', () => { if (Date.now() < _rtSuppressClickUntil) return; openRemoveMenu(slotId, player, pos); });
   } else {
     const plus = document.createElement('span');
     plus.style.cssText = 'font-size:22px;color:rgba(255,255,255,0.5);';
@@ -334,6 +428,23 @@ window.rtFilterTeamChange = function (code) {
   // Not used for pitch filtering, placeholder
 };
 
+window.rtSetTeamName = function (name) {
+  _teamName = name.trim();
+  renderTeamNameLabel();
+  saveState();
+};
+
+function renderTeamNameLabel() {
+  const label = document.getElementById('rtTeamNameLabel');
+  if (!label) return;
+  if (_teamName) {
+    label.textContent = _teamName;
+    label.style.display = '';
+  } else {
+    label.style.display = 'none';
+  }
+}
+
 // ── Actions ────────────────────────────────────────────────────────────────
 async function imgToDataURL(img) {
   try {
@@ -373,7 +484,7 @@ window.rtShare = async function () {
 
 function _rtOpenShareMenu(blob) {
   const url = buildShareUrl();
-  const text = 'Iste benim Dunya Kupasi 2026 kadrom!';
+  const text = _teamName ? `${_teamName} - Dünya Kupası 2026 kadrom!` : 'Iste benim Dunya Kupasi 2026 kadrom!';
   const fullText = `${text}\n${url}`;
   const file = new File([blob], 'ruya-takim.png', { type: 'image/png' });
   const imgUrl = URL.createObjectURL(blob);
@@ -429,7 +540,7 @@ function _rtOpenShareMenu(blob) {
   const nativeBtn = document.getElementById('rtShareNativeBtn');
   if (nativeBtn) {
     nativeBtn.onclick = async () => {
-      try { await navigator.share({ title: 'WC 2026 Rüya Takımım', text: fullText, files: [file] }); menu.remove(); }
+      try { await navigator.share({ title: _teamName || 'WC 2026 Rüya Takımım', text: fullText, files: [file] }); menu.remove(); }
       catch (e) {}
     };
   }
@@ -449,12 +560,13 @@ window.rtClear = function () {
 
 function buildShareUrl() {
   const ids = _lineup.map(e => e.player ? e.player.id : '').join(',');
-  return `${location.origin}/ruyatakimi.html?f=${encodeURIComponent(_formation)}&p=${encodeURIComponent(ids)}`;
+  const namePart = _teamName ? `&n=${encodeURIComponent(_teamName)}` : '';
+  return `${location.origin}/ruyatakimi.html?f=${encodeURIComponent(_formation)}&p=${encodeURIComponent(ids)}${namePart}`;
 }
 
 // ── Persist / restore ──────────────────────────────────────────────────────
 function saveState() {
-  try { localStorage.setItem('rt_v1', JSON.stringify({ f: _formation, l: _lineup })); } catch {}
+  try { localStorage.setItem('rt_v1', JSON.stringify({ f: _formation, l: _lineup, n: _teamName })); } catch {}
 }
 
 function loadSaved() {
@@ -463,14 +575,16 @@ function loadSaved() {
     if (!s) return false;
     if (s.f && FORMATIONS[s.f]) _formation = s.f;
     if (Array.isArray(s.l)) _lineup = s.l;
+    if (typeof s.n === 'string') _teamName = s.n;
     return true;
   } catch { return false; }
 }
 
 function loadFromUrl() {
   const p = new URLSearchParams(location.search);
-  const f = p.get('f'), ids = p.get('p');
+  const f = p.get('f'), ids = p.get('p'), n = p.get('n');
   if (f && FORMATIONS[f]) _formation = f;
+  if (n) _teamName = n;
   initLineup();
   if (ids) {
     ids.split(',').forEach((id, idx) => {
@@ -521,6 +635,10 @@ window.rtInit = function () {
   const sel = document.getElementById('rtFormation');
   if (sel) sel.value = _formation;
 
+  const nameInput = document.getElementById('rtTeamName');
+  if (nameInput) nameInput.value = _teamName;
+  renderTeamNameLabel();
+
   renderPitch();
 };
 
@@ -551,6 +669,8 @@ function injectStyles() {
     .rt-action-btn:hover { opacity:0.8; }
     .rt-action-btn.danger { background:var(--ts-red);color:#fff;border-color:var(--ts-red); }
     #rt-toast { transition:opacity 0.4s; }
+    .rt-player-slot { touch-action:none; }
+    .rt-dragging { z-index:10; cursor:grabbing; opacity:0.85; }
   `;
   document.head.appendChild(s);
 }

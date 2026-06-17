@@ -172,6 +172,7 @@
             } catch(e) {}
           </script>
           <div class="rt-controls">
+            <input type="text" class="rt-select rt-name-input" id="rtTeamName" placeholder="Takım adını yaz... (örn: Devran'ın Rüya Kadrosu)" maxlength="40" oninput="rtSetTeamName(this.value)" />
             <select class="rt-select" id="rtFormation" onchange="rtSetFormation(this.value)">
               <option value="4-3-3">4-3-3</option>
               <option value="4-4-2">4-4-2</option>
@@ -184,6 +185,7 @@
             <span id="rt-counter" style="font-size:12px;font-weight:700;color:var(--ts-muted);background:var(--ts-card);padding:4px 14px;border-radius:20px;border:1px solid var(--ts-border);"></span>
           </div>
           <div class="rt-pitch-wrap">
+            <div class="rt-team-name-label" id="rtTeamNameLabel" style="display:none"></div>
             <div class="rt-pitch">
               <svg class="rt-pitch-svg" viewBox="0 0 400 520" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
                 <!-- Çim şeritleri -->
