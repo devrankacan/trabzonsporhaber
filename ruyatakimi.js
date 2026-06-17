@@ -362,23 +362,68 @@ window.rtShare = async function () {
     // Orijinal src'leri geri yükle
     imgs.forEach((img, i) => { img.src = origSrcs[i]; });
 
-    canvas.toBlob(async (blob) => {
+    canvas.toBlob((blob) => {
       if (!blob) { showToast('Görsel oluşturulamadı'); return; }
-      const file = new File([blob], 'ruya-takim.png', { type: 'image/png' });
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ title: 'WC 2026 Rüya Takımım', files: [file] });
-      } else {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'ruya-takim.png';
-        a.click();
-        showToast('Görsel indirildi!');
-      }
+      _rtOpenShareMenu(blob);
     }, 'image/png');
   } catch (e) {
     showToast('Hata: ' + e.message);
   }
 };
+
+function _rtOpenShareMenu(blob) {
+  const url = buildShareUrl();
+  const text = 'İşte benim Dünya Kupası 2026 kadrom! 🏆⚽';
+  const fullText = `${text}\n${url}`;
+  const file = new File([blob], 'ruya-takim.png', { type: 'image/png' });
+  const imgUrl = URL.createObjectURL(blob);
+  const canNativeShare = navigator.share && navigator.canShare && navigator.canShare({ files: [file] });
+
+  let menu = document.getElementById('rtShareMenu');
+  if (menu) menu.remove();
+  menu = document.createElement('div');
+  menu.id = 'rtShareMenu';
+  menu.className = 'rt-modal-overlay';
+  menu.style.display = 'flex';
+  menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+
+  menu.innerHTML = `
+    <div class="rt-modal" style="max-width:340px;">
+      <div class="rt-modal-header">
+        <div class="rt-modal-title">Paylaş</div>
+        <button class="rt-modal-close" onclick="document.getElementById('rtShareMenu').remove()">&times;</button>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px;max-height:70vh;overflow-y:auto;">
+        <img src="${imgUrl}" style="width:100%;border-radius:10px;margin-bottom:4px;" />
+        ${canNativeShare ? `<button class="rt-btn" style="background:var(--ts-red);color:#fff;" id="rtShareNativeBtn">📤 Paylaş (Uygulamalar)</button>` : ''}
+        <button class="rt-btn" style="background:#25D366;color:#fff;" id="rtShareWa">💬 WhatsApp</button>
+        <button class="rt-btn" style="background:#000;color:#fff;" id="rtShareX">𝕏 X (Twitter)</button>
+        <button class="rt-btn" style="background:#1877F2;color:#fff;" id="rtShareFb">📘 Facebook</button>
+        <button class="rt-btn" style="background:#26A5E4;color:#fff;" id="rtShareTg">✈️ Telegram</button>
+        <button class="rt-btn rt-btn-copy" id="rtShareDownload">🖼️ Görseli İndir</button>
+      </div>
+    </div>`;
+  document.body.appendChild(menu);
+
+  document.getElementById('rtShareWa').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
+  document.getElementById('rtShareX').onclick = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+  document.getElementById('rtShareFb').onclick = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`, '_blank');
+  document.getElementById('rtShareTg').onclick = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+  document.getElementById('rtShareDownload').onclick = () => {
+    const a = document.createElement('a');
+    a.href = imgUrl;
+    a.download = 'ruya-takim.png';
+    a.click();
+    showToast('Görsel indirildi! Sohbet uygulamasına ekleyebilirsin.');
+  };
+  const nativeBtn = document.getElementById('rtShareNativeBtn');
+  if (nativeBtn) {
+    nativeBtn.onclick = async () => {
+      try { await navigator.share({ title: 'WC 2026 Rüya Takımım', text: fullText, files: [file] }); menu.remove(); }
+      catch (e) {}
+    };
+  }
+}
 
 window.rtCopyLink = function () {
   const url = buildShareUrl();
