@@ -3869,11 +3869,12 @@ img { max-width: 100%; display: block; }
 .rt-player-pos { font-size: 9px; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.4); border-radius: 3px; padding: 1px 4px; }
 .rt-player-slot.empty .rt-player-avatar { background: rgba(255,255,255,0.1); border: 2px dashed rgba(255,255,255,0.4); }
 .rt-player-slot.empty .rt-player-name { color: rgba(255,255,255,0.5); }
-.rt-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.rt-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
 .rt-modal { background: var(--bg-card); border-radius: 16px; width: 100%; max-width: 480px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-[data-theme="dark"] .rt-modal { background: #232330; }
+[data-theme="dark"] .rt-modal { background: #2e2e3c; }
 [data-theme="dark"] .rt-modal-search input,
-[data-theme="dark"] .rt-team-tab { background: #2c2c3a; }
+[data-theme="dark"] .rt-team-tab { background: #3a3a4a; border-color: #46465a; }
+[data-theme="dark"] .rt-player-row:hover { background: rgba(255,255,255,0.07); }
 @media (max-width: 600px) {
   .rt-modal-overlay { background: rgba(0,0,0,0.55); padding: 0; align-items: flex-end; }
   .rt-modal { max-height: 92vh; border-radius: 16px 16px 0 0; }
