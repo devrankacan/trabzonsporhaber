@@ -373,7 +373,7 @@ window.rtShare = async function () {
 
 function _rtOpenShareMenu(blob) {
   const url = buildShareUrl();
-  const text = 'İşte benim Dünya Kupası 2026 kadrom! 🏆⚽';
+  const text = 'Iste benim Dunya Kupasi 2026 kadrom!';
   const fullText = `${text}\n${url}`;
   const file = new File([blob], 'ruya-takim.png', { type: 'image/png' });
   const imgUrl = URL.createObjectURL(blob);
@@ -405,15 +405,25 @@ function _rtOpenShareMenu(blob) {
     </div>`;
   document.body.appendChild(menu);
 
-  document.getElementById('rtShareWa').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
-  document.getElementById('rtShareX').onclick = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-  document.getElementById('rtShareFb').onclick = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`, '_blank');
-  document.getElementById('rtShareTg').onclick = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
-  document.getElementById('rtShareDownload').onclick = () => {
+  function _downloadImg() {
     const a = document.createElement('a');
     a.href = imgUrl;
     a.download = 'ruya-takim.png';
     a.click();
+  }
+  function _shareViaLink(openUrl) {
+    // wa.me / twitter / facebook / telegram link'leri sadece metin paylaşır,
+    // görseli ekleyemez. Önce görseli indirip kullanıcının manuel eklemesini sağlıyoruz.
+    _downloadImg();
+    showToast('Görsel indirildi! Açılan sohbete görseli ekleyip mesajı gönderebilirsin.');
+    setTimeout(() => window.open(openUrl, '_blank'), 400);
+  }
+  document.getElementById('rtShareWa').onclick = () => _shareViaLink(`https://wa.me/?text=${encodeURIComponent(fullText)}`);
+  document.getElementById('rtShareX').onclick = () => _shareViaLink(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`);
+  document.getElementById('rtShareFb').onclick = () => _shareViaLink(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`);
+  document.getElementById('rtShareTg').onclick = () => _shareViaLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
+  document.getElementById('rtShareDownload').onclick = () => {
+    _downloadImg();
     showToast('Görsel indirildi! Sohbet uygulamasına ekleyebilirsin.');
   };
   const nativeBtn = document.getElementById('rtShareNativeBtn');
