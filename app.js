@@ -2,6 +2,30 @@
 
 // ==================== WC KADRO MODAL ====================
 
+// Wikipedia oyuncu görseli — anlık çekilir, tarayıcıda cache'lenir
+let _wikiImgCache = {};
+try { _wikiImgCache = JSON.parse(localStorage.getItem('wc_wiki_img_cache') || '{}'); } catch (e) {}
+function _saveWikiImgCache() { try { localStorage.setItem('wc_wiki_img_cache', JSON.stringify(_wikiImgCache)); } catch (e) {} }
+
+async function fetchWikiPlayerThumb(name) {
+  if (Object.prototype.hasOwnProperty.call(_wikiImgCache, name)) return _wikiImgCache[name];
+  let url = null;
+  try {
+    const resp = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name.replace(/ /g, '_'))}`);
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.thumbnail && data.thumbnail.source) url = data.thumbnail.source;
+    }
+  } catch (e) {}
+  _wikiImgCache[name] = url;
+  _saveWikiImgCache();
+  return url;
+}
+
+function _playerInitials(name) {
+  return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
 function wcShowSquad(code) {
   if (typeof WC2026_SQUADS === 'undefined' || !WC2026_SQUADS[code]) return;
   const team = WC2026_SQUADS[code];
@@ -23,6 +47,7 @@ function wcShowSquad(code) {
         <div class="wc-squad-players">
           ${players.map(p => `
             <div class="wc-squad-player-row">
+              <span class="wc-squad-player-avatar" data-player="${escHtml(p.name)}">${_playerInitials(p.name)}</span>
               <span class="wc-squad-player-no">${p.no || ''}</span>
               <span class="wc-squad-player-name">${p.name}</span>
               <span class="wc-squad-player-club">${p.club || ''}</span>
@@ -33,6 +58,14 @@ function wcShowSquad(code) {
   }).join('');
 
   modal.style.display = 'flex';
+
+  // Görselleri arka planda çek
+  body.querySelectorAll('.wc-squad-player-avatar').forEach(el => {
+    const name = el.dataset.player;
+    fetchWikiPlayerThumb(name).then(url => {
+      if (url) el.outerHTML = `<img class="wc-squad-player-avatar" src="${url}" alt="" loading="lazy" onerror="this.style.display='none'">`;
+    });
+  });
 }
 function wcCloseSquadModal() {
   const modal = document.getElementById('wcSquadModal');
