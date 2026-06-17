@@ -396,6 +396,9 @@
         <div class="wc-squad-modal-title" id="wcSquadModalTitle"></div>
         <button class="wc-squad-modal-close" onclick="wcCloseSquadModal()">&times;</button>
       </div>
+      <div class="wc-squad-modal-search">
+        <input type="text" id="wcSquadSearch" placeholder="Oyuncu ara..." oninput="wcFilterSquadPlayers(this.value)" autocomplete="off" />
+      </div>
       <div class="wc-squad-modal-body" id="wcSquadModalBody"></div>
     </div>
   </div>

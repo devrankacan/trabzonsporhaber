@@ -125,6 +125,8 @@
           <span class="wc-live-tab-badge" id="wcMatchesLiveBadge" style="display:none"></span>
         </button>
         <button class="wc-tab" onclick="wcShowTab('stats')" id="wctab-stats">En İyi 3.'ler</button>
+        <button class="wc-tab" onclick="wcShowTab('sim')" id="wctab-sim">Grup Simülasyonu</button>
+        <button class="wc-notif-btn" id="wcNotifBtn" onclick="wcRequestNotifPermission()" title="Türkiye maç bildirimlerini aç">🔔 Bildirimler</button>
       </div>
     </div>
   </div>
@@ -193,6 +195,18 @@
       </div>
     </section>
 
+    <!-- TAB: GRUP SİMÜLASYONU -->
+    <section class="wc-tab-content" id="wc-tab-sim">
+      <div class="wc-page-card" style="margin-top:24px">
+        <div class="wc-page-card-header">
+          <span>Grup Simülasyonu — Kalan Maçları Tahmin Et</span>
+          <button class="wc-sim-reset-btn" onclick="wcSimReset()">Sıfırla</button>
+        </div>
+        <p class="wc-sim-hint">Oynanmamış maçların sonucunu seç, gruplardan kimlerin çıkacağını anlık gör. Tahminler sadece sende saklanır, gerçek sonuçları etkilemez.</p>
+        <div class="wc-sim-grid" id="wcSimGrid"></div>
+      </div>
+    </section>
+
   </main>
 
   <footer class="footer">
@@ -242,6 +256,9 @@
         <div class="wc-squad-modal-title" id="wcSquadModalTitle"></div>
         <button class="wc-squad-modal-close" onclick="wcCloseSquadModal()">&times;</button>
       </div>
+      <div class="wc-squad-modal-search">
+        <input type="text" id="wcSquadSearch" placeholder="Oyuncu ara..." oninput="wcFilterSquadPlayers(this.value)" autocomplete="off" />
+      </div>
       <div class="wc-squad-modal-body" id="wcSquadModalBody"></div>
     </div>
   </div>
@@ -287,9 +304,13 @@
       if (name === 'matches') {
         renderWCMatches();
       }
+      if (name === 'sim') {
+        renderWCSim();
+      }
       // Tüm sekmelerde otomatik güncelleme — her 30s sunucudan çek
       wcStartMatchRefresh();
     }
+    _wcInitNotifBtn();
   </script>
 </body>
 </html>

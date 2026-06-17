@@ -32,6 +32,7 @@ function wcShowSquad(code) {
   const modal = document.getElementById('wcSquadModal');
   const title = document.getElementById('wcSquadModalTitle');
   const body = document.getElementById('wcSquadModalBody');
+  const search = document.getElementById('wcSquadSearch');
   if (!modal || !title || !body) return;
   const POS_TR = { GK: 'Kaleci', DEF: 'Defans', MID: 'Orta Saha', FWD: 'Forvet' };
   const order = ['GK', 'DEF', 'MID', 'FWD'];
@@ -46,7 +47,7 @@ function wcShowSquad(code) {
         <div class="wc-squad-pos-title">${POS_TR[pos]}</div>
         <div class="wc-squad-players">
           ${players.map(p => `
-            <div class="wc-squad-player-row">
+            <div class="wc-squad-player-row" data-name="${escHtml(p.name).toLowerCase()}">
               <span class="wc-squad-player-avatar" data-player="${escHtml(p.name)}">${_playerInitials(p.name)}</span>
               <span class="wc-squad-player-no">${p.no || ''}</span>
               <span class="wc-squad-player-name">${p.name}</span>
@@ -57,6 +58,7 @@ function wcShowSquad(code) {
       </div>`;
   }).join('');
 
+  if (search) search.value = '';
   modal.style.display = 'flex';
 
   // Görselleri arka planda çek
@@ -70,6 +72,18 @@ function wcShowSquad(code) {
 function wcCloseSquadModal() {
   const modal = document.getElementById('wcSquadModal');
   if (modal) modal.style.display = 'none';
+}
+function wcFilterSquadPlayers(q) {
+  q = (q || '').trim().toLowerCase();
+  const body = document.getElementById('wcSquadModalBody');
+  if (!body) return;
+  body.querySelectorAll('.wc-squad-player-row').forEach(row => {
+    row.style.display = row.dataset.name.includes(q) ? '' : 'none';
+  });
+  body.querySelectorAll('.wc-squad-pos-group').forEach(group => {
+    const anyVisible = [...group.querySelectorAll('.wc-squad-player-row')].some(r => r.style.display !== 'none');
+    group.style.display = anyVisible ? '' : 'none';
+  });
 }
 
 // ==================== DATA LAYER ====================
@@ -685,16 +699,167 @@ function wcStartMatchRefresh() {
   function _doRefresh() {
     fetch('/api/' + WC_KEY).then(r => r.ok ? r.json() : null).then(data => {
       if (!data) return;
+      _wcCheckMatchChanges(data);
       _serverData[WC_KEY] = data;
       localStorage.setItem(WC_KEY, JSON.stringify(data));
       renderWCMatches();
       renderWCPage();
       renderWCStats();
       renderFixtureTicker();
+      if (document.getElementById('wc-tab-sim')?.classList.contains('active')) renderWCSim();
     }).catch(() => {});
   }
   _doRefresh();
   _wcMatchRefreshTimer = setInterval(_doRefresh, 30000);
+}
+
+// ==================== TÜRKİYE MAÇ BİLDİRİMLERİ ====================
+
+let _wcLastTrSnapshot = null;
+
+function _wcCheckMatchChanges(newData) {
+  const matches = newData.matches || [];
+  const trMatches = matches.filter(m => m.homeCode === 'tr' || m.awayCode === 'tr');
+  if (_wcLastTrSnapshot) {
+    trMatches.forEach(m => {
+      const old = _wcLastTrSnapshot.find(o => o.id === m.id);
+      if (!old) return;
+      const label = `${m.home} ${m.homeScore ?? 0} - ${m.awayScore ?? 0} ${m.away}`;
+      if (old.status !== 'live' && m.status === 'live') {
+        _wcNotify('🔴 Maç Başladı!', label);
+      } else if ((old.homeScore !== m.homeScore || old.awayScore !== m.awayScore) && m.homeScore !== null && m.homeScore !== undefined) {
+        _wcNotify('⚽ GOL!', label);
+      } else if (old.status !== 'finished' && m.status === 'finished') {
+        _wcNotify('🏁 Maç Bitti', label);
+      }
+    });
+  }
+  _wcLastTrSnapshot = trMatches.map(m => ({ id: m.id, status: m.status, homeScore: m.homeScore, awayScore: m.awayScore }));
+}
+
+function _wcNotify(title, body) {
+  let wrap = document.getElementById('wc-toast-wrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'wc-toast-wrap';
+    wrap.style.cssText = 'position:fixed;top:74px;right:16px;z-index:3000;display:flex;flex-direction:column;gap:8px;max-width:300px;';
+    document.body.appendChild(wrap);
+  }
+  const card = document.createElement('div');
+  card.style.cssText = 'background:var(--ts-red);color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.35);font-size:13px;';
+  card.innerHTML = `<b>${title}</b><br>${body}`;
+  wrap.appendChild(card);
+  setTimeout(() => card.remove(), 6000);
+
+  if (window.Notification && Notification.permission === 'granted') {
+    try { new Notification(title, { body, icon: '/favicon.svg' }); } catch (e) {}
+  }
+}
+
+function wcRequestNotifPermission() {
+  const btn = document.getElementById('wcNotifBtn');
+  if (!window.Notification) { if (btn) btn.textContent = '🔕 Desteklenmiyor'; return; }
+  if (Notification.permission === 'granted') {
+    if (btn) { btn.textContent = '🔔 Bildirimler Açık'; btn.classList.add('wc-notif-on'); }
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    if (btn) btn.textContent = '🔕 Engellendi';
+    return;
+  }
+  Notification.requestPermission().then(perm => {
+    if (!btn) return;
+    if (perm === 'granted') { btn.textContent = '🔔 Bildirimler Açık'; btn.classList.add('wc-notif-on'); }
+    else btn.textContent = '🔕 Reddedildi';
+  });
+}
+
+function _wcInitNotifBtn() {
+  const btn = document.getElementById('wcNotifBtn');
+  if (!btn || !window.Notification) return;
+  if (Notification.permission === 'granted') { btn.textContent = '🔔 Bildirimler Açık'; btn.classList.add('wc-notif-on'); }
+}
+
+// ==================== GRUP SİMÜLASYONU ====================
+
+const WC_SIM_KEY = 'wc_sim_predictions';
+let _wcSimPredictions = {};
+try { _wcSimPredictions = JSON.parse(localStorage.getItem(WC_SIM_KEY) || '{}'); } catch (e) {}
+
+function wcSimReset() {
+  _wcSimPredictions = {};
+  localStorage.removeItem(WC_SIM_KEY);
+  renderWCSim();
+}
+
+function wcSimSetResult(matchId, result) {
+  _wcSimPredictions[matchId] = result;
+  try { localStorage.setItem(WC_SIM_KEY, JSON.stringify(_wcSimPredictions)); } catch (e) {}
+  renderWCSim();
+}
+
+function renderWCSim() {
+  const container = document.getElementById('wcSimGrid');
+  if (!container) return;
+  const wc = getWC();
+  const groups = wc.groups || [];
+  const matches = wc.matches || WC_DEFAULT_MATCHES;
+
+  container.innerHTML = groups.map(g => {
+    const teams = JSON.parse(JSON.stringify(g.teams));
+    const byCode = {};
+    teams.forEach(t => { byCode[t.code] = t; });
+
+    const groupMatches = matches.filter(m => m.group === g.id);
+    const pending = groupMatches.filter(m => m.status !== 'finished');
+
+    pending.forEach(m => {
+      const pred = _wcSimPredictions[m.id];
+      if (!pred) return;
+      const home = byCode[m.homeCode], away = byCode[m.awayCode];
+      if (!home || !away) return;
+      home.played++; away.played++;
+      if (pred === 'home') { home.won++; away.lost++; home.pts += 3; home.gf += 1; away.ga += 1; }
+      else if (pred === 'away') { away.won++; home.lost++; away.pts += 3; away.gf += 1; home.ga += 1; }
+      else { home.drawn++; away.drawn++; home.pts += 1; away.pts += 1; }
+    });
+
+    const sorted = teams.slice().sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
+      if (gdB !== gdA) return gdB - gdA;
+      return b.gf - a.gf;
+    });
+
+    return `
+      <div class="wc-sim-group-card">
+        <div class="wc-sim-group-title">Grup ${g.id}</div>
+        <table class="wc-table wc-sim-table">
+          <thead><tr><th></th><th>O</th><th>G</th><th>B</th><th>M</th><th>P</th></tr></thead>
+          <tbody>
+            ${sorted.map((t, i) => `
+              <tr class="${i < 2 ? 'wc-qualify' : ''}">
+                <td class="wc-team-cell"><img src="${teamImgSrc(t)}" class="wc-flag" alt="" onerror="this.style.display='none'" />${escHtml(t.name)}</td>
+                <td>${t.played}</td><td>${t.won}</td><td>${t.drawn}</td><td>${t.lost}</td>
+                <td class="wc-pts">${t.pts}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        ${pending.length ? `
+          <div class="wc-sim-matches">
+            ${pending.map(m => `
+              <div class="wc-sim-match-row">
+                <span class="wc-sim-team-name">${escHtml(m.home)}</span>
+                <div class="wc-sim-btns">
+                  <button class="wc-sim-btn ${_wcSimPredictions[m.id] === 'home' ? 'active' : ''}" onclick="wcSimSetResult('${m.id}','home')">1</button>
+                  <button class="wc-sim-btn ${_wcSimPredictions[m.id] === 'draw' ? 'active' : ''}" onclick="wcSimSetResult('${m.id}','draw')">X</button>
+                  <button class="wc-sim-btn ${_wcSimPredictions[m.id] === 'away' ? 'active' : ''}" onclick="wcSimSetResult('${m.id}','away')">2</button>
+                </div>
+                <span class="wc-sim-team-name">${escHtml(m.away)}</span>
+              </div>`).join('')}
+          </div>` : '<div class="wc-sim-done">Bu grupta tüm maçlar tamamlandı ✅</div>'}
+      </div>`;
+  }).join('');
 }
 
 function wcStopMatchRefresh() {
