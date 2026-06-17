@@ -643,7 +643,9 @@ function renderWCMatches() {
     const ms = byMatchday[key];
     return `<div class="wc-match-group">
       <div class="wc-match-group-title">${escHtml(key)}</div>
-      ${ms.map(m => _renderMatchCard(m)).join('')}
+      <div class="wc-match-grid">
+        ${ms.map(m => _renderMatchCard(m)).join('')}
+      </div>
     </div>`;
   }).join('');
 }
