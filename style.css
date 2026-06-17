@@ -2357,7 +2357,14 @@ img { max-width: 100%; display: block; }
   .slider { height: 300px; max-width: 100%; }
   .slide-content { padding: 20px 16px; }
   .slide-title { font-size: 18px; }
-  .slide-summary { display: none; }
+  .slide-summary {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 12px;
+    max-width: 100%;
+  }
   .slide-meta { margin-top: 8px; gap: 10px; }
   .slider-btn { width: 36px; height: 36px; font-size: 18px; }
   .slider-btn.prev { left: 10px; }
