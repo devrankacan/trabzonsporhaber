@@ -1,5 +1,44 @@
 'use strict';
 
+// ==================== WC KADRO MODAL ====================
+
+function wcShowSquad(code) {
+  if (typeof WC2026_SQUADS === 'undefined' || !WC2026_SQUADS[code]) return;
+  const team = WC2026_SQUADS[code];
+  const modal = document.getElementById('wcSquadModal');
+  const title = document.getElementById('wcSquadModalTitle');
+  const body = document.getElementById('wcSquadModalBody');
+  if (!modal || !title || !body) return;
+  const POS_TR = { GK: 'Kaleci', DEF: 'Defans', MID: 'Orta Saha', FWD: 'Forvet' };
+  const order = ['GK', 'DEF', 'MID', 'FWD'];
+
+  title.innerHTML = `<img src="https://flagcdn.com/w40/${team.flag}.png" style="width:24px;height:16px;object-fit:cover;border-radius:2px;margin-right:8px;vertical-align:middle;">${team.name} Kadrosu`;
+
+  body.innerHTML = order.map(pos => {
+    const players = team.players.filter(p => p.pos === pos);
+    if (!players.length) return '';
+    return `
+      <div class="wc-squad-pos-group">
+        <div class="wc-squad-pos-title">${POS_TR[pos]}</div>
+        <div class="wc-squad-players">
+          ${players.map(p => `
+            <div class="wc-squad-player-row">
+              <span class="wc-squad-player-no">${p.no || ''}</span>
+              <span class="wc-squad-player-name">${p.name}</span>
+              <span class="wc-squad-player-club">${p.club || ''}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  modal.style.display = 'flex';
+}
+function wcCloseSquadModal() {
+  const modal = document.getElementById('wcSquadModal');
+  if (modal) modal.style.display = 'none';
+}
+
 // ==================== DATA LAYER ====================
 
 const STORAGE_KEY = 'ts_haberler';
@@ -276,7 +315,7 @@ function _wcRenderGroup(groups) {
         <tbody>
           ${g.teams.map((t, i) => `
             <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}${i < 2 ? ' wc-qualify' : ''}">
-              <td class="wc-team-cell">
+              <td class="wc-team-cell" style="cursor:pointer" onclick="wcShowSquad('${t.code}')" title="Kadroyu görüntüle">
                 <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.onerror=null;this.style.display='none'" />
                 <span class="wc-team-name">${escHtml(t.name)}</span>
               </td>
@@ -434,7 +473,7 @@ function renderWCPage() {
         <tbody>
           ${g.teams.map((t, i) => `
             <tr class="${t.code === 'tr' ? 'wc-turkey-row' : ''}${i < 2 ? ' wc-qualify' : ''}">
-              <td class="wc-team-cell">
+              <td class="wc-team-cell" style="cursor:pointer" onclick="wcShowSquad('${t.code}')" title="Kadroyu görüntüle">
                 <img src="${teamImgSrc(t)}" class="wc-flag" alt="${escHtml(t.name)}" onerror="this.onerror=null;this.style.display='none'" />
                 <span class="wc-team-name">${escHtml(t.name)}</span>
               </td>
@@ -585,7 +624,7 @@ function _renderMatchCard(m) {
 
   return `
     <div class="wc-match-card${isLive ? ' wc-match-card-live' : ''}${isFinished ? ' wc-match-card-finished' : ''}${hasTurkey ? ' wc-match-card-turkey' : ''}">
-      <div class="wc-match-team wc-match-team-home">
+      <div class="wc-match-team wc-match-team-home" style="cursor:pointer" onclick="wcShowSquad('${m.homeCode}')" title="Kadroyu görüntüle">
         <img src="https://flagcdn.com/w40/${m.homeCode}.png" class="wc-match-flag" alt="${escHtml(m.home)}" onerror="this.onerror=null;this.style.opacity='0'" />
         <span class="wc-match-name${m.homeCode === 'tr' ? ' wc-match-tr' : ''}">${escHtml(m.home)}</span>
       </div>
@@ -594,7 +633,7 @@ function _renderMatchCard(m) {
         ${scoreHtml}
         <div class="wc-match-date">${escHtml(m.date)} · ${escHtml(m.day)}</div>
       </div>
-      <div class="wc-match-team wc-match-team-away">
+      <div class="wc-match-team wc-match-team-away" style="cursor:pointer" onclick="wcShowSquad('${m.awayCode}')" title="Kadroyu görüntüle">
         <span class="wc-match-name${m.awayCode === 'tr' ? ' wc-match-tr' : ''}">${escHtml(m.away)}</span>
         <img src="https://flagcdn.com/w40/${m.awayCode}.png" class="wc-match-flag" alt="${escHtml(m.away)}" onerror="this.onerror=null;this.style.opacity='0'" />
       </div>

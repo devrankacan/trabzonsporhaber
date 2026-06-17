@@ -3866,3 +3866,19 @@ img { max-width: 100%; display: block; }
 .rt-btn-clear { background: var(--bg-card); border: 1.5px solid var(--border); color: var(--text); }
 .rt-btn-copy { background: #27ae60; color: #fff; }
 @media (max-width: 480px) { .rt-player-avatar { width: 42px; height: 42px; } .rt-player-name { font-size: 9px; max-width: 52px; } }
+
+/* ==================== WC KADRO MODAL ==================== */
+.wc-squad-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.wc-squad-modal { background: var(--bg-card); border-radius: 16px; width: 100%; max-width: 520px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+.wc-squad-modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.wc-squad-modal-title { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; }
+.wc-squad-modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1; }
+.wc-squad-modal-body { padding: 12px 20px 20px; overflow-y: auto; flex: 1; }
+.wc-squad-pos-group { margin-bottom: 16px; }
+.wc-squad-pos-title { font-size: 12px; font-weight: 700; color: var(--ts-red); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+.wc-squad-players { display: flex; flex-direction: column; gap: 4px; }
+.wc-squad-player-row { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-radius: 6px; }
+.wc-squad-player-row:hover { background: var(--bg); }
+.wc-squad-player-no { width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+.wc-squad-player-name { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+.wc-squad-player-club { font-size: 12px; color: var(--text-muted); }
