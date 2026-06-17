@@ -864,14 +864,19 @@ function renderWCSim() {
   }).join('');
 }
 
-function wcSimShare() {
+async function _wcImgToDataURL(img) {
+  try {
+    const resp = await fetch(img.src, { mode: 'cors' });
+    const blob = await resp.blob();
+    return new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
+  } catch { return null; }
+}
+
+function _wcSimSummaryLines() {
   const wc = getWC();
   const groups = wc.groups || [];
   const matches = wc.matches || WC_DEFAULT_MATCHES;
-  const hasPredictions = Object.keys(_wcSimPredictions).length > 0;
-  if (!hasPredictions) { showToast('Önce en az bir maç tahmini yap'); return; }
-
-  const lines = groups.map(g => {
+  return groups.map(g => {
     const teams = JSON.parse(JSON.stringify(g.teams));
     const byCode = {};
     teams.forEach(t => { byCode[t.code] = t; });
@@ -894,15 +899,95 @@ function wcSimShare() {
     });
     return `Grup ${g.id}: ${sorted[0].name}, ${sorted[1].name}`;
   });
+}
 
-  const text = `Dunya Kupasi 2026 grup tahminlerim:\n${lines.join('\n')}\n\nSen de tahminini yap:`;
+async function wcSimShare() {
+  const hasPredictions = Object.keys(_wcSimPredictions).length > 0;
+  if (!hasPredictions) { showToast('Önce en az bir maç tahmini yap'); return; }
+
+  const text = `Dünya Kupası 2026 grup tahminlerim:\n${_wcSimSummaryLines().join('\n')}\n\nSen de tahminini yap:`;
   const url = `${location.origin}/dunyakupasi.html`;
   const fullText = `${text}\n${url}`;
 
-  if (navigator.share) {
-    navigator.share({ title: 'WC 2026 Grup Tahminlerim', text: fullText }).catch(() => {});
-  } else {
-    window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
+  const grid = document.getElementById('wcSimGrid');
+  let blob = null;
+  if (grid && typeof html2canvas !== 'undefined') {
+    showToast('Görsel hazırlanıyor…');
+    try {
+      const imgs = [...grid.querySelectorAll('img[src*="flagcdn"]')];
+      const origSrcs = imgs.map(i => i.src);
+      await Promise.all(imgs.map(async (img) => {
+        const dataUrl = await _wcImgToDataURL(img);
+        if (dataUrl) img.src = dataUrl;
+      }));
+      const canvas = await html2canvas(grid, { useCORS: true, scale: 2, backgroundColor: getComputedStyle(document.body).backgroundColor || '#16161f' });
+      imgs.forEach((img, i) => { img.src = origSrcs[i]; });
+      blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    } catch (e) { /* görsel oluşturulamazsa link paylaşımına devam */ }
+  }
+
+  _wcOpenSimShareMenu(blob, text, fullText, url);
+}
+
+function _wcOpenSimShareMenu(blob, text, fullText, url) {
+  const file = blob ? new File([blob], 'grup-tahminlerim.png', { type: 'image/png' }) : null;
+  const imgUrl = blob ? URL.createObjectURL(blob) : null;
+  const canNativeShareFile = file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] });
+
+  let menu = document.getElementById('wcSimShareMenu');
+  if (menu) menu.remove();
+  menu = document.createElement('div');
+  menu.id = 'wcSimShareMenu';
+  menu.className = 'rt-modal-overlay';
+  menu.style.display = 'flex';
+  menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+
+  menu.innerHTML = `
+    <div class="rt-modal" style="max-width:340px;">
+      <div class="rt-modal-header">
+        <div class="rt-modal-title">Tahminleri Paylaş</div>
+        <button class="rt-modal-close" onclick="document.getElementById('wcSimShareMenu').remove()">&times;</button>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px;max-height:70vh;overflow-y:auto;">
+        ${imgUrl ? `<img src="${imgUrl}" style="width:100%;border-radius:10px;margin-bottom:4px;" />` : ''}
+        ${canNativeShareFile ? `<button class="rt-btn" style="background:var(--ts-red);color:#fff;" id="wcSimShareNative"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş (Uygulamalar)</button>` : ''}
+        <button class="rt-btn" style="background:#25D366;color:#fff;" id="wcSimShareWa"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4a8.96 8.96 0 0 0-7.77 13.4L3 21l3.7-1.25A8.93 8.93 0 0 0 12.05 21a8.95 8.95 0 0 0 5.55-15.68ZM12.05 19.4a7.4 7.4 0 0 1-3.78-1.04l-.27-.16-2.8.95.92-2.73-.18-.28a7.43 7.43 0 0 1 11.7-9.06 7.4 7.4 0 0 1-5.6 12.32Zm4.07-5.56c-.22-.11-1.3-.64-1.5-.71-.2-.07-.35-.11-.5.11-.15.22-.57.71-.7.86-.13.15-.26.16-.48.06-.22-.11-1.32-.49-2.16-1.33-.79-.79-1.27-1.62-1.41-1.85-.13-.22-.01-.35.1-.46.11-.11.25-.28.37-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.03-.42-.07-.11-.62-1.5-.85-2.04-.22-.53-.45-.45-.62-.46h-.53c-.18 0-.46.07-.62.25-.16.18-.62.6-.62 1.46s.64 1.69.73 1.81c.08.11 1.45 2.21 3.52 3.1 2.07.89 2.07.6 2.45.56.38-.04 1.3-.53 1.48-1.04.18-.51.18-.95.13-1.04-.05-.09-.2-.14-.42-.25Z"/></svg> WhatsApp</button>
+        <button class="rt-btn" style="background:#000;color:#fff;" id="wcSimShareX"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L22.6 22H16l-5.2-6.8L4.8 22H1.7l8.1-9.3L1 2h6.7l4.7 6.2L18.9 2Zm-2.2 18h1.7L7.4 4H5.6l11.1 16Z"/></svg> X (Twitter)</button>
+        <button class="rt-btn" style="background:#1877F2;color:#fff;" id="wcSimShareFb"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.16 8.44 9.94v-7.03H7.9v-2.91h2.54V9.41c0-2.51 1.49-3.89 3.78-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.91h-2.34V22c4.78-.78 8.44-4.94 8.44-9.94Z"/></svg> Facebook</button>
+        <button class="rt-btn" style="background:#26A5E4;color:#fff;" id="wcSimShareTg"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 2.7 11.6c-.9.36-.9 1.66.04 1.97l4.6 1.5 1.8 5.7c.27.86 1.36 1.1 1.97.44l2.6-2.8 4.7 3.5c.78.58 1.9.17 2.1-.78L23 5.4c.2-.96-.7-1.7-1.6-1.3ZM9.2 14.5l-1.1 3.6-1-3.3 10.6-7.7-8.5 7.4Z"/></svg> Telegram</button>
+        ${imgUrl ? `<button class="rt-btn rt-btn-copy" id="wcSimShareDownload">🖼️ Görseli İndir</button>` : ''}
+      </div>
+    </div>`;
+  document.body.appendChild(menu);
+
+  function downloadImg() {
+    if (!imgUrl) return;
+    const a = document.createElement('a');
+    a.href = imgUrl;
+    a.download = 'grup-tahminlerim.png';
+    a.click();
+  }
+  function shareViaLink(openUrl) {
+    if (imgUrl) {
+      downloadImg();
+      showToast('Görsel indirildi! Açılan sohbete görseli ekleyip mesajı gönderebilirsin.');
+      setTimeout(() => window.open(openUrl, '_blank'), 400);
+    } else {
+      window.open(openUrl, '_blank');
+    }
+  }
+  document.getElementById('wcSimShareWa').onclick = () => shareViaLink(`https://wa.me/?text=${encodeURIComponent(fullText)}`);
+  document.getElementById('wcSimShareX').onclick = () => shareViaLink(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`);
+  document.getElementById('wcSimShareFb').onclick = () => shareViaLink(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`);
+  document.getElementById('wcSimShareTg').onclick = () => shareViaLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
+  const dlBtn = document.getElementById('wcSimShareDownload');
+  if (dlBtn) dlBtn.onclick = () => { downloadImg(); showToast('Görsel indirildi!'); };
+  const nativeBtn = document.getElementById('wcSimShareNative');
+  if (nativeBtn) {
+    nativeBtn.onclick = async () => {
+      try { await navigator.share({ title: 'WC 2026 Grup Tahminlerim', text: fullText, files: [file] }); menu.remove(); }
+      catch (e) {}
+    };
   }
 }
 
