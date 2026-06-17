@@ -11,7 +11,12 @@ const FORMATIONS = {
   '3-4-3':   { rows: [[1],[3],[4],[3]] },
   '5-3-2':   { rows: [[1],[5],[3],[2]] },
   '4-5-1':   { rows: [[1],[4],[5],[1]] },
+  'Serbest': { rows: [[1],[4],[4],[2]], free: true },
 };
+
+function isFreeFormation() {
+  return !!FORMATIONS[_formation].free;
+}
 
 const POS_TR = { GK: 'Kaleci', DEF: 'Defans', MID: 'Orta Saha', FWD: 'Forvet' };
 
@@ -197,8 +202,10 @@ function attachDrag(slotEl, slotId) {
     const entry = _lineup.find(e => e.slotId === slotId);
     if (entry) {
       entry.custom = { top: slotEl._dragTop, left: slotEl._dragLeft };
-      const newPos = zoneForTop(slotEl._dragTop);
-      if (newPos !== entry.pos) entry.pos = newPos;
+      if (!isFreeFormation()) {
+        const newPos = zoneForTop(slotEl._dragTop);
+        if (newPos !== entry.pos) entry.pos = newPos;
+      }
       saveState();
     }
     renderPitch();
@@ -264,11 +271,11 @@ function makeSlotEl(slotId, pos) {
 
   const name = document.createElement('div');
   name.className = 'rt-player-name';
-  name.textContent = player ? shortName(player.name) : (POS_TR[pos] || pos);
+  name.textContent = player ? shortName(player.name) : (isFreeFormation() ? 'Oyuncu' : (POS_TR[pos] || pos));
 
   const posEl = document.createElement('div');
   posEl.className = 'rt-player-pos';
-  posEl.textContent = player ? (POS_TR[pos] || pos) : '';
+  posEl.textContent = player ? (POS_TR[player.pos] || player.pos) : '';
 
   div.appendChild(avatar);
   div.appendChild(name);
@@ -307,11 +314,11 @@ function openRemoveMenu(slotId, player, pos) {
 function openPicker(slotId, pos) {
   _pickerMode = 'pick';
   _pickerSlot = slotId;
-  _pickerPos = pos;
+  _pickerPos = isFreeFormation() ? '' : pos;
   _filterTeam = 'all';
   _searchQ = '';
 
-  document.getElementById('rtModalTitle').textContent = `Oyuncu Seç — ${POS_TR[pos] || pos}`;
+  document.getElementById('rtModalTitle').textContent = isFreeFormation() ? 'Oyuncu Seç' : `Oyuncu Seç — ${POS_TR[pos] || pos}`;
   document.getElementById('rtSearchInput').style.display = '';
   document.getElementById('rtSearchInput').value = '';
   document.getElementById('rtTeamTabs').style.display = '';
