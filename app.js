@@ -2586,7 +2586,11 @@ function renderArticle() {
   const articleTeamBadges = teams.map(key => {
     const b = BRANCHES[key];
     if (!b) return '';
-    return `<a class="branch-pill" href="/haberler/${key}" style="background:linear-gradient(135deg,${b.color} 50%,${b.color2||b.color} 50%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.4)">${escHtml(b.label)}</a>`;
+    const logo = getLogo(key);
+    const iconHtml = logo
+      ? `<img class="branch-pill-logo" src="${escAttr(logo)}" alt="" />`
+      : `<span class="branch-pill-dot" style="background:${b.color}"></span>`;
+    return `<a class="branch-pill" href="/haberler/${key}">${iconHtml}${escHtml(b.label)}</a>`;
   }).join('');
   articleEl.innerHTML = `
     <div class="article-header">
