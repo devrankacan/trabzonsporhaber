@@ -1286,7 +1286,7 @@ function renderAnalytics() {
           ${topNews.map((n, i) => `
             <tr>
               <td class="rank">${i+1}</td>
-              <td><a href="${slugify(n.id)}" target="_blank">${escHtml(n.title.length > 55 ? n.title.slice(0,55)+'…' : n.title)}</a></td>
+              <td><a href="${slugify(n)}" target="_blank">${escHtml(n.title.length > 55 ? n.title.slice(0,55)+'…' : n.title)}</a></td>
               <td>${escHtml(branchLabel(n.branch))}</td>
               <td><strong>${n.viewCount}</strong></td>
               <td>${comments[n.id] ? comments[n.id].length : 0}</td>
@@ -1483,6 +1483,10 @@ function getNewsById(id) {
   return getNews().find(n => n.id === Number(id));
 }
 
+function getNewsBySlug(slug) {
+  return getNews().find(n => n.slug === slug);
+}
+
 // ==================== UTILITIES ====================
 
 function formatDate(iso) {
@@ -1500,8 +1504,32 @@ function categoryLabel(cat) {
   return map[cat] || cat || 'Genel';
 }
 
-function slugify(id) {
-  return `/haber.html?id=${id}`;
+function slugify(news) {
+  if (news && news.slug) return `/haber/${news.slug}`;
+  return `/haber.html?id=${news.id}`;
+}
+
+function textToSlug(text) {
+  const map = { ı: 'i', İ: 'i', ş: 's', Ş: 's', ğ: 'g', Ğ: 'g', ü: 'u', Ü: 'u', ö: 'o', Ö: 'o', ç: 'c', Ç: 'c' };
+  return String(text)
+    .replace(/[ışŞğĞüÜöÖçÇİ]/g, ch => map[ch] || ch)
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80)
+    .replace(/^-+|-+$/g, '') || 'haber';
+}
+
+function uniqueSlug(baseSlug, list, excludeId) {
+  let slug = baseSlug;
+  let n = 2;
+  while (list.some(item => item.slug === slug && item.id !== excludeId)) {
+    slug = `${baseSlug}-${n++}`;
+  }
+  return slug;
 }
 
 function buildBgStyle(image) {
@@ -1552,7 +1580,7 @@ function buildSlides() {
   if (empty) empty.style.display = 'none';
 
   track.innerHTML = list.map((n, i) => `
-    <div class="slide" onclick="location.href='${slugify(n.id)}'">
+    <div class="slide" onclick="location.href='${slugify(n)}'">
       <div class="slide-bg" style="${buildBgStyle(n.image)}"></div>
       <div class="slide-overlay"></div>
       <div class="slide-content">
@@ -1560,7 +1588,7 @@ function buildSlides() {
         <p class="slide-summary">${escHtml(n.summary)}</p>
         <div class="slide-meta">
           <span class="slide-date">${formatDate(n.date)}</span>
-          <a class="slide-read-more" href="${slugify(n.id)}">Devamını Oku</a>
+          <a class="slide-read-more" href="${slugify(n)}">Devamını Oku</a>
         </div>
       </div>
     </div>
@@ -1651,7 +1679,7 @@ function buildTicker() {
 
 function buildNewsCard(n) {
   return `
-    <div class="news-card" onclick="location.href='${slugify(n.id)}'">
+    <div class="news-card" onclick="location.href='${slugify(n)}'">
       <div class="news-card-image" style="${buildBgStyle(n.image)}">
       </div>
       <div class="news-card-body">
@@ -2524,13 +2552,14 @@ function loadMoreNews() {
 function renderArticle() {
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
+  const slugMatch = location.pathname.match(/^\/haber\/(.+)$/);
   const articleEl = document.getElementById('articleContent');
 
   if (!articleEl) return;
 
-  if (!id) { articleEl.innerHTML = '<div class="article-loading">Haber bulunamadı.</div>'; return; }
+  if (!id && !slugMatch) { articleEl.innerHTML = '<div class="article-loading">Haber bulunamadı.</div>'; return; }
 
-  const news = getNewsById(id);
+  const news = slugMatch ? getNewsBySlug(decodeURIComponent(slugMatch[1])) : getNewsById(id);
   if (!news) { articleEl.innerHTML = '<div class="article-loading">Haber bulunamadı. <a href="haberler.html">Geri dön</a></div>'; return; }
 
   document.title = `${news.title} | Trabzonspor Haber`;
@@ -2658,7 +2687,7 @@ function renderRecentSidebar(excludeId) {
   const news = getNews().filter(n => n.id !== excludeId).slice(0, 5);
   if (news.length === 0) { el.innerHTML = '<p class="no-news-text">Başka haber yok.</p>'; return; }
   el.innerHTML = news.map(n => `
-    <div class="recent-sidebar-item" onclick="location.href='${slugify(n.id)}'">
+    <div class="recent-sidebar-item" onclick="location.href='${slugify(n)}'">
       <div class="recent-thumb" style="${buildBgStyle(n.image)}"></div>
       <div class="recent-title">${escHtml(n.title)}</div>
     </div>
@@ -2979,7 +3008,8 @@ async function handleSubmit() {
   if (editingId !== null) {
     const idx = list.findIndex(n => n.id === editingId);
     if (idx !== -1) {
-      list[idx] = { ...list[idx], title, branch, category, summary, content, image, author, slider, date: dateInput ? new Date(dateInput).toISOString() : list[idx].date };
+      const slug = list[idx].slug || uniqueSlug(textToSlug(title), list, editingId);
+      list[idx] = { ...list[idx], title, branch, category, summary, content, image, author, slider, slug, date: dateInput ? new Date(dateInput).toISOString() : list[idx].date };
     }
     showMessage('success', 'Haber başarıyla güncellendi!');
     editingId = null;
@@ -2987,6 +3017,7 @@ async function handleSubmit() {
     const newItem = {
       id: Date.now(),
       title,
+      slug: uniqueSlug(textToSlug(title), list),
       branch,
       category,
       summary,
@@ -3221,7 +3252,7 @@ function setupSearch(inputId, dropdownId) {
       dropdown.innerHTML = '<div class="search-no-result">Sonuç bulunamadı.</div>';
     } else {
       dropdown.innerHTML = results.map(n => `
-        <a class="search-result-item" href="${slugify(n.id)}">
+        <a class="search-result-item" href="${slugify(n)}">
           <div class="search-result-thumb" style="${buildBgStyle(n.image)}"></div>
           <div class="search-result-info">
             <div class="search-result-title">${escHtml(n.title)}</div>

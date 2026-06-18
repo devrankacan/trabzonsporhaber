@@ -189,7 +189,9 @@
   <script>
     initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
     const _aid = new URLSearchParams(location.search).get('id');
-    trackPageView('haber', _aid ? Number(_aid) : null);
+    const _aslug = location.pathname.match(/^\/haber\/(.+)$/);
+    const _aNews = _aid ? getNewsById(_aid) : (_aslug ? getNewsBySlug(decodeURIComponent(_aslug[1])) : null);
+    trackPageView('haber', _aNews ? _aNews.id : null);
     renderArticle();
     _apiSyncAll().then(() => { renderArticle(); renderNavWcLogo(); renderFixtureTicker(); });
     initDragScroll();

@@ -93,7 +93,17 @@ app.get('/index.html', (req, res) => res.redirect(301, '/'));
 app.get('/haberler.html', serveHtml('haberler.html'));
 app.get('/haberler', serveHtml('haberler.html'));
 app.get('/haberler/*', serveHtml('haberler.html'));
-app.get('/haber.html', (req, res) => {
+function findHaberById(id) {
+  const haberler = readKey('ts_haberler');
+  return Array.isArray(haberler) ? haberler.find(n => n.id === id) : null;
+}
+
+function findHaberBySlug(slug) {
+  const haberler = readKey('ts_haberler');
+  return Array.isArray(haberler) ? haberler.find(n => n.slug === slug) : null;
+}
+
+function renderHaberPage(haber, res) {
   try {
     let html = fs.readFileSync(path.join(__dirname, 'haber.html'), 'utf8');
     const bootstrap = buildBootstrapScript();
@@ -101,31 +111,28 @@ app.get('/haber.html', (req, res) => {
     if (faviconTag) html = html.replace(/<link rel="icon"[^>]*>/, faviconTag);
     html = html.replace('</head>', bootstrap + '</head>');
 
-    const id = parseInt(req.query.id);
-    if (id) {
-      const haberler = readKey('ts_haberler');
-      const haber = Array.isArray(haberler) ? haberler.find(n => n.id === id) : null;
-      if (haber) {
-        const title = (haber.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-        const summary = (haber.summary || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-        const defaultOg = (() => { const v = readKey('ts_og_image'); return v && typeof v === 'string' && v.startsWith('http') ? v : ''; })();
-        const image = (haber.image && !haber.image.startsWith('data:') ? haber.image : '') || defaultOg;
-        const url = `https://habersuperlig.com/haber.html?id=${id}`;
-        const ogTags = [
-          `<meta property="og:title" content="${title}" />`,
-          `<meta property="og:description" content="${summary}" />`,
-          `<meta property="og:url" content="${url}" />`,
-          `<meta name="twitter:card" content="summary_large_image" />`,
-          `<meta name="twitter:title" content="${title}" />`,
-          `<meta name="twitter:description" content="${summary}" />`,
-          image ? `<meta property="og:image" content="${image}" />` : '',
-          image ? `<meta name="twitter:image" content="${image}" />` : '',
-          `<title>${title} | Süper Lig Haber</title>`,
-        ].filter(Boolean).join('\n');
-        html = html
-          .replace('<title>Haber Detayı | Süper Lig Haber</title>', '')
-          .replace('</head>', ogTags + '\n</head>');
-      }
+    if (haber) {
+      const title = (haber.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      const summary = (haber.summary || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      const defaultOg = (() => { const v = readKey('ts_og_image'); return v && typeof v === 'string' && v.startsWith('http') ? v : ''; })();
+      const image = (haber.image && !haber.image.startsWith('data:') ? haber.image : '') || defaultOg;
+      const url = haber.slug
+        ? `https://habersuperlig.com/haber/${haber.slug}`
+        : `https://habersuperlig.com/haber.html?id=${haber.id}`;
+      const ogTags = [
+        `<meta property="og:title" content="${title}" />`,
+        `<meta property="og:description" content="${summary}" />`,
+        `<meta property="og:url" content="${url}" />`,
+        `<meta name="twitter:card" content="summary_large_image" />`,
+        `<meta name="twitter:title" content="${title}" />`,
+        `<meta name="twitter:description" content="${summary}" />`,
+        image ? `<meta property="og:image" content="${image}" />` : '',
+        image ? `<meta name="twitter:image" content="${image}" />` : '',
+        `<title>${title} | Süper Lig Haber</title>`,
+      ].filter(Boolean).join('\n');
+      html = html
+        .replace('<title>Haber Detayı | Süper Lig Haber</title>', '')
+        .replace('</head>', ogTags + '\n</head>');
     }
 
     res.setHeader('Content-Type', 'text/html');
@@ -134,6 +141,19 @@ app.get('/haber.html', (req, res) => {
   } catch (e) {
     res.status(500).send('Error');
   }
+}
+
+app.get('/haber.html', (req, res) => {
+  const id = parseInt(req.query.id);
+  const haber = id ? findHaberById(id) : null;
+  // Eski ?id= linklerini, slug atanmışsa SEO-uyumlu /haber/:slug adresine yönlendir
+  if (haber && haber.slug) return res.redirect(301, `/haber/${haber.slug}`);
+  renderHaberPage(haber, res);
+});
+
+app.get('/haber/:slug', (req, res) => {
+  const haber = findHaberBySlug(req.params.slug);
+  renderHaberPage(haber, res);
 });
 app.get('/dunyakupasi.html', serveHtml('dunyakupasi.html'));
 app.get('/admin.html', serveHtml('admin.html'));
