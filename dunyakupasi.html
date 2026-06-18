@@ -270,9 +270,9 @@
   <script src="/wc2026-squads.js?v=1"></script>
   <script src="/app.js?v=6"></script>
   <script>
-    initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo(); initHeaderSearch(); initDragScroll();
+    initTheme(); initSiteLogo(); initFavicon(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo(); initHeaderSearch(); initDragScroll();
     renderWCPage(); renderWCStats(); renderWCPlayers();
-    _apiSyncAll().then(() => { renderWCPage(); renderWCStats(); renderWCPlayers(); renderNavWcLogo(); renderFixtureTicker(); });
+    _apiSyncAll().then(() => { renderWCPage(); renderWCStats(); renderWCPlayers(); renderNavWcLogo(); renderFixtureTicker(); initFavicon(); });
     requestAnimationFrame(initSegSliders);
 
     function segSelect(btn, ctrlId, renderFn) {

@@ -382,12 +382,12 @@
       header.closest('.sidebar-card').classList.toggle('open');
     }
     trackPageView('index');
-    initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
+    initTheme(); initSiteLogo(); initFavicon(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
     renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar();
     fetchAndApplyTransfersLogo();
     initDragScroll();
     _apiSyncAll().then(() => {
-      renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar(); renderNavWcLogo(); renderFixtureTicker();
+      renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar(); renderNavWcLogo(); renderFixtureTicker(); initFavicon();
     });
     rtInit();
   </script>

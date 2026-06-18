@@ -3619,6 +3619,18 @@ function initSiteLogo() {
   applySiteLogo(getSiteLogo());
 }
 
+function getFavicon() {
+  if (_serverData[FAVICON_KEY] !== undefined) {
+    const v = _serverData[FAVICON_KEY];
+    return typeof v === 'string' ? v : '';
+  }
+  return localStorage.getItem(FAVICON_KEY) || '';
+}
+
+function initFavicon() {
+  applyFaviconDOM(getFavicon());
+}
+
 // --- Admin logo settings ---
 function renderSettingsLogoAdmin() {
   const logo = getSiteLogo();

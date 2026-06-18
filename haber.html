@@ -187,13 +187,13 @@
 
   <script src="/app.js?v=6"></script>
   <script>
-    initTheme(); initSiteLogo(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
+    initTheme(); initSiteLogo(); initFavicon(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
     const _aid = new URLSearchParams(location.search).get('id');
     const _aslug = location.pathname.match(/^\/haber\/(.+)$/);
     const _aNews = _aid ? getNewsById(_aid) : (_aslug ? getNewsBySlug(decodeURIComponent(_aslug[1])) : null);
     trackPageView('haber', _aNews ? _aNews.id : null);
     renderArticle();
-    _apiSyncAll().then(() => { renderArticle(); renderNavWcLogo(); renderFixtureTicker(); });
+    _apiSyncAll().then(() => { renderArticle(); renderNavWcLogo(); renderFixtureTicker(); initFavicon(); });
     initDragScroll();
   </script>
 </body>
