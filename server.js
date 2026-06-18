@@ -6,6 +6,10 @@ const https = require('https');
 
 const app = express();
 app.use(express.json({ limit: '150mb', strict: false }));
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 
 const DATA_DIR = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
