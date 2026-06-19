@@ -1711,6 +1711,7 @@ function renderHomePage() {
     grid.style.display = 'none';
     if (empty) empty.style.display = 'block';
   } else {
+    grid.style.display = '';
     grid.innerHTML = news.map(buildNewsCard).join('');
     if (empty) empty.style.display = 'none';
   }
