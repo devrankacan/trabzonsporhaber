@@ -32,14 +32,22 @@ function auth(req, res, next) {
   next();
 }
 
+const _readCache = new Map();
+
 function readKey(key) {
+  if (_readCache.has(key)) return _readCache.get(key);
   const file = path.join(DATA_DIR, key + '.json');
-  if (!fs.existsSync(file)) return null;
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
+  let val = null;
+  if (fs.existsSync(file)) {
+    try { val = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { val = null; }
+  }
+  _readCache.set(key, val);
+  return val;
 }
 
 function writeKey(key, value) {
   fs.writeFileSync(path.join(DATA_DIR, key + '.json'), JSON.stringify(value));
+  _readCache.set(key, value);
 }
 
 function buildBootstrapScript() {
