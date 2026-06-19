@@ -1701,7 +1701,7 @@ function buildNewsCard(n) {
         <h3 class="news-card-title">${escHtml(n.title)}</h3>
         <p class="news-card-summary">${escHtml(n.summary)}</p>
         <div class="news-card-footer">
-          <span class="news-card-date">📅 ${formatDateShort(n.date)}</span>
+          <span class="news-card-date"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg> ${formatDateShort(n.date)}</span>
           ${n.author ? `<span>${escHtml(n.author)}</span>` : ''}
         </div>
       </div>
@@ -2616,9 +2616,9 @@ function renderArticle() {
       </div>
       <h1 class="article-title">${escHtml(news.title)}</h1>
       <div class="article-meta">
-        <span>📅 ${formatDate(news.date)}</span>
-        ${news.author ? `<span>✍️ ${escHtml(news.author)}</span>` : ''}
-        <span class="article-views">👁 ${views} görüntülenme</span>
+        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg> ${formatDate(news.date)}</span>
+        ${news.author ? `<span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${escHtml(news.author)}</span>` : ''}
+        <span class="article-views"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> ${views} görüntülenme</span>
       </div>
     </div>
     ${imageHtml}
