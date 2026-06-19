@@ -739,6 +739,21 @@ function _wcCheckMatchChanges(newData) {
   _wcLastTrSnapshot = trMatches.map(m => ({ id: m.id, status: m.status, homeScore: m.homeScore, awayScore: m.awayScore }));
 }
 
+function showToast(message) {
+  let wrap = document.getElementById('wc-toast-wrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'wc-toast-wrap';
+    wrap.style.cssText = 'position:fixed;top:74px;right:16px;z-index:3000;display:flex;flex-direction:column;gap:8px;max-width:300px;';
+    document.body.appendChild(wrap);
+  }
+  const card = document.createElement('div');
+  card.style.cssText = 'background:var(--ts-red);color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.35);font-size:13px;';
+  card.textContent = message;
+  wrap.appendChild(card);
+  setTimeout(() => card.remove(), 4000);
+}
+
 function _wcNotify(title, body) {
   let wrap = document.getElementById('wc-toast-wrap');
   if (!wrap) {
