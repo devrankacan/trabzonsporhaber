@@ -1151,8 +1151,8 @@ function renderAnalytics() {
 
   const all = getAnalytics();
   const news = getNews();
-  const views = JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}');
-  const comments = JSON.parse(localStorage.getItem(COMMENTS_KEY) || '{}');
+  const views = _serverData[VIEWS_KEY] !== undefined ? _serverData[VIEWS_KEY] : JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}');
+  const comments = _serverData[COMMENTS_KEY] !== undefined ? _serverData[COMMENTS_KEY] : JSON.parse(localStorage.getItem(COMMENTS_KEY) || '{}');
 
   const now = Date.now();
   const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
@@ -1341,14 +1341,25 @@ function saveComment(newsId, name, text) {
 }
 
 function getViews(newsId) {
-  const all = JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}');
+  const all = _serverData[VIEWS_KEY] !== undefined ? _serverData[VIEWS_KEY] : JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}');
   return all[newsId] || 0;
 }
 
 function incrementViews(newsId) {
-  const all = JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}');
+  const all = _serverData[VIEWS_KEY] !== undefined ? _serverData[VIEWS_KEY] : JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}');
   all[newsId] = (all[newsId] || 0) + 1;
+  _serverData[VIEWS_KEY] = all;
   localStorage.setItem(VIEWS_KEY, JSON.stringify(all));
+  fetch('/api/views/' + newsId, { method: 'POST' })
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if (!d) return;
+      const cur = _serverData[VIEWS_KEY] || {};
+      cur[newsId] = d.views;
+      _serverData[VIEWS_KEY] = cur;
+      localStorage.setItem(VIEWS_KEY, JSON.stringify(cur));
+    })
+    .catch(() => {});
   return all[newsId];
 }
 
@@ -2778,9 +2789,14 @@ function initAdmin() {
   if (!sessionStorage.getItem('_adminSynced')) {
     _apiSyncAll().then(() => _apiPushAll().then(() => {
       sessionStorage.setItem('_adminSynced', '1');
+      if (typeof renderMembers === 'function') renderMembers();
+      renderAnalytics();
     }));
   } else {
-    _apiSyncAll(); // Sadece sunucudan çek, geri gönderme
+    _apiSyncAll().then(() => {
+      if (typeof renderMembers === 'function') renderMembers();
+      renderAnalytics();
+    }); // Sadece sunucudan çek, geri gönderme
   }
   renderAdminList();
   initAdminForm();

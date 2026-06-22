@@ -256,6 +256,13 @@ app.post('/api/:key', auth, (req, res) => {
   res.json({ ok: true });
 });
 
+app.post('/api/views/:newsId', (req, res) => {
+  const all = readKey('ts_views') || {};
+  all[req.params.newsId] = (all[req.params.newsId] || 0) + 1;
+  writeKey('ts_views', all);
+  res.json({ views: all[req.params.newsId] });
+});
+
 app.post('/api/sync', auth, (req, res) => {
   for (const [key, value] of Object.entries(req.body)) {
     if (ALLOWED_KEYS.includes(key)) writeKey(key, value);

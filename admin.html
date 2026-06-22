@@ -797,7 +797,7 @@
   }
 
   function renderMembers() {
-    const users = JSON.parse(localStorage.getItem('sl_users') || '[]');
+    const users = getUsers();
     const badge = document.getElementById('sidebarMemberBadge');
     const label = document.getElementById('memberCountLabel');
     const body = document.getElementById('membersTableBody');
@@ -823,8 +823,8 @@
 
   function deleteMember(id) {
     if (!confirm('Bu üyeyi silmek istediğinizden emin misiniz?')) return;
-    const users = JSON.parse(localStorage.getItem('sl_users') || '[]').filter(u => u.id !== id);
-    localStorage.setItem('sl_users', JSON.stringify(users));
+    const users = getUsers().filter(u => u.id !== id);
+    saveUsers(users);
     renderMembers();
   }
 
