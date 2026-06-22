@@ -2051,12 +2051,19 @@ img { max-width: 100%; display: block; }
 
 /* Branch mini badge in admin list */
 .branch-mini-badge {
-  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ts-text);
+  background: var(--ts-bg);
+  border: 1px solid var(--ts-border);
   font-size: 10px;
   font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 4px;
+  padding: 2px 8px 2px 3px;
+  border-radius: 12px;
 }
+.branch-mini-logo { width: 14px; height: 14px; object-fit: contain; border-radius: 50%; background: #fff; }
+.branch-mini-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
 /* Mobile branch divider */
 .mobile-branch-divider {

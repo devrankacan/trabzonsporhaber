@@ -3123,7 +3123,14 @@ function renderAdminList() {
       <div class="admin-news-body">
         <div class="admin-news-title">${escHtml(n.title)}</div>
         <div class="admin-news-meta">
-          ${getTeams(n).map(k => BRANCHES[k] ? `<span class="branch-mini-badge" style="background:linear-gradient(135deg,${BRANCHES[k].color} 50%,${BRANCHES[k].color2||BRANCHES[k].color} 50%)">${escHtml(BRANCHES[k].label)}</span>` : '').join('')}
+          ${getTeams(n).map(k => {
+            if (!BRANCHES[k]) return '';
+            const logo = getLogo(k);
+            const iconHtml = logo
+              ? `<img class="branch-mini-logo" src="${escAttr(logo)}" alt="" />`
+              : `<span class="branch-mini-dot" style="background:${BRANCHES[k].color}"></span>`;
+            return `<span class="branch-mini-badge">${iconHtml}${escHtml(BRANCHES[k].label)}</span>`;
+          }).join('')}
           <span class="category-badge ${n.category}">${escHtml(categoryLabel(n.category))}</span>
           ${n.slider ? '<span class="slider-badge">SLIDER</span>' : ''}
           <span>${formatDateShort(n.date)}</span>
