@@ -1833,6 +1833,7 @@ function deleteForeignLogo(name) {
 }
 
 function getLogo(teamKey) {
+  if (teamKey === 'milli-takim') return getLogos()[teamKey] || '/img/tr-flag.svg';
   return getLogos()[teamKey] || '';
 }
 
