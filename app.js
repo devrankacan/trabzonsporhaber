@@ -1694,11 +1694,16 @@ function buildTicker() {
   const el = document.getElementById('tickerText');
   if (!el) return;
   const news = getNews();
-  if (news.length === 0) {
-    el.textContent = 'Trabzonspor Haber\'e hoş geldiniz!';
-    return;
-  }
-  el.textContent = news.map(n => `• ${n.title}`).join('   ');
+  el.textContent = news.length === 0
+    ? 'Trabzonspor Haber\'e hoş geldiniz!'
+    : news.map(n => `• ${n.title}`).join('   ');
+
+  // İçerik uzunluğundan bağımsız sabit piksel/saniye hız — haber sayısı artsa da hız değişmez.
+  requestAnimationFrame(() => {
+    const speed = window.innerWidth <= 768 ? 50 : 18; // px/sn
+    const duration = Math.max(20, el.scrollWidth / speed);
+    el.style.animationDuration = duration + 's';
+  });
 }
 
 // ==================== NEWS GRID ====================
