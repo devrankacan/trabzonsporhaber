@@ -649,6 +649,37 @@ function _wcSlotTeam(byGroup, groupId, rank) {
     : { name: rank === 1 ? '1. ' + groupId + ' Grubu' : '2. ' + groupId + ' Grubu', code: '', placeholder: true };
 }
 
+function _wcMatchBoxHtml(home, away, label) {
+  return `<div class="bracket-match">
+    <div class="bracket-match-no">${escHtml(label)}</div>
+    <div class="bracket-team">
+      <img src="${teamImgSrc(home)}" class="wc-flag" alt="" onerror="this.onerror=null;this.style.display='none'" />
+      <span>${escHtml(home.name)}</span>
+    </div>
+    <div class="bracket-team">
+      <img src="${teamImgSrc(away)}" class="wc-flag" alt="" onerror="this.onerror=null;this.style.display='none'" />
+      <span>${escHtml(away.name)}</span>
+    </div>
+  </div>`;
+}
+
+function _wcRoundHtml(matchHtmls, title, pair) {
+  let inner;
+  if (pair) {
+    const pairs = [];
+    for (let i = 0; i < matchHtmls.length; i += 2) {
+      pairs.push(`<div class="bracket-pair">${matchHtmls[i]}${matchHtmls[i + 1] || ''}</div>`);
+    }
+    inner = pairs.join('');
+  } else {
+    inner = matchHtmls.join('');
+  }
+  return `<div class="bracket-round">
+    <div class="bracket-round-title">${escHtml(title)}</div>
+    <div class="bracket-matches">${inner}</div>
+  </div>`;
+}
+
 function renderWCKnockout() {
   const el = document.getElementById('wcKnockoutGrid');
   if (!el) return;
@@ -658,28 +689,27 @@ function renderWCKnockout() {
     return;
   }
 
-  const matches = WC_R32_TEMPLATE.map((m, i) => {
+  const r32 = WC_R32_TEMPLATE.map((m, i) => {
     const home = _wcSlotTeam(byGroup, m.a[0], m.a[1]);
     const away = m.type === 'w3'
       ? (bestThirds[m.thirdIdx] || { name: '3. Sıra Eşleşmesi', code: '', placeholder: true })
       : _wcSlotTeam(byGroup, m.b[0], m.b[1]);
-    return { no: i + 1, home, away };
+    return _wcMatchBoxHtml(home, away, 'Maç ' + (i + 1));
   });
 
-  el.innerHTML = matches.map(m => `
-    <div class="wc-knockout-card">
-      <div class="wc-knockout-no">Maç ${m.no}</div>
-      <div class="wc-knockout-team">
-        <img src="${teamImgSrc(m.home)}" class="wc-flag" alt="" onerror="this.onerror=null;this.style.display='none'" />
-        <span>${escHtml(m.home.name)}</span>
-      </div>
-      <div class="wc-knockout-vs">vs</div>
-      <div class="wc-knockout-team">
-        <img src="${teamImgSrc(m.away)}" class="wc-flag" alt="" onerror="this.onerror=null;this.style.display='none'" />
-        <span>${escHtml(m.away.name)}</span>
-      </div>
-    </div>
-  `).join('');
+  const tbd = { name: 'Belirlenecek', code: '', placeholder: true };
+  const r16 = Array.from({ length: 8 }, (_, i) => _wcMatchBoxHtml(tbd, tbd, (2 * i + 1) + '. / ' + (2 * i + 2) + '. Maç Galibi'));
+  const qf = Array.from({ length: 4 }, (_, i) => _wcMatchBoxHtml(tbd, tbd, 'Çeyrek Final ' + (i + 1)));
+  const sf = Array.from({ length: 2 }, (_, i) => _wcMatchBoxHtml(tbd, tbd, 'Yarı Final ' + (i + 1)));
+  const final = [_wcMatchBoxHtml(tbd, tbd, 'Final')];
+
+  el.innerHTML = `<div class="bracket">
+    ${_wcRoundHtml(r32, 'Son 32', true)}
+    ${_wcRoundHtml(r16, 'Son 16', true)}
+    ${_wcRoundHtml(qf, 'Çeyrek Final', true)}
+    ${_wcRoundHtml(sf, 'Yarı Final', true)}
+    ${_wcRoundHtml(final, 'Final', false)}
+  </div>`;
 }
 
 // ==================== WC MATCHES ====================
