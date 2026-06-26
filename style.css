@@ -628,7 +628,7 @@ img { max-width: 100%; display: block; }
   white-space: nowrap;
   font-size: 13px;
   color: rgba(255,255,255,0.75);
-  animation: ticker 60s linear infinite;
+  animation: ticker 85s linear infinite;
   padding-left: 100%;
 }
 
