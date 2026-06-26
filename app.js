@@ -1700,7 +1700,7 @@ function buildTicker() {
 
   // İçerik uzunluğundan bağımsız sabit piksel/saniye hız — haber sayısı artsa da hız değişmez.
   requestAnimationFrame(() => {
-    const speed = window.innerWidth <= 768 ? 50 : 18; // px/sn
+    const speed = window.innerWidth <= 768 ? 50 : 40; // px/sn
     const duration = Math.max(20, el.scrollWidth / speed);
     el.style.animationDuration = duration + 's';
   });
