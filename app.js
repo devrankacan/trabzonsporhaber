@@ -419,12 +419,7 @@ function renderFixtureTicker() {
   const el = document.getElementById('fixtureTicker');
   if (!el) return;
   const wc = getWC();
-  // Use wc.matches filtered to Turkey; fall back to old fixtures if no matches yet
-  let fixtures = [];
-  if (wc.matches && wc.matches.length) {
-    fixtures = wc.matches.filter(m => m.homeCode === 'tr' || m.awayCode === 'tr');
-  }
-  if (!fixtures.length) fixtures = wc.fixtures || WC_DEFAULT_FIXTURES;
+  let fixtures = (wc.matches && wc.matches.length) ? wc.matches : (wc.fixtures || WC_DEFAULT_FIXTURES);
   if (!fixtures.length) { el.closest('.fixture-bar')?.style && (el.closest('.fixture-bar').style.display = 'none'); return; }
 
   const itemHtml = fixtures.map(f => {
@@ -466,11 +461,14 @@ function renderFixtureTicker() {
   }).join('');
 
   el.innerHTML = itemHtml + itemHtml;
-  // Hız: maç başına 5s — az maç = daha hızlı döngü
-  const duration = Math.max(8, fixtures.length * 5);
   el.style.animation = 'none';
   void el.offsetWidth;
-  el.style.animation = `fixtureTicker ${duration}s linear infinite`;
+  // İçerik uzunluğundan bağımsız sabit piksel/saniye hız (maç sayısı arttıkça hızlanmasın)
+  requestAnimationFrame(() => {
+    const speed = 40; // px/sn
+    const duration = Math.max(8, (el.scrollWidth / 2) / speed);
+    el.style.animation = `fixtureTicker ${duration}s linear infinite`;
+  });
 }
 
 // Ticker bağımsız refresh — her sayfada çalışır, tab açık olmak gerekmez
@@ -595,6 +593,93 @@ function renderWCStats() {
   if (!thirds.length) {
     body.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-muted)">Henüz grup sonuçları oluşmadı.</td></tr>';
   }
+}
+
+// ==================== WC ELEME TURU (SON 32) ====================
+
+function _wcQualifiers() {
+  const wc = getWC();
+  const groups = (wc.groups || []).slice().sort((a, b) => a.id.localeCompare(b.id));
+  const byGroup = {};
+  groups.forEach(g => {
+    const sorted = (g.teams || []).slice().sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
+      if (gdB !== gdA) return gdB - gdA;
+      return b.gf - a.gf;
+    });
+    byGroup[g.id] = sorted;
+  });
+  const thirds = groups.map(g => byGroup[g.id][2] ? { ...byGroup[g.id][2], group: g.id } : null).filter(Boolean);
+  thirds.sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
+    if (gdB !== gdA) return gdB - gdA;
+    return b.gf - a.gf;
+  });
+  return { byGroup, bestThirds: thirds.slice(0, 8), groupIds: groups.map(g => g.id) };
+}
+
+// FIFA'nın resmi 495 kombinasyonluk 3.lük eşleştirme tablosu kamuya açık kaynaklardan tam olarak
+// alınamadığı için, resmi formatın kurallarına (4 Grup 1.-2.si, 8 Grup 1.-3.sü, 4 Grup 2.-2.si = 16 maç)
+// uygun, alfabetik grup sırasına dayanan kendi eşleştirme şablonumuz kullanılıyor.
+const WC_R32_TEMPLATE = [
+  { type: 'wr', a: ['A', 1], b: ['B', 2] },
+  { type: 'wr', a: ['C', 1], b: ['D', 2] },
+  { type: 'wr', a: ['E', 1], b: ['F', 2] },
+  { type: 'wr', a: ['G', 1], b: ['H', 2] },
+  { type: 'w3', a: ['B', 1], thirdIdx: 0 },
+  { type: 'w3', a: ['D', 1], thirdIdx: 1 },
+  { type: 'w3', a: ['F', 1], thirdIdx: 2 },
+  { type: 'w3', a: ['H', 1], thirdIdx: 3 },
+  { type: 'w3', a: ['I', 1], thirdIdx: 4 },
+  { type: 'w3', a: ['J', 1], thirdIdx: 5 },
+  { type: 'w3', a: ['K', 1], thirdIdx: 6 },
+  { type: 'w3', a: ['L', 1], thirdIdx: 7 },
+  { type: 'rr', a: ['A', 2], b: ['C', 2] },
+  { type: 'rr', a: ['E', 2], b: ['G', 2] },
+  { type: 'rr', a: ['I', 2], b: ['J', 2] },
+  { type: 'rr', a: ['K', 2], b: ['L', 2] },
+];
+
+function _wcSlotTeam(byGroup, groupId, rank) {
+  const t = byGroup[groupId] && byGroup[groupId][rank - 1];
+  return t
+    ? { ...t, group: groupId }
+    : { name: rank === 1 ? '1. ' + groupId + ' Grubu' : '2. ' + groupId + ' Grubu', code: '', placeholder: true };
+}
+
+function renderWCKnockout() {
+  const el = document.getElementById('wcKnockoutGrid');
+  if (!el) return;
+  const { byGroup, bestThirds, groupIds } = _wcQualifiers();
+  if (groupIds.length < 12) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Eleme turu için grup verisi eksik.</div>';
+    return;
+  }
+
+  const matches = WC_R32_TEMPLATE.map((m, i) => {
+    const home = _wcSlotTeam(byGroup, m.a[0], m.a[1]);
+    const away = m.type === 'w3'
+      ? (bestThirds[m.thirdIdx] || { name: '3. Sıra Eşleşmesi', code: '', placeholder: true })
+      : _wcSlotTeam(byGroup, m.b[0], m.b[1]);
+    return { no: i + 1, home, away };
+  });
+
+  el.innerHTML = matches.map(m => `
+    <div class="wc-knockout-card">
+      <div class="wc-knockout-no">Maç ${m.no}</div>
+      <div class="wc-knockout-team">
+        <img src="${teamImgSrc(m.home)}" class="wc-flag" alt="" onerror="this.onerror=null;this.style.display='none'" />
+        <span>${escHtml(m.home.name)}</span>
+      </div>
+      <div class="wc-knockout-vs">vs</div>
+      <div class="wc-knockout-team">
+        <img src="${teamImgSrc(m.away)}" class="wc-flag" alt="" onerror="this.onerror=null;this.style.display='none'" />
+        <span>${escHtml(m.away.name)}</span>
+      </div>
+    </div>
+  `).join('');
 }
 
 // ==================== WC MATCHES ====================

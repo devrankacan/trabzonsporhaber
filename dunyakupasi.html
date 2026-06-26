@@ -126,6 +126,7 @@
           <span class="wc-live-tab-badge" id="wcMatchesLiveBadge" style="display:none"></span>
         </button>
         <button class="wc-tab" onclick="wcShowTab('stats')" id="wctab-stats">En İyi 3.'ler</button>
+        <button class="wc-tab" onclick="wcShowTab('knockout')" id="wctab-knockout">Eleme Turu (Son 32)</button>
         <button class="wc-tab" onclick="wcShowTab('sim')" id="wctab-sim">Grup Simülasyonu</button>
         <button class="wc-notif-btn" id="wcNotifBtn" onclick="wcRequestNotifPermission()" title="Türkiye maç bildirimlerini aç">🔔 Bildirimler</button>
       </div>
@@ -193,6 +194,17 @@
             <tbody id="wcStatsBody"></tbody>
           </table>
         </div>
+      </div>
+    </section>
+
+    <!-- TAB: ELEME TURU -->
+    <section class="wc-tab-content" id="wc-tab-knockout">
+      <div class="wc-page-card" style="margin-top:24px">
+        <div class="wc-page-card-header">
+          <span>Eleme Turu — Son 32 Eşleşmeleri</span>
+        </div>
+        <p class="wc-sim-hint">Grup aşaması bitmeden eşleşmeler kesinleşmez; aşağıdaki tablo, grup birincisi/ikincisi ve en iyi 8 üçüncü takımın resmi formata uygun eşleştirme şablonuna göre güncel durumunu gösterir.</p>
+        <div class="wc-knockout-grid" id="wcKnockoutGrid"></div>
       </div>
     </section>
 
@@ -271,8 +283,8 @@
   <script src="/app.js?v=6"></script>
   <script>
     initTheme(); initSiteLogo(); initFavicon(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo(); initHeaderSearch(); initDragScroll();
-    renderWCPage(); renderWCStats();
-    _apiSyncAll().then(() => { renderWCPage(); renderWCStats(); renderNavWcLogo(); renderFixtureTicker(); initFavicon(); });
+    renderWCPage(); renderWCStats(); renderWCKnockout();
+    _apiSyncAll().then(() => { renderWCPage(); renderWCStats(); renderWCKnockout(); renderNavWcLogo(); renderFixtureTicker(); initFavicon(); });
     requestAnimationFrame(initSegSliders);
 
     function segSelect(btn, ctrlId, renderFn) {
@@ -310,6 +322,9 @@
       }
       if (name === 'sim') {
         renderWCSim();
+      }
+      if (name === 'knockout') {
+        renderWCKnockout();
       }
       // Tüm sekmelerde otomatik güncelleme — her 30s sunucudan çek
       wcStartMatchRefresh();
