@@ -422,6 +422,10 @@ function renderFixtureTicker() {
   let fixtures = (wc.matches && wc.matches.length) ? wc.matches : (wc.fixtures || WC_DEFAULT_FIXTURES);
   if (!fixtures.length) { el.closest('.fixture-bar')?.style && (el.closest('.fixture-bar').style.display = 'none'); return; }
 
+  // Sadece son hafta (en yüksek matchday) maçlarını göster
+  const maxMatchday = fixtures.reduce((max, f) => Math.max(max, f.matchday || 0), 0);
+  if (maxMatchday) fixtures = fixtures.filter(f => (f.matchday || 0) === maxMatchday);
+
   const itemHtml = fixtures.map(f => {
     const isLive = f.status === 'live' || f.status === 'halftime';
     const isFinished = f.status === 'finished';
