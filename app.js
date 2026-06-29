@@ -628,19 +628,53 @@ const WC_R32_TEMPLATE = [
   { type: 'wr', a: ['C', 1], b: ['D', 2] },
   { type: 'wr', a: ['E', 1], b: ['F', 2] },
   { type: 'wr', a: ['G', 1], b: ['H', 2] },
-  { type: 'w3', a: ['B', 1], thirdIdx: 0 },
-  { type: 'w3', a: ['D', 1], thirdIdx: 1 },
-  { type: 'w3', a: ['F', 1], thirdIdx: 2 },
-  { type: 'w3', a: ['H', 1], thirdIdx: 3 },
-  { type: 'w3', a: ['I', 1], thirdIdx: 4 },
-  { type: 'w3', a: ['J', 1], thirdIdx: 5 },
-  { type: 'w3', a: ['K', 1], thirdIdx: 6 },
-  { type: 'w3', a: ['L', 1], thirdIdx: 7 },
+  { type: 'w3', a: ['B', 1] },
+  { type: 'w3', a: ['D', 1] },
+  { type: 'w3', a: ['F', 1] },
+  { type: 'w3', a: ['H', 1] },
+  { type: 'w3', a: ['I', 1] },
+  { type: 'w3', a: ['J', 1] },
+  { type: 'w3', a: ['K', 1] },
+  { type: 'w3', a: ['L', 1] },
   { type: 'rr', a: ['A', 2], b: ['C', 2] },
   { type: 'rr', a: ['E', 2], b: ['G', 2] },
   { type: 'rr', a: ['I', 2], b: ['J', 2] },
   { type: 'rr', a: ['K', 2], b: ['L', 2] },
 ];
+
+// Bir grubun 1.si, hiçbir zaman kendi grubunun 3.südür ile eşleşemez (gerçek FIFA kuralı).
+// Bu yüzden en iyi 8 üçüncü takım, "w3" maçlarına sabit index ile değil, bu kurala uyacak şekilde
+// dinamik olarak atanır.
+function _wcAssignThirds(bestThirds, homeGroups) {
+  const n = homeGroups.length;
+  const assignment = new Array(n).fill(null);
+  const used = new Array(bestThirds.length).fill(false);
+  for (let j = 0; j < n; j++) {
+    for (let k = 0; k < bestThirds.length; k++) {
+      if (!used[k] && bestThirds[k].group !== homeGroups[j]) {
+        assignment[j] = k;
+        used[k] = true;
+        break;
+      }
+    }
+  }
+  for (let j = 0; j < n; j++) {
+    if (assignment[j] === null) {
+      const freeIdx = used.findIndex(u => !u);
+      for (let j2 = 0; j2 < n; j2++) {
+        if (j2 === j || assignment[j2] === null) continue;
+        const k2 = assignment[j2];
+        if (bestThirds[k2].group !== homeGroups[j] && bestThirds[freeIdx].group !== homeGroups[j2]) {
+          assignment[j] = k2;
+          assignment[j2] = freeIdx;
+          used[freeIdx] = true;
+          break;
+        }
+      }
+    }
+  }
+  return assignment;
+}
 
 function _wcSlotTeam(byGroup, groupId, rank) {
   const t = byGroup[groupId] && byGroup[groupId][rank - 1];
@@ -689,11 +723,20 @@ function renderWCKnockout() {
     return;
   }
 
+  const w3Slots = WC_R32_TEMPLATE.filter(m => m.type === 'w3');
+  const w3Assignment = _wcAssignThirds(bestThirds, w3Slots.map(m => m.a[0]));
+  let w3Cursor = 0;
+
   const r32 = WC_R32_TEMPLATE.map((m, i) => {
     const home = _wcSlotTeam(byGroup, m.a[0], m.a[1]);
-    const away = m.type === 'w3'
-      ? (bestThirds[m.thirdIdx] || { name: '3. Sıra Eşleşmesi', code: '', placeholder: true })
-      : _wcSlotTeam(byGroup, m.b[0], m.b[1]);
+    let away;
+    if (m.type === 'w3') {
+      const thirdIdx = w3Assignment[w3Cursor];
+      away = (thirdIdx !== null && bestThirds[thirdIdx]) ? bestThirds[thirdIdx] : { name: '3. Sıra Eşleşmesi', code: '', placeholder: true };
+      w3Cursor++;
+    } else {
+      away = _wcSlotTeam(byGroup, m.b[0], m.b[1]);
+    }
     return _wcMatchBoxHtml(home, away, 'Maç ' + (i + 1));
   });
 
