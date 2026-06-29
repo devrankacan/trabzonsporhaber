@@ -597,90 +597,20 @@ function renderWCStats() {
 
 // ==================== WC ELEME TURU (SON 32) ====================
 
-function _wcQualifiers() {
-  const wc = getWC();
-  const groups = (wc.groups || []).slice().sort((a, b) => a.id.localeCompare(b.id));
-  const byGroup = {};
-  groups.forEach(g => {
-    const sorted = (g.teams || []).slice().sort((a, b) => {
-      if (b.pts !== a.pts) return b.pts - a.pts;
-      const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
-      if (gdB !== gdA) return gdB - gdA;
-      return b.gf - a.gf;
-    });
-    byGroup[g.id] = sorted;
-  });
-  const thirds = groups.map(g => byGroup[g.id][2] ? { ...byGroup[g.id][2], group: g.id } : null).filter(Boolean);
-  thirds.sort((a, b) => {
-    if (b.pts !== a.pts) return b.pts - a.pts;
-    const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
-    if (gdB !== gdA) return gdB - gdA;
-    return b.gf - a.gf;
-  });
-  return { byGroup, bestThirds: thirds.slice(0, 8), groupIds: groups.map(g => g.id) };
-}
-
-// FIFA'nın resmi 495 kombinasyonluk 3.lük eşleştirme tablosu kamuya açık kaynaklardan tam olarak
-// alınamadığı için, resmi formatın kurallarına (4 Grup 1.-2.si, 8 Grup 1.-3.sü, 4 Grup 2.-2.si = 16 maç)
-// uygun, alfabetik grup sırasına dayanan kendi eşleştirme şablonumuz kullanılıyor.
-const WC_R32_TEMPLATE = [
-  { type: 'wr', a: ['A', 1], b: ['B', 2] },
-  { type: 'wr', a: ['C', 1], b: ['D', 2] },
-  { type: 'wr', a: ['E', 1], b: ['F', 2] },
-  { type: 'wr', a: ['G', 1], b: ['H', 2] },
-  { type: 'w3', a: ['B', 1] },
-  { type: 'w3', a: ['D', 1] },
-  { type: 'w3', a: ['F', 1] },
-  { type: 'w3', a: ['H', 1] },
-  { type: 'w3', a: ['I', 1] },
-  { type: 'w3', a: ['J', 1] },
-  { type: 'w3', a: ['K', 1] },
-  { type: 'w3', a: ['L', 1] },
-  { type: 'rr', a: ['A', 2], b: ['C', 2] },
-  { type: 'rr', a: ['E', 2], b: ['G', 2] },
-  { type: 'rr', a: ['I', 2], b: ['J', 2] },
-  { type: 'rr', a: ['K', 2], b: ['L', 2] },
+// Resmi/yayınlanan Son 32 turu eşleşmeleri (Transfermarkt braketine göre), ülke koduna göre sabit.
+const WC_R32_PAIRS = [
+  ['de', 'py'], ['fr', 'se'], ['za', 'ca'], ['nl', 'ma'],
+  ['br', 'jp'], ['ci', 'no'], ['mx', 'ec'], ['gb-eng', 'cd'],
+  ['pt', 'hr'], ['es', 'at'], ['us', 'ba'], ['be', 'sn'],
+  ['ar', 'cv'], ['au', 'eg'], ['ch', 'dz'], ['co', 'gh'],
 ];
 
-// Bir grubun 1.si, hiçbir zaman kendi grubunun 3.südür ile eşleşemez (gerçek FIFA kuralı).
-// Bu yüzden en iyi 8 üçüncü takım, "w3" maçlarına sabit index ile değil, bu kurala uyacak şekilde
-// dinamik olarak atanır.
-function _wcAssignThirds(bestThirds, homeGroups) {
-  const n = homeGroups.length;
-  const assignment = new Array(n).fill(null);
-  const used = new Array(bestThirds.length).fill(false);
-  for (let j = 0; j < n; j++) {
-    for (let k = 0; k < bestThirds.length; k++) {
-      if (!used[k] && bestThirds[k].group !== homeGroups[j]) {
-        assignment[j] = k;
-        used[k] = true;
-        break;
-      }
-    }
+function _wcTeamByCode(wc, code) {
+  for (const g of (wc.groups || [])) {
+    const t = (g.teams || []).find(x => x.code === code);
+    if (t) return { ...t, group: g.id };
   }
-  for (let j = 0; j < n; j++) {
-    if (assignment[j] === null) {
-      const freeIdx = used.findIndex(u => !u);
-      for (let j2 = 0; j2 < n; j2++) {
-        if (j2 === j || assignment[j2] === null) continue;
-        const k2 = assignment[j2];
-        if (bestThirds[k2].group !== homeGroups[j] && bestThirds[freeIdx].group !== homeGroups[j2]) {
-          assignment[j] = k2;
-          assignment[j2] = freeIdx;
-          used[freeIdx] = true;
-          break;
-        }
-      }
-    }
-  }
-  return assignment;
-}
-
-function _wcSlotTeam(byGroup, groupId, rank) {
-  const t = byGroup[groupId] && byGroup[groupId][rank - 1];
-  return t
-    ? { ...t, group: groupId }
-    : { name: rank === 1 ? '1. ' + groupId + ' Grubu' : '2. ' + groupId + ' Grubu', code: '', placeholder: true };
+  return { name: code.toUpperCase(), code, placeholder: true };
 }
 
 function _wcMatchBoxHtml(home, away, label) {
@@ -717,26 +647,16 @@ function _wcRoundHtml(matchHtmls, title, pair) {
 function renderWCKnockout() {
   const el = document.getElementById('wcKnockoutGrid');
   if (!el) return;
-  const { byGroup, bestThirds, groupIds } = _wcQualifiers();
-  if (groupIds.length < 12) {
+  const wc = getWC();
+  const groups = wc.groups || [];
+  if (groups.length < 12) {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Eleme turu için grup verisi eksik.</div>';
     return;
   }
 
-  const w3Slots = WC_R32_TEMPLATE.filter(m => m.type === 'w3');
-  const w3Assignment = _wcAssignThirds(bestThirds, w3Slots.map(m => m.a[0]));
-  let w3Cursor = 0;
-
-  const r32 = WC_R32_TEMPLATE.map((m, i) => {
-    const home = _wcSlotTeam(byGroup, m.a[0], m.a[1]);
-    let away;
-    if (m.type === 'w3') {
-      const thirdIdx = w3Assignment[w3Cursor];
-      away = (thirdIdx !== null && bestThirds[thirdIdx]) ? bestThirds[thirdIdx] : { name: '3. Sıra Eşleşmesi', code: '', placeholder: true };
-      w3Cursor++;
-    } else {
-      away = _wcSlotTeam(byGroup, m.b[0], m.b[1]);
-    }
+  const r32 = WC_R32_PAIRS.map((pair, i) => {
+    const home = _wcTeamByCode(wc, pair[0]);
+    const away = _wcTeamByCode(wc, pair[1]);
     return _wcMatchBoxHtml(home, away, 'Maç ' + (i + 1));
   });
 
