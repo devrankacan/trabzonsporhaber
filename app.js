@@ -710,7 +710,7 @@ function _wcMatchBoxHtml(home, away, label, result) {
   </div>`;
 }
 
-function _wcRoundHtml(matchHtmls, title, pair) {
+function _wcRoundHtml(matchHtmls, title, pair, colorClass) {
   let inner;
   if (pair) {
     const pairs = [];
@@ -721,7 +721,7 @@ function _wcRoundHtml(matchHtmls, title, pair) {
   } else {
     inner = matchHtmls.join('');
   }
-  return `<div class="bracket-round">
+  return `<div class="bracket-round ${colorClass || ''}">
     <div class="bracket-round-title">${escHtml(title)}</div>
     <div class="bracket-matches">${inner}</div>
   </div>`;
@@ -787,11 +787,11 @@ function renderWCKnockout() {
   const finalHtml = [_wcMatchBoxHtml(fHome || tbd, fAway || tbd, 'FİNAL', res('final', 0))];
 
   el.innerHTML = `<div class="bracket">
-    ${_wcRoundHtml(r32Html, 'Son 32', true)}
-    ${_wcRoundHtml(r16Html, 'Son 16', true)}
-    ${_wcRoundHtml(qfHtml, 'Çeyrek Final', true)}
-    ${_wcRoundHtml(sfHtml, 'Yarı Final', true)}
-    ${_wcRoundHtml(finalHtml, 'Final', false)}
+    ${_wcRoundHtml(r32Html, 'Son 32', true, 'bracket-round-r32')}
+    ${_wcRoundHtml(r16Html, 'Son 16', true, 'bracket-round-r16')}
+    ${_wcRoundHtml(qfHtml, 'Çeyrek Final', true, 'bracket-round-qf')}
+    ${_wcRoundHtml(sfHtml, 'Yarı Final', true, 'bracket-round-sf')}
+    ${_wcRoundHtml(finalHtml, 'Final', false, 'bracket-round-final')}
   </div>`;
 }
 

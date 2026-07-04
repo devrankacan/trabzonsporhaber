@@ -122,7 +122,6 @@
       <div class="wc-tabs">
         <button class="wc-tab active" onclick="wcShowTab('groups')" id="wctab-groups">Gruplar</button>
         <button class="wc-tab" onclick="wcShowTab('knockout')" id="wctab-knockout">Eleme Turu</button>
-        <button class="wc-tab" onclick="wcShowTab('sim')" id="wctab-sim">Grup Simülasyonu</button>
         <button class="wc-notif-btn" id="wcNotifBtn" onclick="wcRequestNotifPermission()" title="Türkiye maç bildirimlerini aç">🔔 Bildirimler</button>
       </div>
     </div>
@@ -143,21 +142,6 @@
         </div>
         <p class="wc-sim-hint">Son 32'den Final'e tüm turları gösteren turnuva haritası. Son 32 eşleşmeleri grup birincisi/ikincisi ve en iyi 8 üçüncü takımın resmi formata uygun eşleştirme şablonuna göre belirlenir; sonraki turlar grup aşaması tamamlanmadan kesinleşmediği için "Belirlenecek" olarak gösterilir. Haritayı kaydırarak tüm turları görebilirsiniz.</p>
         <div class="wc-knockout-grid" id="wcKnockoutGrid"></div>
-      </div>
-    </section>
-
-    <!-- TAB: GRUP SİMÜLASYONU -->
-    <section class="wc-tab-content" id="wc-tab-sim">
-      <div class="wc-page-card" style="margin-top:24px">
-        <div class="wc-page-card-header">
-          <span>Grup Simülasyonu — Kalan Maçları Tahmin Et</span>
-          <div style="display:flex;gap:8px">
-            <button class="wc-sim-share-btn" onclick="wcSimShare()">Tahminleri Paylaş</button>
-            <button class="wc-sim-reset-btn" onclick="wcSimReset()">Sıfırla</button>
-          </div>
-        </div>
-        <p class="wc-sim-hint">Oynanmamış maçların sonucunu seç, gruplardan kimlerin çıkacağını anlık gör. Tahminler sadece sende saklanır, gerçek sonuçları etkilemez.</p>
-        <div class="wc-sim-grid" id="wcSimGrid"></div>
       </div>
     </section>
 
@@ -255,9 +239,6 @@
       document.querySelectorAll('.wc-tab').forEach(el => el.classList.remove('active'));
       document.getElementById('wc-tab-' + name).classList.add('active');
       document.getElementById('wctab-' + name).classList.add('active');
-      if (name === 'sim') {
-        renderWCSim();
-      }
       if (name === 'knockout') {
         renderWCKnockout();
       }

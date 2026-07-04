@@ -3998,4 +3998,30 @@ img { max-width: 100%; display: block; }
 .bracket-score-finished { color: var(--text-muted); }
 .bracket-live-badge { font-size: 9px; font-weight: 700; background: #27ae60; color: #fff; border-radius: 4px; padding: 1px 4px; vertical-align: middle; margin-left: 4px; }
 .bracket-winner { font-weight: 700; color: var(--ts-red); }
+
+.bracket-round { border-radius: 12px; padding: 12px 8px; }
+.bracket-round-r32   { background: rgba(59,  130, 246, 0.07); }
+.bracket-round-r16   { background: rgba(139,  92, 246, 0.08); }
+.bracket-round-qf    { background: rgba(249, 115,  22, 0.08); }
+.bracket-round-sf    { background: rgba(239,  68,  68, 0.08); }
+.bracket-round-final { background: rgba(234, 179,   8, 0.10); border: 1px solid rgba(234,179,8,0.25); }
+
+.bracket-round-r32   .bracket-round-title { color: #3b82f6; }
+.bracket-round-r16   .bracket-round-title { color: #8b5cf6; }
+.bracket-round-qf    .bracket-round-title { color: #f97316; }
+.bracket-round-sf    .bracket-round-title { color: #ef4444; }
+.bracket-round-final .bracket-round-title { color: #d97706; font-size: 13px; }
+
+@media (prefers-color-scheme: dark) {
+  .bracket-round-r32   { background: rgba(59,  130, 246, 0.10); }
+  .bracket-round-r16   { background: rgba(139,  92, 246, 0.12); }
+  .bracket-round-qf    { background: rgba(249, 115,  22, 0.12); }
+  .bracket-round-sf    { background: rgba(239,  68,  68, 0.12); }
+  .bracket-round-final { background: rgba(234, 179,   8, 0.14); }
+}
+:root[data-theme="dark"] .bracket-round-r32   { background: rgba(59,  130, 246, 0.10); }
+:root[data-theme="dark"] .bracket-round-r16   { background: rgba(139,  92, 246, 0.12); }
+:root[data-theme="dark"] .bracket-round-qf    { background: rgba(249, 115,  22, 0.12); }
+:root[data-theme="dark"] .bracket-round-sf    { background: rgba(239,  68,  68, 0.12); }
+:root[data-theme="dark"] .bracket-round-final { background: rgba(234, 179,   8, 0.14); }
 .wc-sim-done { margin-top: 10px; font-size: 12px; color: #27ae60; font-weight: 600; }
