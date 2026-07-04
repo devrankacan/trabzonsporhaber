@@ -3967,8 +3967,12 @@ img { max-width: 100%; display: block; }
 .wc-sim-btn { width: 26px; height: 26px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--bg-card); color: var(--text-muted); font-size: 11px; font-weight: 700; cursor: pointer; }
 .wc-sim-btn.active { background: var(--ts-red); border-color: var(--ts-red); color: #fff; }
 
-.wc-knockout-grid { overflow-x: auto; padding: 10px 0; }
-.bracket { display: flex; padding: 20px 30px; gap: 0; }
+.wc-knockout-grid { padding: 10px 0; }
+
+/* ── Masaüstü bracket ── */
+.bracket-mobile { display: none; }
+.bracket-desktop { display: flex; overflow-x: auto; padding: 20px 30px; gap: 0; }
+.bracket { display: flex; overflow-x: auto; padding: 20px 30px; gap: 0; }
 .bracket-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 190px; margin-right: 30px; }
 .bracket-round:last-child { margin-right: 0; }
 .bracket-round-title { text-align: center; font-weight: 700; font-size: 11px; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
@@ -4024,4 +4028,35 @@ img { max-width: 100%; display: block; }
 :root[data-theme="dark"] .bracket-round-qf    { background: rgba(249, 115,  22, 0.12); }
 :root[data-theme="dark"] .bracket-round-sf    { background: rgba(239,  68,  68, 0.12); }
 :root[data-theme="dark"] .bracket-round-final { background: rgba(234, 179,   8, 0.14); }
+
+/* ── Mobil bracket ── */
+@media (max-width: 768px) {
+  .bracket-desktop { display: none; }
+  .bracket-mobile { display: block; padding: 12px 0 0; }
+
+  .bracket-mobile-tabs {
+    display: flex; gap: 6px; overflow-x: auto; padding: 0 16px 12px;
+    scrollbar-width: none;
+  }
+  .bracket-mobile-tabs::-webkit-scrollbar { display: none; }
+  .bracket-mobile-tab {
+    flex-shrink: 0; padding: 7px 14px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--bg);
+    color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer;
+    white-space: nowrap;
+  }
+  .bracket-mobile-tab.active {
+    background: var(--ts-red); border-color: var(--ts-red); color: #fff;
+  }
+
+  .bracket-mobile-round { padding: 8px 12px 16px; border-radius: 12px; margin: 0 4px; }
+  .bracket-mobile-matches { display: flex; flex-direction: column; gap: 10px; }
+  .bracket-mobile-matches .bracket-match {
+    font-size: 13px; padding: 10px 12px;
+  }
+  .bracket-mobile-matches .bracket-team { gap: 8px; padding: 5px 0; font-size: 13px; }
+  .bracket-mobile-matches .wc-flag { width: 26px; height: 18px; }
+  .bracket-mobile-matches .bracket-match-no { font-size: 11px; margin-bottom: 8px; }
+  .bracket-mobile-matches .bracket-score { font-size: 15px; padding: 4px 0; }
+}
 .wc-sim-done { margin-top: 10px; font-size: 12px; color: #27ae60; font-weight: 600; }

@@ -786,13 +786,40 @@ function renderWCKnockout() {
   const fAway = _wcKnockoutWinner(sfTeams[1].home, sfTeams[1].away, res('sf', 1));
   const finalHtml = [_wcMatchBoxHtml(fHome || tbd, fAway || tbd, 'FİNAL', res('final', 0))];
 
-  el.innerHTML = `<div class="bracket">
-    ${_wcRoundHtml(r32Html, 'Son 32', true, 'bracket-round-r32')}
-    ${_wcRoundHtml(r16Html, 'Son 16', true, 'bracket-round-r16')}
-    ${_wcRoundHtml(qfHtml, 'Çeyrek Final', true, 'bracket-round-qf')}
-    ${_wcRoundHtml(sfHtml, 'Yarı Final', true, 'bracket-round-sf')}
-    ${_wcRoundHtml(finalHtml, 'Final', false, 'bracket-round-final')}
+  const rounds = [
+    { key: 'r32',   label: 'Son 32',       html: r32Html,    pair: true,  color: 'bracket-round-r32' },
+    { key: 'r16',   label: 'Son 16',       html: r16Html,    pair: true,  color: 'bracket-round-r16' },
+    { key: 'qf',    label: 'Çeyrek Final', html: qfHtml,     pair: true,  color: 'bracket-round-qf' },
+    { key: 'sf',    label: 'Yarı Final',   html: sfHtml,     pair: true,  color: 'bracket-round-sf' },
+    { key: 'final', label: 'Final',        html: finalHtml,  pair: false, color: 'bracket-round-final' },
+  ];
+
+  // Masaüstü: yatay bracket
+  const desktopHtml = `<div class="bracket bracket-desktop">
+    ${rounds.map(r => _wcRoundHtml(r.html, r.label, r.pair, r.color)).join('')}
   </div>`;
+
+  // Mobil: tur seçici + tek sütun liste
+  const mobileTabs = `<div class="bracket-mobile-tabs">
+    ${rounds.map((r, i) => `<button class="bracket-mobile-tab${i === 0 ? ' active' : ''}" onclick="wcKnockoutTab(this,'${r.key}')" data-round="${r.key}">${escHtml(r.label)}</button>`).join('')}
+  </div>`;
+  const mobileRounds = rounds.map(r => {
+    const matchList = r.html.join('');
+    return `<div class="bracket-mobile-round ${r.color}" id="bmr-${r.key}" style="${r.key !== 'r32' ? 'display:none' : ''}">
+      <div class="bracket-mobile-matches">${matchList}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = desktopHtml + `<div class="bracket-mobile">${mobileTabs}${mobileRounds}</div>`;
+}
+
+function wcKnockoutTab(btn, roundKey) {
+  const container = btn.closest('.bracket-mobile');
+  container.querySelectorAll('.bracket-mobile-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.bracket-mobile-round').forEach(r => r.style.display = 'none');
+  const target = container.querySelector('#bmr-' + roundKey);
+  if (target) target.style.display = '';
 }
 
 // ==================== WC MATCHES ====================
