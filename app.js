@@ -419,12 +419,52 @@ function renderFixtureTicker() {
   const el = document.getElementById('fixtureTicker');
   if (!el) return;
   const wc = getWC();
-  let fixtures = (wc.matches && wc.matches.length) ? wc.matches : (wc.fixtures || WC_DEFAULT_FIXTURES);
-  if (!fixtures.length) { el.closest('.fixture-bar')?.style && (el.closest('.fixture-bar').style.display = 'none'); return; }
+  const kr = wc.knockoutResults || {};
+  const rounds = [
+    { key: 'r32', label: 'Son 32', pairs: WC_R32_PAIRS },
+    { key: 'r16', label: 'Son 16', count: 8 },
+    { key: 'qf',  label: 'Çeyrek Final', count: 4 },
+    { key: 'sf',  label: 'Yarı Final', count: 2 },
+    { key: 'final', label: 'Final', count: 1 },
+  ];
 
-  // Sadece son hafta (en yüksek matchday) maçlarını göster
-  const maxMatchday = fixtures.reduce((max, f) => Math.max(max, f.matchday || 0), 0);
-  if (maxMatchday) fixtures = fixtures.filter(f => (f.matchday || 0) === maxMatchday);
+  // Aktif tur = sonuçları olan en son tur, ya da henüz sonuç yoksa Son 32
+  let activeRoundKey = 'r32';
+  for (const r of rounds) {
+    const results = kr[r.key] || [];
+    if (results.some(x => x && (x.status === 'live' || x.status === 'halftime' || x.status === 'finished'))) {
+      activeRoundKey = r.key;
+    }
+  }
+  const activeRound = rounds.find(r => r.key === activeRoundKey);
+
+  let fixtures = [];
+  if (activeRoundKey === 'r32') {
+    fixtures = WC_R32_PAIRS.map((pair, i) => {
+      const h = _wcTeamByCode(wc, pair[0]);
+      const a = _wcTeamByCode(wc, pair[1]);
+      const res = (kr.r32 || [])[i] || {};
+      return { home: h.name, homeCode: h.code, away: a.name, awayCode: a.code,
+        homeScore: res.homeScore !== undefined ? res.homeScore : null,
+        awayScore: res.awayScore !== undefined ? res.awayScore : null,
+        status: res.status || 'upcoming', minute: res.minute || 0,
+        date: res.date || 'Haz 27–3 Tem', day: activeRound.label, time: '' };
+    });
+  } else {
+    // Son 16+ — sadece kayıtlı sonuçları göster
+    const results = kr[activeRoundKey] || [];
+    fixtures = results.map((res, i) => {
+      if (!res) return null;
+      return { home: res.home || '?', homeCode: res.homeCode || '',
+        away: res.away || '?', awayCode: res.awayCode || '',
+        homeScore: res.homeScore !== undefined ? res.homeScore : null,
+        awayScore: res.awayScore !== undefined ? res.awayScore : null,
+        status: res.status || 'upcoming', minute: res.minute || 0,
+        date: res.date || '', day: activeRound.label, time: res.time || '' };
+    }).filter(Boolean);
+  }
+
+  if (!fixtures.length) { el.closest('.fixture-bar')?.style && (el.closest('.fixture-bar').style.display = 'none'); return; }
 
   const itemHtml = fixtures.map(f => {
     const isLive = f.status === 'live' || f.status === 'halftime';
@@ -617,14 +657,30 @@ function _wcTeamByCode(wc, code) {
   return { name: code.toUpperCase(), code, placeholder: true };
 }
 
-function _wcMatchBoxHtml(home, away, label) {
-  return `<div class="bracket-match">
+function _wcMatchBoxHtml(home, away, label, result) {
+  const isLive = result && (result.status === 'live' || result.status === 'halftime');
+  const isFinished = result && result.status === 'finished';
+  const hasScore = result && result.homeScore !== null && result.homeScore !== undefined
+    && result.awayScore !== null && result.awayScore !== undefined;
+  const homeWon = isFinished && hasScore && result.homeScore > result.awayScore;
+  const awayWon = isFinished && hasScore && result.awayScore > result.homeScore;
+
+  let scoreMid = '';
+  if (isLive && hasScore) {
+    const badge = result.status === 'halftime' ? 'DEVRE' : (result.minute ? result.minute + '\'' : 'CANLI');
+    scoreMid = `<div class="bracket-score bracket-score-live">${result.homeScore} - ${result.awayScore} <span class="bracket-live-badge">${badge}</span></div>`;
+  } else if (isFinished && hasScore) {
+    scoreMid = `<div class="bracket-score bracket-score-finished">${result.homeScore} - ${result.awayScore}</div>`;
+  }
+
+  return `<div class="bracket-match${isLive ? ' bracket-match-live' : ''}${isFinished ? ' bracket-match-done' : ''}">
     <div class="bracket-match-no">${escHtml(label)}</div>
-    <div class="bracket-team">
+    <div class="bracket-team${homeWon ? ' bracket-winner' : ''}">
       <img src="${teamImgSrc(home)}" class="wc-flag" alt="" onerror="this.onerror=null;this.style.display='none'" />
       <span>${escHtml(home.name)}</span>
     </div>
-    <div class="bracket-team">
+    ${scoreMid}
+    <div class="bracket-team${awayWon ? ' bracket-winner' : ''}">
       <img src="${teamImgSrc(away)}" class="wc-flag" alt="" onerror="this.onerror=null;this.style.display='none'" />
       <span>${escHtml(away.name)}</span>
     </div>
@@ -648,6 +704,15 @@ function _wcRoundHtml(matchHtmls, title, pair) {
   </div>`;
 }
 
+function _wcKnockoutWinner(home, away, result) {
+  if (!result || result.status !== 'finished') return null;
+  if (result.winner === 'home') return home;
+  if (result.winner === 'away') return away;
+  if (result.homeScore > result.awayScore) return home;
+  if (result.awayScore > result.homeScore) return away;
+  return null;
+}
+
 function renderWCKnockout() {
   const el = document.getElementById('wcKnockoutGrid');
   if (!el) return;
@@ -658,24 +723,52 @@ function renderWCKnockout() {
     return;
   }
 
-  const r32 = WC_R32_PAIRS.map((pair, i) => {
-    const home = _wcTeamByCode(wc, pair[0]);
-    const away = _wcTeamByCode(wc, pair[1]);
-    return _wcMatchBoxHtml(home, away, 'Maç ' + (i + 1));
-  });
-
+  const kr = wc.knockoutResults || {};
+  const res = (round, idx) => (kr[round] || [])[idx] || null;
   const tbd = { name: 'Belirlenecek', code: '', placeholder: true };
-  const r16 = Array.from({ length: 8 }, (_, i) => _wcMatchBoxHtml(tbd, tbd, (2 * i + 1) + '. / ' + (2 * i + 2) + '. Maç Galibi'));
-  const qf = Array.from({ length: 4 }, (_, i) => _wcMatchBoxHtml(tbd, tbd, 'Çeyrek Final ' + (i + 1)));
-  const sf = Array.from({ length: 2 }, (_, i) => _wcMatchBoxHtml(tbd, tbd, 'Yarı Final ' + (i + 1)));
-  const final = [_wcMatchBoxHtml(tbd, tbd, 'Final')];
+
+  // Son 32 — sabit eşleşmeler, skor varsa göster
+  const r32Teams = WC_R32_PAIRS.map(pair => ({
+    home: _wcTeamByCode(wc, pair[0]),
+    away: _wcTeamByCode(wc, pair[1]),
+  }));
+  const r32Html = r32Teams.map((m, i) => _wcMatchBoxHtml(m.home, m.away, 'Maç ' + (i + 1), res('r32', i)));
+
+  // Son 16 — kazanan takımlar üst turda
+  const r16Teams = Array.from({ length: 8 }, (_, i) => {
+    const a = _wcKnockoutWinner(r32Teams[i * 2].home, r32Teams[i * 2].away, res('r32', i * 2));
+    const b = _wcKnockoutWinner(r32Teams[i * 2 + 1].home, r32Teams[i * 2 + 1].away, res('r32', i * 2 + 1));
+    return { home: a || tbd, away: b || tbd };
+  });
+  const r16Html = r16Teams.map((m, i) => _wcMatchBoxHtml(m.home, m.away, 'Son 16 · Maç ' + (i + 1), res('r16', i)));
+
+  // Çeyrek Final
+  const qfTeams = Array.from({ length: 4 }, (_, i) => {
+    const a = _wcKnockoutWinner(r16Teams[i * 2].home, r16Teams[i * 2].away, res('r16', i * 2));
+    const b = _wcKnockoutWinner(r16Teams[i * 2 + 1].home, r16Teams[i * 2 + 1].away, res('r16', i * 2 + 1));
+    return { home: a || tbd, away: b || tbd };
+  });
+  const qfHtml = qfTeams.map((m, i) => _wcMatchBoxHtml(m.home, m.away, 'Çeyrek Final ' + (i + 1), res('qf', i)));
+
+  // Yarı Final
+  const sfTeams = Array.from({ length: 2 }, (_, i) => {
+    const a = _wcKnockoutWinner(qfTeams[i * 2].home, qfTeams[i * 2].away, res('qf', i * 2));
+    const b = _wcKnockoutWinner(qfTeams[i * 2 + 1].home, qfTeams[i * 2 + 1].away, res('qf', i * 2 + 1));
+    return { home: a || tbd, away: b || tbd };
+  });
+  const sfHtml = sfTeams.map((m, i) => _wcMatchBoxHtml(m.home, m.away, 'Yarı Final ' + (i + 1), res('sf', i)));
+
+  // Final
+  const fHome = _wcKnockoutWinner(sfTeams[0].home, sfTeams[0].away, res('sf', 0));
+  const fAway = _wcKnockoutWinner(sfTeams[1].home, sfTeams[1].away, res('sf', 1));
+  const finalHtml = [_wcMatchBoxHtml(fHome || tbd, fAway || tbd, 'FİNAL', res('final', 0))];
 
   el.innerHTML = `<div class="bracket">
-    ${_wcRoundHtml(r32, 'Son 32', true)}
-    ${_wcRoundHtml(r16, 'Son 16', true)}
-    ${_wcRoundHtml(qf, 'Çeyrek Final', true)}
-    ${_wcRoundHtml(sf, 'Yarı Final', true)}
-    ${_wcRoundHtml(final, 'Final', false)}
+    ${_wcRoundHtml(r32Html, 'Son 32', true)}
+    ${_wcRoundHtml(r16Html, 'Son 16', true)}
+    ${_wcRoundHtml(qfHtml, 'Çeyrek Final', true)}
+    ${_wcRoundHtml(sfHtml, 'Yarı Final', true)}
+    ${_wcRoundHtml(finalHtml, 'Final', false)}
   </div>`;
 }
 

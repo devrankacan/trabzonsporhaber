@@ -3991,4 +3991,11 @@ img { max-width: 100%; display: block; }
 .bracket-team { display: flex; align-items: center; gap: 6px; padding: 3px 0; color: var(--text); }
 .bracket-team span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bracket-round:last-child .bracket-match { border-color: var(--ts-red); }
+.bracket-match-live { border-color: #27ae60; }
+.bracket-match-done { background: var(--bg-card); }
+.bracket-score { text-align: center; font-size: 13px; font-weight: 800; padding: 3px 0; color: var(--text); }
+.bracket-score-live { color: #27ae60; }
+.bracket-score-finished { color: var(--text-muted); }
+.bracket-live-badge { font-size: 9px; font-weight: 700; background: #27ae60; color: #fff; border-radius: 4px; padding: 1px 4px; vertical-align: middle; margin-left: 4px; }
+.bracket-winner { font-weight: 700; color: var(--ts-red); }
 .wc-sim-done { margin-top: 10px; font-size: 12px; color: #27ae60; font-weight: 600; }

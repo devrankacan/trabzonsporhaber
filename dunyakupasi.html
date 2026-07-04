@@ -121,12 +121,8 @@
     <div class="container">
       <div class="wc-tabs">
         <button class="wc-tab active" onclick="wcShowTab('groups')" id="wctab-groups">Gruplar</button>
-        <button class="wc-tab" onclick="wcShowTab('matches')" id="wctab-matches">
-          Maçlar &amp; Canlı
-          <span class="wc-live-tab-badge" id="wcMatchesLiveBadge" style="display:none"></span>
-        </button>
         <button class="wc-tab" onclick="wcShowTab('stats')" id="wctab-stats">En İyi 3.'ler</button>
-        <button class="wc-tab" onclick="wcShowTab('knockout')" id="wctab-knockout">Eleme Turu (Son 32)</button>
+        <button class="wc-tab" onclick="wcShowTab('knockout')" id="wctab-knockout">Eleme Turu</button>
         <button class="wc-tab" onclick="wcShowTab('sim')" id="wctab-sim">Grup Simülasyonu</button>
         <button class="wc-notif-btn" id="wcNotifBtn" onclick="wcRequestNotifPermission()" title="Türkiye maç bildirimlerini aç">🔔 Bildirimler</button>
       </div>
@@ -138,36 +134,6 @@
     <!-- TAB: GRUPLAR -->
     <section class="wc-tab-content active" id="wc-tab-groups">
       <div class="wc-groups-grid" id="wcGroupsGrid"></div>
-    </section>
-
-    <!-- TAB: MAÇLAR -->
-    <section class="wc-tab-content" id="wc-tab-matches">
-      <div class="wc-page-card" style="margin-top:24px">
-        <div class="wc-page-card-header">
-          <span>Fikstür &amp; Canlı Sonuçlar</span>
-          <div class="wc-match-filters">
-            <button class="wc-match-filter-btn active" data-val="all" onclick="wcMatchFilter('all')">Tümü</button>
-            <button class="wc-match-filter-btn" data-val="tr" onclick="wcMatchFilter('tr')">🇹🇷 Türkiye</button>
-            <button class="wc-match-filter-btn" data-val="D" onclick="wcMatchFilter('D')">Grup D</button>
-            <button class="wc-match-filter-btn" data-val="A" onclick="wcMatchFilter('A')">Grup A</button>
-            <button class="wc-match-filter-btn" data-val="B" onclick="wcMatchFilter('B')">Grup B</button>
-            <button class="wc-match-filter-btn" data-val="C" onclick="wcMatchFilter('C')">Grup C</button>
-            <button class="wc-match-filter-btn" data-val="E" onclick="wcMatchFilter('E')">Grup E</button>
-            <button class="wc-match-filter-btn" data-val="F" onclick="wcMatchFilter('F')">Grup F</button>
-            <button class="wc-match-filter-btn" data-val="G" onclick="wcMatchFilter('G')">Grup G</button>
-            <button class="wc-match-filter-btn" data-val="H" onclick="wcMatchFilter('H')">Grup H</button>
-            <button class="wc-match-filter-btn" data-val="I" onclick="wcMatchFilter('I')">Grup I</button>
-            <button class="wc-match-filter-btn" data-val="J" onclick="wcMatchFilter('J')">Grup J</button>
-            <button class="wc-match-filter-btn" data-val="K" onclick="wcMatchFilter('K')">Grup K</button>
-            <button class="wc-match-filter-btn" data-val="L" onclick="wcMatchFilter('L')">Grup L</button>
-          </div>
-        </div>
-        <div id="wcMatchesContainer"></div>
-        <div class="wc-refresh-note" id="wcRefreshNote">
-          <span class="wc-refresh-dot"></span>
-          Sonuçlar otomatik olarak her 30 saniyede bir güncellenir.
-        </div>
-      </div>
     </section>
 
     <!-- TAB: TAKIM İSTATİSTİKLERİ -->
@@ -201,7 +167,7 @@
     <section class="wc-tab-content" id="wc-tab-knockout">
       <div class="wc-page-card" style="margin-top:24px">
         <div class="wc-page-card-header">
-          <span>Eleme Turu — Son 32 Eşleşmeleri</span>
+          <span>Eleme Turu</span>
         </div>
         <p class="wc-sim-hint">Son 32'den Final'e tüm turları gösteren turnuva haritası. Son 32 eşleşmeleri grup birincisi/ikincisi ve en iyi 8 üçüncü takımın resmi formata uygun eşleştirme şablonuna göre belirlenir; sonraki turlar grup aşaması tamamlanmadan kesinleşmediği için "Belirlenecek" olarak gösterilir. Haritayı kaydırarak tüm turları görebilirsiniz.</p>
         <div class="wc-knockout-grid" id="wcKnockoutGrid"></div>
@@ -317,9 +283,6 @@
       document.querySelectorAll('.wc-tab').forEach(el => el.classList.remove('active'));
       document.getElementById('wc-tab-' + name).classList.add('active');
       document.getElementById('wctab-' + name).classList.add('active');
-      if (name === 'matches') {
-        renderWCMatches();
-      }
       if (name === 'sim') {
         renderWCSim();
       }
