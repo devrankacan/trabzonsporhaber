@@ -121,7 +121,6 @@
     <div class="container">
       <div class="wc-tabs">
         <button class="wc-tab active" onclick="wcShowTab('groups')" id="wctab-groups">Gruplar</button>
-        <button class="wc-tab" onclick="wcShowTab('stats')" id="wctab-stats">En İyi 3.'ler</button>
         <button class="wc-tab" onclick="wcShowTab('knockout')" id="wctab-knockout">Eleme Turu</button>
         <button class="wc-tab" onclick="wcShowTab('sim')" id="wctab-sim">Grup Simülasyonu</button>
         <button class="wc-notif-btn" id="wcNotifBtn" onclick="wcRequestNotifPermission()" title="Türkiye maç bildirimlerini aç">🔔 Bildirimler</button>
@@ -134,33 +133,6 @@
     <!-- TAB: GRUPLAR -->
     <section class="wc-tab-content active" id="wc-tab-groups">
       <div class="wc-groups-grid" id="wcGroupsGrid"></div>
-    </section>
-
-    <!-- TAB: TAKIM İSTATİSTİKLERİ -->
-    <section class="wc-tab-content" id="wc-tab-stats">
-      <div class="wc-page-card">
-        <div class="wc-page-card-header">
-          <span>En İyi 3.'ler — Gruptan Çıkma Durumu</span>
-        </div>
-        <div class="wc-thirds-legend">
-          <span class="wc-thirds-badge wc-thirds-pass">İlk 8 → Gruptan Çıkar</span>
-          <span class="wc-thirds-badge wc-thirds-out">Son 4 → Elenir</span>
-        </div>
-        <div style="overflow-x:auto">
-          <table class="wc-stats-table" id="wcStatsTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th style="text-align:left">Takım</th>
-                <th style="text-align:left">Grup</th>
-                <th>O</th><th>G</th><th>B</th><th>M</th>
-                <th>AG</th><th>YG</th><th>Av</th><th>P</th>
-              </tr>
-            </thead>
-            <tbody id="wcStatsBody"></tbody>
-          </table>
-        </div>
-      </div>
     </section>
 
     <!-- TAB: ELEME TURU -->
@@ -249,8 +221,8 @@
   <script src="/app.js?v=6"></script>
   <script>
     initTheme(); initSiteLogo(); initFavicon(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo(); initHeaderSearch(); initDragScroll();
-    renderWCPage(); renderWCStats(); renderWCKnockout();
-    _apiSyncAll().then(() => { renderWCPage(); renderWCStats(); renderWCKnockout(); renderNavWcLogo(); renderFixtureTicker(); initFavicon(); });
+    renderWCPage(); renderWCKnockout();
+    _apiSyncAll().then(() => { renderWCPage(); renderWCKnockout(); renderNavWcLogo(); renderFixtureTicker(); initFavicon(); });
     requestAnimationFrame(initSegSliders);
 
     function segSelect(btn, ctrlId, renderFn) {

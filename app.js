@@ -296,6 +296,7 @@ function getWC() {
   if (!data.players) data.players = [];
   if (!data.fixtures) data.fixtures = WC_DEFAULT_FIXTURES;
   if (!data.matches) data.matches = JSON.parse(JSON.stringify(WC_DEFAULT_MATCHES));
+  if (!data.knockoutResults) data.knockoutResults = JSON.parse(JSON.stringify(WC_DEFAULT_KNOCKOUT_RESULTS));
   data.groups.forEach(g => g.teams.forEach(t => {
     if (!t.logo) t.logo = `https://flagcdn.com/w40/${t.code}.png`;
   }));
@@ -648,6 +649,28 @@ const WC_R32_PAIRS = [
   ['pt', 'hr'], ['es', 'at'], ['us', 'ba'], ['be', 'sn'],
   ['ar', 'cv'], ['au', 'eg'], ['ch', 'dz'], ['co', 'gh'],
 ];
+
+// Gerçek Son 32 sonuçları (28 Haz – 3 Tem 2026). Cezalı atışta winner alanı kazananı belirtir.
+const WC_DEFAULT_KNOCKOUT_RESULTS = {
+  r32: [
+    { homeScore: 1, awayScore: 1, status: 'finished', winner: 'away' }, // Almanya 1-1 Paraguay (P.C. 4-3 PAR)
+    { homeScore: 3, awayScore: 0, status: 'finished', winner: 'home' }, // Fransa 3-0 İsveç
+    { homeScore: 0, awayScore: 1, status: 'finished', winner: 'away' }, // G.Afrika 0-1 Kanada
+    { homeScore: 1, awayScore: 1, status: 'finished', winner: 'away' }, // Hollanda 1-1 Fas (P.C. 2-3 MAR)
+    { homeScore: 2, awayScore: 1, status: 'finished', winner: 'home' }, // Brezilya 2-1 Japonya
+    { homeScore: 1, awayScore: 2, status: 'finished', winner: 'away' }, // Fildişi Sahili 1-2 Norveç
+    { homeScore: 2, awayScore: 0, status: 'finished', winner: 'home' }, // Meksika 2-0 Ekvador
+    { homeScore: 2, awayScore: 1, status: 'finished', winner: 'home' }, // İngiltere 2-1 K.Kongo
+    { homeScore: 2, awayScore: 1, status: 'finished', winner: 'home' }, // Portekiz 2-1 Hırvatistan
+    { homeScore: 3, awayScore: 0, status: 'finished', winner: 'home' }, // İspanya 3-0 Avusturya
+    { homeScore: 2, awayScore: 0, status: 'finished', winner: 'home' }, // ABD 2-0 Bosna Hersek
+    { homeScore: 3, awayScore: 2, status: 'finished', winner: 'home' }, // Belçika 3-2 Senegal (uzatma)
+    { homeScore: 3, awayScore: 2, status: 'finished', winner: 'home' }, // Arjantin 3-2 Cabo Verde (uzatma)
+    { homeScore: 1, awayScore: 1, status: 'finished', winner: 'away' }, // Avustralya 1-1 Mısır (P.C. 2-4 EGY)
+    { homeScore: 2, awayScore: 0, status: 'finished', winner: 'home' }, // İsviçre 2-0 Cezayir
+    { homeScore: 1, awayScore: 0, status: 'finished', winner: 'home' }, // Kolombiya 1-0 Gana
+  ],
+};
 
 function _wcTeamByCode(wc, code) {
   for (const g of (wc.groups || [])) {
