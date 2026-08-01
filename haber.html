@@ -64,7 +64,6 @@
     <div class="container">
       <div class="branch-nav-inner">
         <a href="/haberler" class="branch-link">Tümü</a>
-        <a href="/dunyakupasi.html" class="branch-link branch-link-wc" id="navWcLink"><img id="wcNavLogoImg" class="_wc-nav-logo" alt="" style="display:none" />Dünya Kupası</a>
         <a href="/haberler/milli-takim" class="branch-link">Milli Takım</a>
         <a href="/haberler/galatasaray" class="branch-link">Galatasaray</a>
         <a href="/haberler/fenerbahce" class="branch-link">Fenerbahçe</a>
@@ -87,16 +86,6 @@
       </div>
     </div>
   </nav>
-  <script>
-    try {
-      var _wcd = JSON.parse(localStorage.getItem('ts_wc2026'));
-      if (_wcd && _wcd.logo) {
-        var _wcimg = document.getElementById('wcNavLogoImg');
-        if (_wcimg) { _wcimg.src = _wcd.logo; _wcimg.style.display = 'inline-block'; }
-      }
-    } catch(e) {}
-  </script>
-
   <main class="main container">
     <div class="content-grid">
       <article class="article" id="articleContent">

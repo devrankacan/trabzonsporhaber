@@ -21,8 +21,6 @@
 </head>
 <body>
 
-  <div class="fixture-bar"><div class="fixture-track" id="fixtureTicker"></div></div>
-
   <header class="header">
     <div class="container">
       <div class="header-inner">
@@ -69,7 +67,6 @@
     <div class="container">
       <div class="branch-nav-inner">
         <a href="/haberler" class="branch-link">Tümü</a>
-        <a href="/dunyakupasi.html" class="branch-link branch-link-wc" id="navWcLink"><img id="wcNavLogoImg" class="_wc-nav-logo" alt="" style="display:none" />Dünya Kupası</a>
         <a href="/haberler/milli-takim" class="branch-link">Milli Takım</a>
         <a href="/haberler/galatasaray" class="branch-link">Galatasaray</a>
         <a href="/haberler/fenerbahce" class="branch-link">Fenerbahçe</a>
@@ -92,16 +89,6 @@
       </div>
     </div>
   </nav>
-  <script>
-    try {
-      var _wcd = JSON.parse(localStorage.getItem('ts_wc2026'));
-      if (_wcd && _wcd.logo) {
-        var _wcimg = document.getElementById('wcNavLogoImg');
-        if (_wcimg) { _wcimg.src = _wcd.logo; _wcimg.style.display = 'inline-block'; }
-      }
-    } catch(e) {}
-  </script>
-
   <!-- SLIDER -->
   <section class="slider-section">
     <div class="container">
@@ -157,20 +144,9 @@
         <!-- Rüya Takımı -->
         <div class="rt-home-section">
           <div class="rt-hero">
-            <img id="rtHeroWcLogo" src="" alt="WC 2026" style="height:48px;width:auto;margin:0 auto 10px;display:none;" />
             <h2 class="rt-hero-h2">Rüya Takımını Kur &amp; Paylaş</h2>
-            <p class="rt-hero-p">48 takımın kadrosundan en iyi 11'ini seç, arkadaşlarınla paylaş!</p>
+            <p class="rt-hero-p">En iyi 11'ini seç, arkadaşlarınla paylaş!</p>
           </div>
-          <script>
-            try {
-              var _rtWc = JSON.parse(localStorage.getItem('ts_wc2026') || 'null');
-              var _rtLogo = _rtWc && _rtWc.logo ? _rtWc.logo : null;
-              if (_rtLogo && _rtLogo.length > 4) {
-                var _rtEl = document.getElementById('rtHeroWcLogo');
-                if (_rtEl) { _rtEl.src = _rtLogo; _rtEl.style.display = 'block'; }
-              }
-            } catch(e) {}
-          </script>
           <div class="rt-controls">
             <input type="text" class="rt-select rt-name-input" id="rtTeamName" placeholder="Takım adını yaz... (örn: Devran'ın Rüya Kadrosu)" maxlength="40" oninput="rtSetTeamName(this.value)" />
             <select class="rt-select" id="rtFormation" onchange="rtSetFormation(this.value)">
@@ -260,15 +236,6 @@
             <div id="transfersSidebar">
               <p class="no-news-text">Henüz transfer yok.</p>
             </div>
-          </div>
-        </div>
-        <div class="sidebar-card">
-          <div class="sidebar-accordion-header" onclick="toggleSidebarCard(this)">
-            <h3 class="sidebar-title" id="wcSidebarTitle">2026 Dünya Kupası Grupları</h3>
-            <span class="sidebar-chevron">›</span>
-          </div>
-          <div class="sidebar-accordion-body">
-            <div id="wc2026Sidebar"></div>
           </div>
         </div>
         <div class="sidebar-card">
@@ -375,35 +342,20 @@
   </footer>
 
   <script src="app.js?v=6"></script>
-  <script src="/wc2026-squads.js?v=1"></script>
   <script src="/ruyatakimi.js?v=1"></script>
   <script>
     function toggleSidebarCard(header) {
       header.closest('.sidebar-card').classList.toggle('open');
     }
     trackPageView('index');
-    initTheme(); initSiteLogo(); initFavicon(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
-    renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar();
+    initTheme(); initSiteLogo(); initFavicon(); updateAuthUI();
+    renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar();
     fetchAndApplyTransfersLogo();
     initDragScroll();
     _apiSyncAll().then(() => {
-      renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); renderWC2026Sidebar(); renderNavWcLogo(); renderFixtureTicker(); initFavicon();
+      renderHomePage(); renderTransfersSidebar(); renderStandingsSidebar(); initFavicon();
     });
     rtInit();
   </script>
-
-  <!-- KADRO MODAL -->
-  <div class="wc-squad-modal-overlay" id="wcSquadModal" onclick="if(event.target===this) wcCloseSquadModal()" style="display:none">
-    <div class="wc-squad-modal">
-      <div class="wc-squad-modal-header">
-        <div class="wc-squad-modal-title" id="wcSquadModalTitle"></div>
-        <button class="wc-squad-modal-close" onclick="wcCloseSquadModal()">&times;</button>
-      </div>
-      <div class="wc-squad-modal-search">
-        <input type="text" id="wcSquadSearch" placeholder="Oyuncu ara..." oninput="wcFilterSquadPlayers(this.value)" autocomplete="off" />
-      </div>
-      <div class="wc-squad-modal-body" id="wcSquadModalBody"></div>
-    </div>
-  </div>
 </body>
 </html>
