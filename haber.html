@@ -16,8 +16,6 @@
 </head>
 <body>
 
-  <div class="fixture-bar"><div class="fixture-track" id="fixtureTicker"></div></div>
-
   <header class="header">
     <div class="container">
       <div class="header-inner">
@@ -176,13 +174,13 @@
 
   <script src="/app.js?v=6"></script>
   <script>
-    initTheme(); initSiteLogo(); initFavicon(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
+    initTheme(); initSiteLogo(); initFavicon(); updateAuthUI();
     const _aid = new URLSearchParams(location.search).get('id');
     const _aslug = location.pathname.match(/^\/haber\/(.+)$/);
     const _aNews = _aid ? getNewsById(_aid) : (_aslug ? getNewsBySlug(decodeURIComponent(_aslug[1])) : null);
     trackPageView('haber', _aNews ? _aNews.id : null);
     renderArticle();
-    _apiSyncAll().then(() => { renderArticle(); renderNavWcLogo(); renderFixtureTicker(); initFavicon(); });
+    _apiSyncAll().then(() => { renderArticle(); initFavicon(); });
     initDragScroll();
   </script>
 </body>

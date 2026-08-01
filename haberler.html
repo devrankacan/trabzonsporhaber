@@ -18,8 +18,6 @@
 </head>
 <body>
 
-  <div class="fixture-bar"><div class="fixture-track" id="fixtureTicker"></div></div>
-
   <header class="header">
     <div class="container">
       <div class="header-inner">
@@ -248,13 +246,13 @@
       applyTeamFilter(team);
     });
 
-    initTheme(); initSiteLogo(); initFavicon(); updateAuthUI(); renderFixtureTicker(); renderNavWcLogo();
+    initTheme(); initSiteLogo(); initFavicon(); updateAuthUI();
     trackPageView('haberler');
 
     // Read team from URL path on page load
     const _pathTeam = location.pathname.match(/\/haberler\/([^/]+)/)?.[1] || '';
     applyTeamFilter(_pathTeam);
-    _apiSyncAll().then(() => { applyTeamFilter(_pathTeam); renderNavWcLogo(); renderFixtureTicker(); initFavicon(); });
+    _apiSyncAll().then(() => { applyTeamFilter(_pathTeam); initFavicon(); });
 
     initDragScroll();
     document.getElementById('searchInput').addEventListener('input', renderAllNews);
