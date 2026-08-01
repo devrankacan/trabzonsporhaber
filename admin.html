@@ -776,6 +776,7 @@
     document.getElementById('dashTopbarTitle').textContent = TAB_TITLES[name] || '';
     if (name === 'standings') { initStandingsLogoPreview(); }
     if (name === 'transfers') { initTransfersLogoPreview(); }
+    if (name === 'list') { renderAdminList(); }
     // Close sidebar on mobile
     if (window.innerWidth <= 768) document.getElementById('dashSidebar').classList.remove('open');
   }

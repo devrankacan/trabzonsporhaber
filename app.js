@@ -2175,13 +2175,15 @@ function renderSliderOrder() {
   el.innerHTML = sliders.map((n, i) => `
     <div class="slider-order-item" draggable="true" data-id="${n.id}"
       style="display:flex;align-items:center;gap:10px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;padding:10px 14px;cursor:grab">
-      <span style="font-size:18px;color:var(--ts-muted);cursor:grab">⠿</span>
-      <div style="width:40px;height:40px;border-radius:6px;flex-shrink:0;${buildBgStyle(n.image)}"></div>
+      <span style="font-size:18px;color:var(--ts-muted);cursor:grab;user-select:none">⠿</span>
+      <div style="width:44px;height:44px;border-radius:6px;flex-shrink:0;${buildBgStyle(n.image)}"></div>
       <div style="flex:1;font-size:13px;font-weight:600;color:var(--ts-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(n.title)}</div>
-      <input type="number" min="1" max="${sliders.length}" value="${i + 1}"
-        style="width:52px;padding:4px 6px;border:1px solid var(--ts-border);border-radius:6px;background:var(--ts-bg);color:var(--ts-text);font-size:13px;text-align:center"
-        onchange="sliderMoveToPos(${n.id}, this.value, ${sliders.length})"
-        onclick="this.select()" />
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <button onclick="sliderMoveToPos(${n.id}, ${i}, ${sliders.length})" ${i === 0 ? 'disabled' : ''}
+          style="padding:2px 8px;font-size:14px;border:1px solid var(--ts-border);border-radius:4px;background:var(--ts-bg);color:var(--ts-text);cursor:pointer;line-height:1.4" title="Yukarı taşı">▲</button>
+        <button onclick="sliderMoveToPos(${n.id}, ${i + 2}, ${sliders.length})" ${i === sliders.length - 1 ? 'disabled' : ''}
+          style="padding:2px 8px;font-size:14px;border:1px solid var(--ts-border);border-radius:4px;background:var(--ts-bg);color:var(--ts-text);cursor:pointer;line-height:1.4" title="Aşağı taşı">▼</button>
+      </div>
     </div>
   `).join('');
 
