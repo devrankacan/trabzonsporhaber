@@ -933,7 +933,6 @@
     news.unshift(newItem);
     saveNews(news);
     _botAdded.add(idx);
-    const row = document.querySelector(`.bot-item[data-idx="${idx}"]`);
     if (row) {
       row.style.opacity = '0.45';
       const actions = row.querySelector('.admin-news-actions');
