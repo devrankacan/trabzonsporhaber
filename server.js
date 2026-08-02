@@ -225,13 +225,20 @@ app.get('/api/all', (req, res) => {
 // =============================================
 
 const BOT_SOURCES = [
-  { id: 'ajansspor', name: 'Ajansspor',    url: 'https://www.ajansspor.com/rss' },
-  { id: 'sporx',     name: 'Sporx',         url: 'https://www.sporx.com/rss/sporx.xml' },
-  { id: 'fanatik',   name: 'Fanatik',       url: 'https://www.fanatik.com.tr/rss/spor.xml' },
-  { id: 'sabah',     name: 'Sabah Spor',    url: 'https://www.sabah.com.tr/rss/spor.xml' },
-  { id: 'milliyet',  name: 'Milliyet Spor', url: 'https://www.milliyet.com.tr/rss/rssnew/sporRss.xml' },
-  { id: 'ntv',       name: 'NTV Spor',      url: 'https://www.ntvspor.net/rss' },
-  { id: 'trtspor',   name: 'TRT Spor',      url: 'https://www.trtsport.com/rss' },
+  { id: 'ajansspor', name: 'Ajansspor',       url: 'https://www.ajansspor.com/rss' },
+  { id: 'sporx',     name: 'Sporx',            url: 'https://www.sporx.com/rss/sporx.xml' },
+  { id: 'fanatik',   name: 'Fanatik',          url: 'https://www.fanatik.com.tr/rss/spor.xml' },
+  { id: 'sabah',     name: 'Sabah Spor',       url: 'https://www.sabah.com.tr/rss/spor.xml' },
+  { id: 'milliyet',  name: 'Milliyet Spor',    url: 'https://www.milliyet.com.tr/rss/rssnew/sporRss.xml' },
+  { id: 'ntv',       name: 'NTV Spor',         url: 'https://www.ntvspor.net/rss' },
+  { id: 'trtspor',   name: 'TRT Spor',         url: 'https://www.trtsport.com/rss' },
+  { id: 'hurriyet',  name: 'Hürriyet Spor',    url: 'https://www.hurriyet.com.tr/rss/spor' },
+  { id: 'haberturk', name: 'Habertürk Spor',   url: 'https://www.haberturk.com/rss/spor.xml' },
+  { id: 'fotomac',   name: 'Fotomaç',          url: 'https://www.fotomac.com.tr/rss/spor.xml' },
+  { id: 'takvim',    name: 'Takvim Spor',      url: 'https://www.takvim.com.tr/rss/spor.xml' },
+  { id: 'posta',     name: 'Posta Spor',       url: 'https://www.posta.com.tr/rss/spor.xml' },
+  { id: 'sozcu',     name: 'Sözcü Spor',       url: 'https://www.sozcu.com.tr/rss/spor.xml' },
+  { id: 'cumhuriyet',name: 'Cumhuriyet Spor',  url: 'https://www.cumhuriyet.com.tr/rss/spor.xml' },
 ];
 
 function fetchUrl(urlStr) {
@@ -332,13 +339,20 @@ app.post('/api/bot/fetch', auth, async (req, res) => {
 
 // Site-specific content selectors
 const SITE_SELECTORS = {
-  ajansspor: ['haber-detay-icerik', 'news-detail-text', 'article-content', 'haber-icerik'],
-  sporx:     ['article-detail-text', 'news-detail-content', 'article-content', 'content-text'],
-  fanatik:   ['news-content-text', 'article-detail-text', 'news-body', 'article-content'],
-  sabah:     ['article-body-text', 'news-body', 'article-content', 'article-text'],
-  milliyet:  ['article-body', 'news-detail-content', 'article-content'],
-  ntv:       ['article-body', 'content-body', 'article-text', 'news-content'],
-  trtspor:   ['news-detail-content', 'article-text', 'article-body', 'haberDetayIcerik'],
+  ajansspor:  ['haber-detay-icerik', 'news-detail-text', 'article-content', 'haber-icerik'],
+  sporx:      ['article-detail-text', 'news-detail-content', 'article-content', 'content-text'],
+  fanatik:    ['news-content-text', 'article-detail-text', 'news-body', 'article-content'],
+  sabah:      ['article-body-text', 'news-body', 'article-content', 'article-text'],
+  milliyet:   ['article-body', 'news-detail-content', 'article-content'],
+  ntv:        ['article-body', 'content-body', 'article-text', 'news-content'],
+  trtspor:    ['news-detail-content', 'article-text', 'article-body', 'haberDetayIcerik'],
+  hurriyet:   ['news-detail-text', 'article-content', 'article-body', 'story-text'],
+  haberturk:  ['article-detail-content', 'news-body', 'article-content', 'haberIcerik'],
+  fotomac:    ['news-detail-content', 'article-body', 'article-content', 'news-body'],
+  takvim:     ['article-content', 'news-body', 'article-body', 'habericerik'],
+  posta:      ['article-body', 'news-content', 'article-content', 'habericerik'],
+  sozcu:      ['news-detail', 'article-content', 'article-body', 'news-body'],
+  cumhuriyet: ['article-content', 'news-body', 'article-body', 'habericerik'],
 };
 
 function decodeHtmlEntities(str) {
