@@ -696,6 +696,35 @@
   </div><!-- /dash-main -->
 </div><!-- /dashboard -->
 
+<!-- Bot Modal -->
+<div id="botModal" onclick="if(event.target===this)botCloseModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center">
+  <div style="background:var(--ts-card);border-radius:12px;padding:24px 28px;min-width:340px;max-width:600px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.3);position:relative">
+    <button onclick="botCloseModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--ts-muted)">✕</button>
+    <div style="font-weight:700;font-size:15px;margin-bottom:16px;padding-right:24px" id="botModalTitle">Haber Ekle</div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--ts-muted);margin-bottom:4px">KATEGORİ</div>
+        <select id="botModalCat" class="form-input" style="padding:5px 10px;font-size:13px;width:auto">
+          <option value="general">Genel</option>
+          <option value="transfer">Transfer</option>
+          <option value="mac">Maç</option>
+          <option value="milli-takim">Milli Takım</option>
+          <option value="kulup">Kulüp</option>
+          <option value="yonetim">Yönetim</option>
+          <option value="diger">Diğer</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <div style="font-size:11px;font-weight:600;color:var(--ts-muted);margin-bottom:4px">TAKIM (birden fazla seçilebilir)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px" id="botModalTeams"></div>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px">
+      <button class="btn-primary" onclick="botAddFromModal()">✓ Ekle</button>
+      <button class="btn-secondary" onclick="botCloseModal()">İptal</button>
+    </div>
+  </div>
+</div>
 <script src="app.js?v=6"></script>
 <script>
   const ADMIN_HASH = 'ee098b74';
@@ -874,47 +903,45 @@
               ` : ''}
             </div>
           </div>
-          <!-- Seçim paneli -->
-          <div id="bot-panel-${idx}" style="display:none;padding:12px 14px;border-top:1px solid var(--ts-border);background:var(--ts-bg)">
-            <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">
-              <div>
-                <div style="font-size:11px;font-weight:600;color:var(--ts-muted);margin-bottom:4px">KATEGORİ</div>
-                <select id="bot-cat-${idx}" class="form-input" style="padding:5px 10px;font-size:13px;width:auto">
-                  <option value="general">Genel</option>
-                  <option value="transfer">Transfer</option>
-                  <option value="mac">Maç</option>
-                  <option value="milli-takim">Milli Takım</option>
-                  <option value="kulup">Kulüp</option>
-                  <option value="yonetim">Yönetim</option>
-                  <option value="diger">Diğer</option>
-                </select>
-              </div>
-              <div style="flex:1;min-width:220px">
-                <div style="font-size:11px;font-weight:600;color:var(--ts-muted);margin-bottom:4px">TAKIM (birden fazla seçilebilir)</div>
-                <div style="display:flex;flex-wrap:wrap;gap:5px" id="bot-teams-${idx}">
-                  ${Object.entries(typeof BRANCHES !== 'undefined' ? BRANCHES : {}).map(([k,v]) =>
-                    `<label style="display:flex;align-items:center;gap:4px;font-size:12px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:6px;padding:3px 8px;cursor:pointer">
-                      <input type="checkbox" value="${k}" style="accent-color:var(--ts-red)"> ${v.label}
-                    </label>`
-                  ).join('')}
-                </div>
-              </div>
-            </div>
-            <div style="margin-top:10px;display:flex;gap:8px">
-              <button class="btn-primary btn-sm" onclick="botAddItem(${idx})">✓ Ekle</button>
-              <button class="btn-secondary btn-sm" onclick="document.getElementById('bot-panel-${idx}').style.display='none'">İptal</button>
-            </div>
-          </div>
         </div>`;
     }).join('');
     botApplyFilter();
   }
 
+  let _botModalIdx = null;
+
   function botOpenPanel(idx) {
-    // Diğer açık panelleri kapat
-    document.querySelectorAll('[id^="bot-panel-"]').forEach(p => p.style.display = 'none');
-    const panel = document.getElementById(`bot-panel-${idx}`);
-    if (panel) panel.style.display = 'block';
+    _botModalIdx = idx;
+    const item = _botItems[idx];
+    const modal = document.getElementById('botModal');
+    const title = document.getElementById('botModalTitle');
+    const teamsEl = document.getElementById('botModalTeams');
+    const catEl = document.getElementById('botModalCat');
+    if (!modal) return;
+    if (title && item) title.textContent = item.title.slice(0, 80) + (item.title.length > 80 ? '…' : '');
+    if (catEl) catEl.value = 'general';
+    if (teamsEl) {
+      teamsEl.innerHTML = Object.entries(typeof BRANCHES !== 'undefined' ? BRANCHES : {}).map(([k,v]) =>
+        `<label style="display:flex;align-items:center;gap:4px;font-size:12px;background:var(--ts-bg);border:1px solid var(--ts-border);border-radius:6px;padding:3px 8px;cursor:pointer">
+          <input type="checkbox" value="${k}" style="accent-color:var(--ts-red)"> ${v.label}
+        </label>`
+      ).join('');
+    }
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function botCloseModal() {
+    const modal = document.getElementById('botModal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+    _botModalIdx = null;
+  }
+
+  function botAddFromModal() {
+    if (_botModalIdx === null) return;
+    botAddItem(_botModalIdx);
+    botCloseModal();
   }
 
   function botCleanSummary(text) {
@@ -954,9 +981,9 @@
     const cleanSummary = botCleanSummary(item.summary);
     const finalContent = fullContent || cleanSummary;
 
-    // Panelden kategori ve takım oku
-    const catEl   = document.getElementById(`bot-cat-${idx}`);
-    const teamsEl = document.getElementById(`bot-teams-${idx}`);
+    // Modalden kategori ve takım oku
+    const catEl   = document.getElementById('botModalCat');
+    const teamsEl = document.getElementById('botModalTeams');
     const category = catEl ? catEl.value : 'general';
     const teams = teamsEl
       ? [...teamsEl.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value)
@@ -972,7 +999,7 @@
       author: '',
       date: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
       category,
-      teams,
+      branch: teams,
       slider: false,
       source: item.source,
       sourceUrl: item.link,
