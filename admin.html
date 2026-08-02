@@ -718,6 +718,12 @@
       <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Takım (birden fazla seçilebilir)</div>
       <div style="display:flex;flex-wrap:wrap;gap:7px" id="botModalTeams"></div>
     </div>
+    <div style="margin-bottom:18px">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600;color:#111">
+        <input type="checkbox" id="botModalSlider" style="accent-color:#e63946;width:16px;height:16px">
+        Slayta ekle (Ana sayfada slider'da göster)
+      </label>
+    </div>
     <div style="display:flex;gap:10px;border-top:1px solid #eee;padding-top:18px">
       <button onclick="botAddFromModal()" style="background:#e63946;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer">✓ Ekle</button>
       <button onclick="botCloseModal()" style="background:#f0f0f0;color:#333;border:none;border-radius:8px;padding:10px 20px;font-size:14px;cursor:pointer">İptal</button>
@@ -919,6 +925,8 @@
     if (!modal) return;
     if (title && item) title.textContent = item.title.slice(0, 80) + (item.title.length > 80 ? '…' : '');
     if (catEl) catEl.value = 'general';
+    const sliderEl = document.getElementById('botModalSlider');
+    if (sliderEl) sliderEl.checked = false;
     if (teamsEl) {
       teamsEl.innerHTML = Object.entries(typeof BRANCHES !== 'undefined' ? BRANCHES : {}).map(([k,v]) =>
         `<label style="display:flex;align-items:center;gap:5px;font-size:13px;background:#f4f4f4;border:1.5px solid #ddd;border-radius:7px;padding:5px 10px;cursor:pointer;color:#111;font-weight:500">
@@ -980,13 +988,15 @@
     const cleanSummary = botCleanSummary(item.summary);
     const finalContent = fullContent || cleanSummary;
 
-    // Modalden kategori ve takım oku
-    const catEl   = document.getElementById('botModalCat');
-    const teamsEl = document.getElementById('botModalTeams');
+    // Modalden kategori, takım ve slider oku
+    const catEl    = document.getElementById('botModalCat');
+    const teamsEl  = document.getElementById('botModalTeams');
+    const sliderEl = document.getElementById('botModalSlider');
     const category = catEl ? catEl.value : 'general';
     const teams = teamsEl
       ? [...teamsEl.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value)
       : [];
+    const sliderVal = sliderEl ? sliderEl.checked : false;
 
     const news = getNews();
     const newItem = {
@@ -999,7 +1009,7 @@
       date: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
       category,
       branch: teams,
-      slider: false,
+      slider: sliderVal,
       source: item.source,
       sourceUrl: item.link,
     };
