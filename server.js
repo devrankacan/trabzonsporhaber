@@ -330,6 +330,106 @@ app.post('/api/bot/fetch', auth, async (req, res) => {
   res.json({ ok: true, items: unique, total: unique.length });
 });
 
+// Site-specific content selectors
+const SITE_SELECTORS = {
+  ajansspor: ['haber-detay-icerik', 'news-detail-text', 'article-content', 'haber-icerik'],
+  sporx:     ['article-detail-text', 'news-detail-content', 'article-content', 'content-text'],
+  fanatik:   ['news-content-text', 'article-detail-text', 'news-body', 'article-content'],
+  sabah:     ['article-body-text', 'news-body', 'article-content', 'article-text'],
+  milliyet:  ['article-body', 'news-detail-content', 'article-content'],
+  ntv:       ['article-body', 'content-body', 'article-text', 'news-content'],
+  trtspor:   ['news-detail-content', 'article-text', 'article-body', 'haberDetayIcerik'],
+};
+
+function decodeHtmlEntities(str) {
+  return str
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n))
+    .replace(/&[a-z]+;/g, ' ');
+}
+
+function extractParagraphs(html) {
+  const paras = [];
+  const rx = /<p[^>]*>([\s\S]*?)<\/p>/gi;
+  let m;
+  while ((m = rx.exec(html)) !== null) {
+    const text = decodeHtmlEntities(m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim());
+    if (text.length > 40) paras.push(text);
+  }
+  return paras;
+}
+
+function extractArticleContent(html, sourceId) {
+  // Strip noise
+  const clean = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '');
+
+  // 1. Try site-specific class selectors
+  const selectors = SITE_SELECTORS[sourceId] || [];
+  for (const cls of selectors) {
+    const rx = new RegExp(`<(?:div|article|section)[^>]+class="[^"]*${cls}[^"]*"[^>]*>([\\s\\S]{200,}?)(?=<(?:div|article|section)[^>]+class="(?:related|yorum|comment|social|share|tag|reklam|ad-|footer)|<\\/(?:article|main)>)`, 'i');
+    const match = clean.match(rx);
+    if (match) {
+      const paras = extractParagraphs(match[1]);
+      if (paras.length >= 2) return paras.join('\n\n');
+    }
+  }
+
+  // 2. Try <article> tag
+  const artMatch = clean.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+  if (artMatch) {
+    const paras = extractParagraphs(artMatch[1]);
+    if (paras.length >= 2) return paras.join('\n\n');
+  }
+
+  // 3. Try <main> tag
+  const mainMatch = clean.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+  if (mainMatch) {
+    const paras = extractParagraphs(mainMatch[1]);
+    if (paras.length >= 2) return paras.join('\n\n');
+  }
+
+  // 4. Generic: find the div with the most <p> content
+  const divRx = /<div[^>]*>([\s\S]*?)<\/div>/gi;
+  let bestParas = [], bestLen = 0, dm;
+  while ((dm = divRx.exec(clean)) !== null) {
+    const paras = extractParagraphs(dm[1]);
+    const totalLen = paras.join('').length;
+    if (paras.length >= 3 && totalLen > bestLen) { bestLen = totalLen; bestParas = paras; }
+  }
+  if (bestParas.length >= 3) return bestParas.join('\n\n');
+
+  // 5. Last resort: all <p> tags in page
+  const allParas = extractParagraphs(clean);
+  return allParas.slice(0, 30).join('\n\n');
+}
+
+function extractOgImage(html) {
+  const m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+          || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+  return m ? m[1].trim() : '';
+}
+
+app.post('/api/bot/article', auth, async (req, res) => {
+  const { url, sourceId } = req.body || {};
+  if (!url) return res.status(400).json({ ok: false, error: 'url gerekli' });
+  try {
+    const html = await fetchUrl(url);
+    const content = extractArticleContent(html, sourceId || '');
+    const image   = extractOgImage(html);
+    if (!content || content.length < 100) {
+      return res.json({ ok: false, error: 'İçerik ayıklanamadı', content: '', image });
+    }
+    res.json({ ok: true, content, image });
+  } catch (e) {
+    res.json({ ok: false, error: e.message, content: '', image: '' });
+  }
+});
+
 app.get('/api/:key', (req, res) => {
   if (!ALLOWED_KEYS.includes(req.params.key)) return res.status(400).json({ error: 'Invalid key' });
   res.json(readKey(req.params.key));

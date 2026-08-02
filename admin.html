@@ -889,14 +889,38 @@
   async function botAddItem(idx) {
     const item = _botItems[idx];
     if (!item) return;
-    const news = getNews();
+
+    // Buton durumunu güncelle
+    const row = document.querySelector(`.bot-item[data-idx="${idx}"]`);
+    const actionsEl = row ? row.querySelector('.admin-news-actions') : null;
+    if (actionsEl) actionsEl.innerHTML = '<span style="font-size:12px;color:var(--ts-muted)">⏳ Çekiliyor...</span>';
+
+    // Tam içeriği çek
+    let fullContent = '';
+    let fullImage = item.image || '';
+    try {
+      const r = await fetch('/api/bot/article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': _API_KEY },
+        body: JSON.stringify({ url: item.link, sourceId: item.sourceId }),
+      });
+      const data = await r.json();
+      if (data.ok && data.content && data.content.length > 100) {
+        fullContent = data.content;
+        if (!fullImage && data.image) fullImage = data.image;
+      }
+    } catch {}
+
     const cleanSummary = botCleanSummary(item.summary);
+    const finalContent = fullContent || cleanSummary;
+
+    const news = getNews();
     const newItem = {
       id: Date.now(),
       title: item.title,
       summary: cleanSummary,
-      content: cleanSummary,
-      image: item.image || '',
+      content: finalContent,
+      image: fullImage,
       author: '',
       date: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
       category: 'general',
