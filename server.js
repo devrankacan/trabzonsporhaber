@@ -220,6 +220,116 @@ app.get('/api/all', (req, res) => {
 });
 
 
+// =============================================
+// HABER BOTU — RSS
+// =============================================
+
+const BOT_SOURCES = [
+  { id: 'ajansspor', name: 'Ajansspor',    url: 'https://www.ajansspor.com/rss' },
+  { id: 'sporx',     name: 'Sporx',         url: 'https://www.sporx.com/rss/sporx.xml' },
+  { id: 'fanatik',   name: 'Fanatik',       url: 'https://www.fanatik.com.tr/rss/spor.xml' },
+  { id: 'sabah',     name: 'Sabah Spor',    url: 'https://www.sabah.com.tr/rss/spor.xml' },
+  { id: 'milliyet',  name: 'Milliyet Spor', url: 'https://www.milliyet.com.tr/rss/rssnew/sporRss.xml' },
+  { id: 'ntv',       name: 'NTV Spor',      url: 'https://www.ntvspor.net/rss' },
+  { id: 'trtspor',   name: 'TRT Spor',      url: 'https://www.trtsport.com/rss' },
+];
+
+function fetchUrl(urlStr) {
+  return new Promise((resolve, reject) => {
+    const tryFetch = (u, redirects) => {
+      if (redirects > 5) return reject(new Error('Too many redirects'));
+      let parsed;
+      try { parsed = new URL(u); } catch { return reject(new Error('Bad URL')); }
+      const mod = parsed.protocol === 'https:' ? https : require('http');
+      const req = mod.request({
+        hostname: parsed.hostname,
+        path: parsed.pathname + parsed.search,
+        method: 'GET',
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HaberBot/1.0)', Accept: 'application/rss+xml,application/xml,text/xml,*/*' },
+      }, res => {
+        if ([301, 302, 307, 308].includes(res.statusCode) && res.headers.location) {
+          return tryFetch(res.headers.location.startsWith('http') ? res.headers.location : `${parsed.origin}${res.headers.location}`, redirects + 1);
+        }
+        const chunks = [];
+        res.on('data', d => chunks.push(d));
+        res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+      });
+      req.on('error', reject);
+      req.setTimeout(12000, () => { req.destroy(); reject(new Error('timeout')); });
+      req.end();
+    };
+    tryFetch(urlStr, 0);
+  });
+}
+
+function parseRss(xml, sourceName, sourceId) {
+  const items = [];
+  const itemRx = /<item[\s>]([\s\S]*?)<\/item>/gi;
+  let m;
+  const getCdata = (block, tag) => {
+    const r = block.match(new RegExp(`<${tag}[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?<\\/${tag}>`, 'i'));
+    return r ? r[1].trim() : '';
+  };
+  while ((m = itemRx.exec(xml)) !== null) {
+    const b = m[1];
+    const title   = getCdata(b, 'title');
+    const rawLink = getCdata(b, 'link') || (b.match(/<link>([\s\S]*?)<\/link>/i) || [])[1] || '';
+    const link    = rawLink.trim().replace(/[\r\n\t]/g, '');
+    const desc    = getCdata(b, 'description');
+    const pubDate = getCdata(b, 'pubDate') || getCdata(b, 'dc:date');
+
+    let image = '';
+    const enc   = b.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]*type=["']image/i);
+    const media = b.match(/<media:(?:content|thumbnail)[^>]+url=["']([^"']+)["']/i);
+    const imgD  = desc.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (enc)   image = enc[1];
+    else if (media) image = media[1];
+    else if (imgD)  image = imgD[1];
+
+    const summary = desc
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
+      .replace(/\s+/g,' ').trim().slice(0, 350);
+
+    if (!title || !link) continue;
+    items.push({ title, link, summary, image, pubDate, source: sourceName, sourceId });
+  }
+  return items;
+}
+
+app.get('/api/bot/sources', auth, (req, res) => {
+  res.json(BOT_SOURCES.map(s => ({ id: s.id, name: s.name })));
+});
+
+app.post('/api/bot/fetch', auth, async (req, res) => {
+  const { sources } = req.body || {};
+  const toFetch = (sources && sources.length)
+    ? BOT_SOURCES.filter(s => sources.includes(s.id))
+    : BOT_SOURCES;
+
+  const results = await Promise.allSettled(
+    toFetch.map(async src => {
+      try {
+        const xml = await fetchUrl(src.url);
+        return parseRss(xml, src.name, src.id);
+      } catch (e) {
+        console.warn(`[Bot] ${src.name} hatası: ${e.message}`);
+        return [];
+      }
+    })
+  );
+
+  const allItems = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+  const seen = new Set();
+  const unique = allItems.filter(item => {
+    if (seen.has(item.link)) return false;
+    seen.add(item.link);
+    return true;
+  });
+
+  res.json({ ok: true, items: unique, total: unique.length });
+});
+
 app.get('/api/:key', (req, res) => {
   if (!ALLOWED_KEYS.includes(req.params.key)) return res.status(400).json({ error: 'Invalid key' });
   res.json(readKey(req.params.key));

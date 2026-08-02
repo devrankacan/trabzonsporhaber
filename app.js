@@ -1647,6 +1647,7 @@ function renderArticle() {
     </div>
     ${imageHtml}
     <div class="article-body">${contentHtml}</div>
+    ${news.source ? `<div class="article-source">Kaynak: <a href="${escAttr(news.sourceUrl || '#')}" target="_blank" rel="noopener noreferrer">${escHtml(news.source)}</a></div>` : ''}
     <div class="article-share">
       <span class="article-share-label">Paylaş:</span>
       <a class="share-btn share-twitter" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(news.title)}&url=${encodeURIComponent(location.href)}" target="_blank" rel="noopener" title="Twitter/X'te Paylaş">

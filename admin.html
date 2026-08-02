@@ -96,6 +96,9 @@
       <button class="dash-nav-item" onclick="showTab('standings')" id="tab-standings">
         <span class="dash-nav-icon">🏆</span> Puan Tablosu
       </button>
+      <button class="dash-nav-item" onclick="showTab('bot')" id="tab-bot">
+        <span class="dash-nav-icon">🤖</span> Haber Botu
+      </button>
       <button class="dash-nav-item" onclick="showTab('settings')" id="tab-settings">
         <span class="dash-nav-icon">⚙️</span> Ayarlar
       </button>
@@ -274,6 +277,35 @@
         <span style="font-size:12px;color:var(--ts-muted)">Sürükle-bırak veya sıra numarası gir</span>
       </div>
       <div id="sliderOrderList" style="display:flex;flex-direction:column;gap:8px;max-width:600px"></div>
+    </section>
+
+    <!-- TAB: HABER BOTU -->
+    <section class="dash-tab" id="tabBot">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">Haber Botu</h2>
+        <span style="font-size:12px;color:var(--ts-muted)">RSS kaynaklarından haber çek, beğendiklerini ekle</span>
+      </div>
+
+      <!-- Kaynak seçimi -->
+      <div class="dash-form-card" style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--ts-text);margin-bottom:10px">Kaynaklar</div>
+        <div id="botSourceList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-primary" onclick="botFetch()">🔍 Haberleri Çek</button>
+          <button class="btn-secondary btn-sm" onclick="botSelectAll()">Tümünü Seç</button>
+          <button class="btn-secondary btn-sm" onclick="botSelectNone()">Temizle</button>
+          <span id="botStatus" style="font-size:13px;color:var(--ts-muted)"></span>
+        </div>
+      </div>
+
+      <!-- Filtre -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <input type="text" id="botFilter" class="form-input" placeholder="Başlık filtrele..." style="max-width:320px;padding:7px 12px" oninput="botApplyFilter()" />
+        <span id="botCount" style="font-size:12px;color:var(--ts-muted)"></span>
+      </div>
+
+      <!-- Haber listesi -->
+      <div id="botResults"></div>
     </section>
 
     <!-- TAB: TRANSFERLER -->
@@ -743,6 +775,150 @@
     location.reload();
   }
 
+  // ── HABER BOTU ──────────────────────────────────────────────────
+  let _botSources = [];
+  let _botItems   = [];
+  let _botSkipped = new Set();
+  let _botAdded   = new Set();
+
+  async function botInit() {
+    if (_botSources.length) { botRenderSources(); return; }
+    try {
+      const r = await fetch('/api/bot/sources', { headers: { 'x-api-key': _API_KEY } });
+      _botSources = await r.json();
+    } catch { _botSources = []; }
+    botRenderSources();
+  }
+
+  function botRenderSources() {
+    const el = document.getElementById('botSourceList');
+    if (!el) return;
+    el.innerHTML = _botSources.map(s => `
+      <label style="display:flex;align-items:center;gap:6px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:500">
+        <input type="checkbox" class="bot-src-cb" value="${s.id}" checked style="accent-color:var(--ts-red)" />
+        ${s.name}
+      </label>
+    `).join('');
+  }
+
+  function botSelectAll()  { document.querySelectorAll('.bot-src-cb').forEach(c => c.checked = true); }
+  function botSelectNone() { document.querySelectorAll('.bot-src-cb').forEach(c => c.checked = false); }
+
+  async function botFetch() {
+    const selected = [...document.querySelectorAll('.bot-src-cb:checked')].map(c => c.value);
+    if (!selected.length) { document.getElementById('botStatus').textContent = 'En az bir kaynak seç.'; return; }
+    const statusEl = document.getElementById('botStatus');
+    statusEl.textContent = 'Çekiliyor...';
+    document.getElementById('botResults').innerHTML = '<p class="no-news-text">Yükleniyor...</p>';
+    try {
+      const r = await fetch('/api/bot/fetch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': _API_KEY },
+        body: JSON.stringify({ sources: selected }),
+      });
+      const data = await r.json();
+      _botItems = data.items || [];
+      _botSkipped = new Set();
+      _botAdded   = new Set();
+      statusEl.textContent = `${_botItems.length} haber bulundu`;
+      botRenderResults();
+    } catch (e) {
+      statusEl.textContent = 'Hata: ' + e.message;
+      document.getElementById('botResults').innerHTML = '';
+    }
+  }
+
+  function botApplyFilter() {
+    const q = (document.getElementById('botFilter')?.value || '').toLowerCase();
+    document.querySelectorAll('.bot-item').forEach(el => {
+      const title = (el.dataset.title || '').toLowerCase();
+      el.style.display = (!q || title.includes(q)) ? '' : 'none';
+    });
+    const visible = [...document.querySelectorAll('.bot-item')].filter(e => e.style.display !== 'none').length;
+    const countEl = document.getElementById('botCount');
+    if (countEl) countEl.textContent = q ? `${visible} sonuç` : '';
+  }
+
+  function botRenderResults() {
+    const el = document.getElementById('botResults');
+    if (!el) return;
+    if (!_botItems.length) { el.innerHTML = '<p class="no-news-text">Haber bulunamadı.</p>'; return; }
+
+    const existingTitles = new Set((getNews() || []).map(n => n.title.trim().toLowerCase()));
+
+    el.innerHTML = _botItems.map((item, idx) => {
+      const duplicate = existingTitles.has(item.title.trim().toLowerCase());
+      const added   = _botAdded.has(idx);
+      const skipped = _botSkipped.has(idx);
+      const statusBadge = added   ? '<span style="color:var(--ts-green,#27ae60);font-weight:700;font-size:12px">✓ Eklendi</span>'
+                        : skipped ? '<span style="color:var(--ts-muted);font-size:12px">Atlandı</span>'
+                        : duplicate ? '<span style="color:var(--ts-red);font-size:12px">Zaten var</span>' : '';
+      return `
+        <div class="bot-item admin-news-item" data-idx="${idx}" data-title="${escHtml(item.title)}"
+          style="${added || skipped ? 'opacity:0.45;' : ''}">
+          ${item.image ? `<div class="admin-news-thumb" style="background-image:url('${escAttr(item.image)}');background-size:cover;background-position:center"></div>` : '<div class="admin-news-thumb" style="background:var(--ts-border)"></div>'}
+          <div class="admin-news-body" style="flex:1;min-width:0">
+            <div class="admin-news-title">${escHtml(item.title)}</div>
+            <div class="admin-news-meta" style="gap:8px">
+              <span style="color:var(--ts-red);font-weight:600;font-size:11px">${escHtml(item.source)}</span>
+              ${item.pubDate ? `<span>${escHtml(item.pubDate.slice(0,16))}</span>` : ''}
+              ${item.summary ? `<span style="color:var(--ts-muted);font-size:11px">${escHtml(item.summary.slice(0,100))}…</span>` : ''}
+              ${statusBadge}
+            </div>
+          </div>
+          <div class="admin-news-actions" style="flex-shrink:0">
+            ${!added && !skipped ? `
+              <button class="btn-primary btn-sm" onclick="botAddItem(${idx})">+ Ekle</button>
+              <button class="btn-secondary btn-sm" onclick="botSkipItem(${idx})">Atla</button>
+            ` : ''}
+          </div>
+        </div>`;
+    }).join('');
+    botApplyFilter();
+  }
+
+  async function botAddItem(idx) {
+    const item = _botItems[idx];
+    if (!item) return;
+    const news = getNews();
+    const newItem = {
+      id: Date.now(),
+      title: item.title,
+      summary: item.summary || '',
+      content: item.summary || '',
+      image: item.image || '',
+      author: '',
+      date: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+      category: 'general',
+      teams: [],
+      slider: false,
+      source: item.source,
+      sourceUrl: item.link,
+    };
+    if (typeof generateSlug === 'function') newItem.slug = generateSlug(newItem.title, news);
+    news.unshift(newItem);
+    saveNews(news);
+    _botAdded.add(idx);
+    const row = document.querySelector(`.bot-item[data-idx="${idx}"]`);
+    if (row) {
+      row.style.opacity = '0.45';
+      const actions = row.querySelector('.admin-news-actions');
+      if (actions) actions.innerHTML = '<span style="color:var(--ts-green,#27ae60);font-weight:700;font-size:12px">✓ Eklendi</span>';
+    }
+    updateSidebarBadge();
+  }
+
+  function botSkipItem(idx) {
+    _botSkipped.add(idx);
+    const row = document.querySelector(`.bot-item[data-idx="${idx}"]`);
+    if (row) {
+      row.style.opacity = '0.45';
+      const actions = row.querySelector('.admin-news-actions');
+      if (actions) actions.innerHTML = '<span style="color:var(--ts-muted);font-size:12px">Atlandı</span>';
+    }
+  }
+  // ── HABER BOTU SON ─────────────────────────────────────────────
+
   async function syncToServer() {
     const btn = document.getElementById('syncToServerBtn');
     const msg = document.getElementById('syncMsg');
@@ -764,7 +940,7 @@
   }
 
 
-  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu', settings: 'Ayarlar', members: 'Üyeler' };
+  const TAB_TITLES = { stats: 'İstatistikler', add: 'Haber Ekle', list: 'Haberler', transfers: 'Transferler', standings: 'Puan Tablosu', bot: 'Haber Botu', settings: 'Ayarlar', members: 'Üyeler' };
   function showTab(name) {
     document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dash-nav-item').forEach(b => b.classList.remove('active'));
@@ -777,6 +953,7 @@
     if (name === 'standings') { initStandingsLogoPreview(); }
     if (name === 'transfers') { initTransfersLogoPreview(); }
     if (name === 'list') { renderAdminList(); }
+    if (name === 'bot') { botInit(); }
     // Close sidebar on mobile
     if (window.innerWidth <= 768) document.getElementById('dashSidebar').classList.remove('open');
   }
