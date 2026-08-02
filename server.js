@@ -360,52 +360,89 @@ function extractParagraphs(html) {
   return paras;
 }
 
+// Verilen HTML string içindeki ilk açılış tag'inden başlayarak dengelenmiş kapanışı bulur
+function findClosingTag(html, startIdx) {
+  // startIdx: açılış tag'inin başlangıcı (<div veya <article vs.)
+  const tagMatch = html.slice(startIdx).match(/^<(div|article|section|main)/i);
+  if (!tagMatch) return -1;
+  const tag = tagMatch[1].toLowerCase();
+  const openRx  = new RegExp(`<${tag}[\\s>]`, 'gi');
+  const closeRx = new RegExp(`<\\/${tag}>`, 'gi');
+  openRx.lastIndex  = startIdx;
+  closeRx.lastIndex = startIdx;
+  let depth = 0;
+  let pos = startIdx;
+  while (pos < html.length) {
+    openRx.lastIndex  = pos;
+    closeRx.lastIndex = pos;
+    const nextOpen  = openRx.exec(html);
+    const nextClose = closeRx.exec(html);
+    if (!nextClose) return -1;
+    if (nextOpen && nextOpen.index < nextClose.index) {
+      depth++;
+      pos = nextOpen.index + 1;
+    } else {
+      if (depth === 0) return nextClose.index + `</${tag}>`.length;
+      depth--;
+      pos = nextClose.index + 1;
+    }
+  }
+  return -1;
+}
+
 function extractArticleContent(html, sourceId) {
-  // Strip noise
   const clean = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '');
 
-  // 1. Try site-specific class selectors
-  const selectors = SITE_SELECTORS[sourceId] || [];
-  for (const cls of selectors) {
-    const rx = new RegExp(`<(?:div|article|section)[^>]+class="[^"]*${cls}[^"]*"[^>]*>([\\s\\S]{200,}?)(?=<(?:div|article|section)[^>]+class="(?:related|yorum|comment|social|share|tag|reklam|ad-|footer)|<\\/(?:article|main)>)`, 'i');
-    const match = clean.match(rx);
-    if (match) {
-      const paras = extractParagraphs(match[1]);
-      if (paras.length >= 2) return paras.join('\n\n');
-    }
+  // 1. Site-specific ve generic class selectors — balanced tag extraction
+  const genericClasses = ['article-content','news-content','news-detail','article-body','article-text','content-body','haber-icerik','haber-detay'];
+  const allSelectors = [...(SITE_SELECTORS[sourceId] || []), ...genericClasses];
+  for (const cls of allSelectors) {
+    const startRx = new RegExp(`<(div|article|section)[^>]+class="[^"]*${cls}[^"]*"`, 'i');
+    const startMatch = startRx.exec(clean);
+    if (!startMatch) continue;
+    const endIdx = findClosingTag(clean, startMatch.index);
+    const block = endIdx > 0 ? clean.slice(startMatch.index, endIdx) : clean.slice(startMatch.index, startMatch.index + 50000);
+    const paras = extractParagraphs(block);
+    if (paras.length >= 3) return paras.join('\n\n');
   }
 
-  // 2. Try <article> tag
-  const artMatch = clean.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
-  if (artMatch) {
-    const paras = extractParagraphs(artMatch[1]);
+  // 2. <article> tag — balanced
+  const artStart = /<article[\s>]/i.exec(clean);
+  if (artStart) {
+    const endIdx = findClosingTag(clean, artStart.index);
+    const block = endIdx > 0 ? clean.slice(artStart.index, endIdx) : clean.slice(artStart.index, artStart.index + 80000);
+    const paras = extractParagraphs(block);
     if (paras.length >= 2) return paras.join('\n\n');
   }
 
-  // 3. Try <main> tag
-  const mainMatch = clean.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-  if (mainMatch) {
-    const paras = extractParagraphs(mainMatch[1]);
+  // 3. <main> tag — balanced
+  const mainStart = /<main[\s>]/i.exec(clean);
+  if (mainStart) {
+    const endIdx = findClosingTag(clean, mainStart.index);
+    const block = endIdx > 0 ? clean.slice(mainStart.index, endIdx) : clean.slice(mainStart.index, mainStart.index + 80000);
+    const paras = extractParagraphs(block);
     if (paras.length >= 2) return paras.join('\n\n');
   }
 
-  // 4. Generic: find the div with the most <p> content
-  const divRx = /<div[^>]*>([\s\S]*?)<\/div>/gi;
-  let bestParas = [], bestLen = 0, dm;
-  while ((dm = divRx.exec(clean)) !== null) {
-    const paras = extractParagraphs(dm[1]);
-    const totalLen = paras.join('').length;
-    if (paras.length >= 3 && totalLen > bestLen) { bestLen = totalLen; bestParas = paras; }
-  }
-  if (bestParas.length >= 3) return bestParas.join('\n\n');
-
-  // 5. Last resort: all <p> tags in page
+  // 4. Tüm <p> tag'lerinden en yoğun bölgeyi bul (sliding window)
   const allParas = extractParagraphs(clean);
-  return allParas.slice(0, 30).join('\n\n');
+  if (allParas.length >= 3) {
+    // En uzun ardışık grup
+    let best = [], bestLen = 0, cur = [], curLen = 0;
+    for (const p of allParas) {
+      if (p.length > 40) { cur.push(p); curLen += p.length; }
+      else { if (curLen > bestLen) { best = cur; bestLen = curLen; } cur = []; curLen = 0; }
+    }
+    if (curLen > bestLen) best = cur;
+    if (best.length >= 2) return best.join('\n\n');
+    return allParas.join('\n\n');
+  }
+
+  return allParas.join('\n\n');
 }
 
 function extractOgImage(html) {
