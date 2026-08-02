@@ -877,15 +877,25 @@
     botApplyFilter();
   }
 
+  function botCleanSummary(text) {
+    // "devamını oku", "devamı için tıklayınız" gibi linkleri temizle
+    return (text || '')
+      .replace(/devam[ıi]\s*(için\s*)?(tıklayınız|okumak\s*için\s*tıklayın[ıi]z?|oku[nyui]+[a-z]*)[.…]*/gi, '')
+      .replace(/haberin\s*taman[ıi]\s*(için|okumak)?.*/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+
   async function botAddItem(idx) {
     const item = _botItems[idx];
     if (!item) return;
     const news = getNews();
+    const cleanSummary = botCleanSummary(item.summary);
     const newItem = {
       id: Date.now(),
       title: item.title,
-      summary: item.summary || '',
-      content: item.summary || '',
+      summary: cleanSummary,
+      content: cleanSummary,
       image: item.image || '',
       author: '',
       date: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),

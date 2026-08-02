@@ -3146,6 +3146,22 @@ img { max-width: 100%; display: block; }
   margin-top: 8px;
 }
 
+.article-read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 16px 0 8px;
+  padding: 10px 20px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.article-read-more:hover { opacity: .85; }
+
 .article-source {
   margin: 0 0 20px;
   font-size: 12px;

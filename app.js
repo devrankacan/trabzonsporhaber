@@ -1647,6 +1647,11 @@ function renderArticle() {
     </div>
     ${imageHtml}
     <div class="article-body">${contentHtml}</div>
+    ${news.sourceUrl ? `
+    <a class="article-read-more" href="${escAttr(news.sourceUrl)}" target="_blank" rel="noopener noreferrer">
+      Haberin tamamını oku
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>` : ''}
     ${news.source ? `<div class="article-source">Kaynak: <a href="${escAttr(news.sourceUrl || '#')}" target="_blank" rel="noopener noreferrer">${escHtml(news.source)}</a></div>` : ''}
     <div class="article-share">
       <span class="article-share-label">Paylaş:</span>
