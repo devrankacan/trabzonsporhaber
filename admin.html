@@ -697,31 +697,30 @@
 </div><!-- /dashboard -->
 
 <!-- Bot Modal -->
-<div id="botModal" onclick="if(event.target===this)botCloseModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center">
-  <div style="background:var(--ts-card);border-radius:12px;padding:24px 28px;min-width:340px;max-width:600px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.3);position:relative">
-    <button onclick="botCloseModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--ts-muted)">✕</button>
-    <div style="font-weight:700;font-size:15px;margin-bottom:16px;padding-right:24px" id="botModalTitle">Haber Ekle</div>
-    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
-      <div>
-        <div style="font-size:11px;font-weight:600;color:var(--ts-muted);margin-bottom:4px">KATEGORİ</div>
-        <select id="botModalCat" class="form-input" style="padding:5px 10px;font-size:13px;width:auto">
-          <option value="general">Genel</option>
-          <option value="transfer">Transfer</option>
-          <option value="mac">Maç</option>
-          <option value="milli-takim">Milli Takım</option>
-          <option value="kulup">Kulüp</option>
-          <option value="yonetim">Yönetim</option>
-          <option value="diger">Diğer</option>
-        </select>
-      </div>
-      <div style="flex:1;min-width:220px">
-        <div style="font-size:11px;font-weight:600;color:var(--ts-muted);margin-bottom:4px">TAKIM (birden fazla seçilebilir)</div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px" id="botModalTeams"></div>
-      </div>
+<div id="botModal" onclick="if(event.target===this)botCloseModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.72);align-items:center;justify-content:center">
+  <div style="background:#fff;color:#111;border-radius:14px;padding:28px 32px;min-width:340px;max-width:640px;width:92%;box-shadow:0 12px 60px rgba(0,0,0,0.45);position:relative;max-height:90vh;overflow-y:auto">
+    <button onclick="botCloseModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#555;line-height:1">✕</button>
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;padding-right:28px;color:#111" id="botModalTitle">Haber Ekle</div>
+    <div style="font-size:12px;color:#888;margin-bottom:18px">Kategori ve takımı seçip Ekle'ye basın.</div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Kategori</div>
+      <select id="botModalCat" style="padding:8px 12px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;width:100%;background:#f9f9f9;color:#111;outline:none">
+        <option value="general">Genel</option>
+        <option value="transfer">Transfer</option>
+        <option value="mac">Maç</option>
+        <option value="milli-takim">Milli Takım</option>
+        <option value="kulup">Kulüp</option>
+        <option value="yonetim">Yönetim</option>
+        <option value="diger">Diğer</option>
+      </select>
     </div>
-    <div style="margin-top:16px;display:flex;gap:10px">
-      <button class="btn-primary" onclick="botAddFromModal()">✓ Ekle</button>
-      <button class="btn-secondary" onclick="botCloseModal()">İptal</button>
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Takım (birden fazla seçilebilir)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px" id="botModalTeams"></div>
+    </div>
+    <div style="display:flex;gap:10px;border-top:1px solid #eee;padding-top:18px">
+      <button onclick="botAddFromModal()" style="background:#e63946;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer">✓ Ekle</button>
+      <button onclick="botCloseModal()" style="background:#f0f0f0;color:#333;border:none;border-radius:8px;padding:10px 20px;font-size:14px;cursor:pointer">İptal</button>
     </div>
   </div>
 </div>
@@ -922,8 +921,8 @@
     if (catEl) catEl.value = 'general';
     if (teamsEl) {
       teamsEl.innerHTML = Object.entries(typeof BRANCHES !== 'undefined' ? BRANCHES : {}).map(([k,v]) =>
-        `<label style="display:flex;align-items:center;gap:4px;font-size:12px;background:var(--ts-bg);border:1px solid var(--ts-border);border-radius:6px;padding:3px 8px;cursor:pointer">
-          <input type="checkbox" value="${k}" style="accent-color:var(--ts-red)"> ${v.label}
+        `<label style="display:flex;align-items:center;gap:5px;font-size:13px;background:#f4f4f4;border:1.5px solid #ddd;border-radius:7px;padding:5px 10px;cursor:pointer;color:#111;font-weight:500">
+          <input type="checkbox" value="${k}" style="accent-color:#e63946;width:14px;height:14px"> ${v.label}
         </label>`
       ).join('');
     }
