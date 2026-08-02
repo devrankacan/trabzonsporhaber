@@ -1003,7 +1003,21 @@
       source: item.source,
       sourceUrl: item.link,
     };
-    if (typeof generateSlug === 'function') newItem.slug = generateSlug(newItem.title, news);
+    newItem.slug = (function makeSlug(title, existingNews) {
+      const base = title
+        .toLowerCase()
+        .replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s')
+        .replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c')
+        .replace(/[^a-z0-9\s-]/g,'')
+        .trim()
+        .replace(/\s+/g,'-')
+        .replace(/-+/g,'-')
+        .slice(0, 80);
+      const taken = new Set((existingNews || []).map(n => n.slug).filter(Boolean));
+      let slug = base, i = 2;
+      while (taken.has(slug)) slug = base + '-' + (i++);
+      return slug;
+    })(newItem.title, news);
     news.unshift(newItem);
     saveNews(news);
     _botAdded.add(idx);
