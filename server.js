@@ -313,6 +313,66 @@ function parseRss(xml, sourceName, sourceId) {
   return items;
 }
 
+// Takım logoları — Wikimedia proxy (hotlink bypass)
+const TEAM_LOGOS = {
+  trabzonspor:    'https://upload.wikimedia.org/wikipedia/en/8/8d/Trabzonspor_logo.svg',
+  galatasaray:    'https://upload.wikimedia.org/wikipedia/en/2/22/Galatasaray_logo.svg',
+  fenerbahce:     'https://upload.wikimedia.org/wikipedia/en/2/26/Fenerbah%C3%A7e_Logo.svg',
+  besiktas:       'https://upload.wikimedia.org/wikipedia/en/9/90/Besiktas_JK_logo.svg',
+  basaksehir:     'https://upload.wikimedia.org/wikipedia/en/c/ce/Istanbul_Basaksehir_logo.svg',
+  kasimpasa:      'https://upload.wikimedia.org/wikipedia/en/5/57/Kasimpasa_logo.svg',
+  samsunspor:     'https://upload.wikimedia.org/wikipedia/en/6/63/Samsunspor_logo.svg',
+  rizespor:       'https://upload.wikimedia.org/wikipedia/en/5/56/Caykur_Rizespor_logo.svg',
+  konyaspor:      'https://upload.wikimedia.org/wikipedia/en/3/37/Konyaspor_logo.svg',
+  alanyaspor:     'https://upload.wikimedia.org/wikipedia/en/6/6e/Alanyaspor_logo.svg',
+  goztepe:        'https://upload.wikimedia.org/wikipedia/en/4/4a/Goztepe_SK_logo.svg',
+  gaziantep:      'https://upload.wikimedia.org/wikipedia/en/1/10/Gaziantep_FK_logo.svg',
+  genclerbirligi: 'https://upload.wikimedia.org/wikipedia/en/8/89/Genclerbirligi_logo.svg',
+  eyupspor:       'https://upload.wikimedia.org/wikipedia/tr/6/60/Ey%C3%BCpspor_logo.svg',
+  kocaelispor:    'https://upload.wikimedia.org/wikipedia/en/c/cf/Kocaelispor_logo.svg',
+  corum:          'https://upload.wikimedia.org/wikipedia/en/7/72/Corum_FK_logo.svg',
+  erzurumspor:    'https://upload.wikimedia.org/wikipedia/en/a/a2/Erzurumspor_logo.svg',
+  'milli-takim':  'https://upload.wikimedia.org/wikipedia/en/1/1b/Turkey_national_football_team_logo.svg',
+};
+
+const LOGO_CACHE = {};
+
+app.get('/api/team-logo/:team', (req, res) => {
+  const team = req.params.team;
+  const url = TEAM_LOGOS[team];
+  if (!url) return res.status(404).end();
+
+  if (LOGO_CACHE[team]) {
+    res.setHeader('Content-Type', LOGO_CACHE[team].ct);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.end(LOGO_CACHE[team].data);
+  }
+
+  const tryUrl = (u, redirects) => {
+    if (redirects > 5) return res.status(502).end();
+    const mod = require(u.startsWith('https') ? 'https' : 'http');
+    mod.get(u, { headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://en.wikipedia.org/' } }, (r) => {
+      if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+        const loc = r.headers.location.startsWith('http') ? r.headers.location : new URL(r.headers.location, u).href;
+        r.resume();
+        return tryUrl(loc, redirects + 1);
+      }
+      if (r.statusCode !== 200) { r.resume(); return res.status(r.statusCode).end(); }
+      const ct = r.headers['content-type'] || 'image/svg+xml';
+      const chunks = [];
+      r.on('data', c => chunks.push(c));
+      r.on('end', () => {
+        const data = Buffer.concat(chunks);
+        LOGO_CACHE[team] = { ct, data };
+        res.setHeader('Content-Type', ct);
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        res.end(data);
+      });
+    }).on('error', () => res.status(502).end());
+  };
+  tryUrl(url, 0);
+});
+
 app.get('/api/bot/sources', auth, (req, res) => {
   res.json(BOT_SOURCES.map(s => ({ id: s.id, name: s.name })));
 });
