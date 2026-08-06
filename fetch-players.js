@@ -1,270 +1,289 @@
 'use strict';
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// Target clubs (Wikidata Q IDs) — players who played for ANY of these will be fetched
-// along with their FULL career history across all clubs
-const TARGET_CLUBS = [
-  { q: 'Q164947', name: 'Trabzonspor' },
-  { q: 'Q43977',  name: 'Galatasaray' },
-  { q: 'Q40809',  name: 'Fenerbahçe' },
-  { q: 'Q43941',  name: 'Beşiktaş' },
-  { q: 'Q1072994',name: 'İstanbul Başakşehir' },
-  { q: 'Q185925', name: 'Samsunspor' },
-  { q: 'Q207382', name: 'Çaykur Rizespor' },
-  { q: 'Q207386', name: 'Konyaspor' },
-  { q: 'Q750452', name: 'Alanyaspor' },
-  { q: 'Q207376', name: 'Göztepe' },
-  { q: 'Q207388', name: 'Sivasspor' },
-  { q: 'Q207372', name: 'Kayserispor' },
-  { q: 'Q207394', name: 'Antalyaspor' },
-  { q: 'Q207371', name: 'Kasımpaşa' },
-  { q: 'Q131343', name: 'Bursaspor' },
-  { q: 'Q207389', name: 'Gaziantep FK' },
-  { q: 'Q1079394',name: 'Eyüpspor' },
-  { q: 'Q8682',   name: 'FC Barcelona' },
-  { q: 'Q8721',   name: 'Real Madrid' },
-  { q: 'Q43942',  name: 'Atletico Madrid' },
-  { q: 'Q9616',   name: 'Manchester United' },
-  { q: 'Q18918',  name: 'Manchester City' },
-  { q: 'Q9617',   name: 'Liverpool' },
-  { q: 'Q9613',   name: 'Arsenal' },
-  { q: 'Q9610',   name: 'Chelsea' },
-  { q: 'Q18906',  name: 'Tottenham' },
-  { q: 'Q43414',  name: 'Bayern Münih' },
-  { q: 'Q15889',  name: 'Borussia Dortmund' },
-  { q: 'Q18603',  name: 'Schalke 04' },
-  { q: 'Q40895',  name: 'Paris Saint-Germain' },
-  { q: 'Q43459',  name: 'Juventus' },
-  { q: 'Q43280',  name: 'AC Milan' },
-  { q: 'Q9005',   name: 'Inter Milan' },
-  { q: 'Q43264',  name: 'Napoli' },
-  { q: 'Q43698',  name: 'Ajax' },
-  { q: 'Q43629',  name: 'Porto' },
-  { q: 'Q43624',  name: 'Benfica' },
-  { q: 'Q43274',  name: 'Sevilla' },
-  { q: 'Q43260',  name: 'Valencia' },
-  { q: 'Q43289',  name: 'Villarreal' },
-  { q: 'Q43295',  name: 'Athletic Bilbao' },
-  { q: 'Q43300',  name: 'Real Betis' },
-  { q: 'Q43304',  name: 'Deportivo La Coruña' },
-  { q: 'Q3942',   name: 'Bayer Leverkusen' },
-  { q: 'Q43433',  name: 'Eintracht Frankfurt' },
-  { q: 'Q43428',  name: 'Werder Bremen' },
-  { q: 'Q43440',  name: 'VfB Stuttgart' },
-  { q: 'Q43454',  name: 'Hamburger SV' },
-  { q: 'Q45543',  name: 'AS Roma' },
-  { q: 'Q43276',  name: 'Fiorentina' },
-  { q: 'Q43296',  name: 'Lazio' },
-  { q: 'Q43284',  name: 'Atalanta' },
-  { q: 'Q43279',  name: 'Torino' },
-  { q: 'Q43262',  name: 'Sampdoria' },
-  { q: 'Q206813', name: 'Olympique Marseille' },
-  { q: 'Q192629', name: 'Olympique Lyon' },
-  { q: 'Q192637', name: 'Monaco' },
-  { q: 'Q206799', name: 'Lille' },
-  { q: 'Q206823', name: 'Nice' },
-  { q: 'Q43416',  name: 'Sporting CP' },
-  { q: 'Q43430',  name: 'Sporting Lisbon' },
-  { q: 'Q219714', name: 'Galatasaray' }, // duplicate guard
-  { q: 'Q1048302',name: 'Anzhi Makhachkala' },
-  { q: 'Q206855', name: 'PSV Eindhoven' },
-  { q: 'Q207477', name: 'Feyenoord' },
-  { q: 'Q4710',   name: 'Celtic' },
-  { q: 'Q214416', name: 'Rangers' },
-  { q: 'Q166792', name: 'Zenit Saint Petersburg' },
-  { q: 'Q47484',  name: 'CSKA Moscow' },
-];
+// TheSportsDB v1 - ücretsiz, API key gerektirmez
+const BASE = 'https://www.thesportsdb.com/api/v1/json/3';
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function sparql(query) {
+function get(url) {
   return new Promise((resolve, reject) => {
-    const body = 'query=' + encodeURIComponent(query) + '&format=json';
-    const opts = {
-      hostname: 'query.wikidata.org',
-      path: '/sparql',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/sparql-results+json',
-        'User-Agent': 'TaktikTabloBot/2.0 (habersuperlig.com; futbol oyunu)',
-        'Content-Length': Buffer.byteLength(body),
-      },
-    };
-    const req = https.request(opts, res => {
+    const mod = url.startsWith('https') ? https : http;
+    const req = mod.get(url, {
+      headers: { 'User-Agent': 'TaktikTabloBot/1.0' }
+    }, res => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.resume();
+        return resolve(get(res.headers.location));
+      }
       let data = '';
       res.on('data', c => data += c);
       res.on('end', () => {
-        if (res.statusCode === 429) return reject(Object.assign(new Error('rate_limit'), { code: 429 }));
-        if (res.statusCode === 503) return reject(Object.assign(new Error('service_unavailable'), { code: 503 }));
-        if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}: ${data.slice(0,200)}`));
+        if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
         try { resolve(JSON.parse(data)); }
-        catch(e) { reject(new Error('JSON parse hatası: ' + data.slice(0,100))); }
+        catch(e) { reject(new Error('JSON parse hatası')); }
       });
     });
     req.on('error', reject);
-    req.setTimeout(90000, () => { req.destroy(); reject(new Error('timeout')); });
-    req.write(body);
-    req.end();
+    req.setTimeout(30000, () => { req.destroy(); reject(new Error('timeout')); });
   });
 }
 
-async function sparqlWithRetry(query, maxRetries = 5) {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await sparql(query);
-    } catch(e) {
-      const isRetryable = e.code === 429 || e.code === 503 || e.message.includes('timeout');
-      if (!isRetryable || i === maxRetries - 1) throw e;
-      const wait = Math.pow(2, i + 2) * 1000; // 4s, 8s, 16s, 32s, 64s
-      console.log(`  ⏳ ${e.message} — ${wait/1000}s bekle (deneme ${i+1}/${maxRetries})`);
+async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function withRetry(fn, label, retries = 4) {
+  for (let i = 0; i < retries; i++) {
+    try { return await fn(); }
+    catch(e) {
+      if (i === retries - 1) throw e;
+      const wait = Math.pow(2, i) * 2000;
+      process.stdout.write(` [retry ${i+1}]`);
       await sleep(wait);
     }
   }
 }
 
-// Fetch all players who played for a club, including their full career
-// We use two-step: get player QIDs first, then get all their clubs
-async function fetchPlayersForClub(club) {
-  const q = `
-SELECT DISTINCT ?player ?playerLabel WHERE {
-  ?player wdt:P106 wd:Q937857 .
-  ?player wdt:P54 wd:${club.q} .
-  ?player rdfs:label ?playerLabel .
-  FILTER(LANG(?playerLabel) IN ("tr","en"))
+// Kulüp adı → TheSportsDB team ID
+async function findTeamId(name) {
+  const d = await withRetry(() => get(`${BASE}/searchteams.php?t=${encodeURIComponent(name)}`), name);
+  if (!d || !d.teams) return null;
+  // Soccer/Football olan kulübü bul
+  const team = d.teams.find(t => t.strSport === 'Soccer' || t.strLeague);
+  return team ? team.idTeam : (d.teams[0] ? d.teams[0].idTeam : null);
 }
-LIMIT 2000`;
 
-  const result = await sparqlWithRetry(q);
-  const players = {};
-  for (const b of result.results.bindings) {
-    const qid = b.player.value.split('/').pop();
-    const name = b.playerLabel.value;
-    if (name && !name.startsWith('Q') && !players[qid]) {
-      players[qid] = name;
-    }
+// Takımın tüm oyuncuları (aktif + eski)
+async function getTeamPlayers(teamId) {
+  const d = await withRetry(() => get(`${BASE}/lookup_all_players.php?id=${teamId}`), teamId);
+  return d && d.player ? d.player : [];
+}
+
+// Oyuncu detayı - strFormerTeams dahil
+async function getPlayerDetail(playerId) {
+  const d = await withRetry(() => get(`${BASE}/lookupplayer.php?id=${playerId}`), playerId);
+  return d && d.players && d.players[0] ? d.players[0] : null;
+}
+
+// ---- Kulüp listesi ----
+const CLUBS_TR = {
+  'Trabzonspor': 'Süper Lig',
+  'Galatasaray': 'Süper Lig',
+  'Fenerbahce': 'Süper Lig',        // API'de Türkçe karakter olmayabilir
+  'Fenerbahçe': 'Süper Lig',
+  'Besiktas': 'Süper Lig',
+  'Beşiktaş': 'Süper Lig',
+  'Istanbul Basaksehir': 'Süper Lig',
+  'Samsunspor': 'Süper Lig',
+  'Antalyaspor': 'Süper Lig',
+  'Kayserispor': 'Süper Lig',
+  'Sivasspor': 'Süper Lig',
+  'Konyaspor': 'Süper Lig',
+  'Bursaspor': 'Süper Lig',
+  'Rizespor': 'Süper Lig',
+  'Göztepe': 'Süper Lig',
+  'Alanyaspor': 'Süper Lig',
+};
+
+const CLUBS_EU = {
+  'FC Barcelona': 'La Liga',
+  'Real Madrid': 'La Liga',
+  'Atletico Madrid': 'La Liga',
+  'Sevilla': 'La Liga',
+  'Valencia': 'La Liga',
+  'Villarreal': 'La Liga',
+  'Athletic Bilbao': 'La Liga',
+  'Real Betis': 'La Liga',
+  'Deportivo La Coruna': 'La Liga',
+  'Manchester United': 'Premier League',
+  'Manchester City': 'Premier League',
+  'Liverpool': 'Premier League',
+  'Arsenal': 'Premier League',
+  'Chelsea': 'Premier League',
+  'Tottenham Hotspur': 'Premier League',
+  'Everton': 'Premier League',
+  'Newcastle United': 'Premier League',
+  'Leicester City': 'Premier League',
+  'Bayern Munich': 'Bundesliga',
+  'Borussia Dortmund': 'Bundesliga',
+  'Schalke 04': 'Bundesliga',
+  'Bayer Leverkusen': 'Bundesliga',
+  'Eintracht Frankfurt': 'Bundesliga',
+  'Werder Bremen': 'Bundesliga',
+  'VfB Stuttgart': 'Bundesliga',
+  'Hamburger SV': 'Bundesliga',
+  'Paris Saint-Germain': 'Ligue 1',
+  'Olympique Marseille': 'Ligue 1',
+  'Olympique Lyonnais': 'Ligue 1',
+  'Monaco': 'Ligue 1',
+  'Lille': 'Ligue 1',
+  'Juventus': 'Serie A',
+  'AC Milan': 'Serie A',
+  'Inter Milan': 'Serie A',
+  'Napoli': 'Serie A',
+  'AS Roma': 'Serie A',
+  'Lazio': 'Serie A',
+  'Fiorentina': 'Serie A',
+  'Atalanta': 'Serie A',
+  'Ajax': 'Eredivisie',
+  'PSV Eindhoven': 'Eredivisie',
+  'Feyenoord': 'Eredivisie',
+  'Porto': 'Primeira Liga',
+  'Benfica': 'Primeira Liga',
+  'Sporting CP': 'Primeira Liga',
+  'Celtic': 'Scottish Premiership',
+  'Rangers': 'Scottish Premiership',
+  'Zenit Saint Petersburg': 'Premier League Rusya',
+};
+
+const ALL_CLUBS = { ...CLUBS_TR, ...CLUBS_EU };
+
+// Kulüp adı normalizasyon (API'deki isimle eşleştirmek için)
+const CLUB_DISPLAY_MAP = {
+  'Fenerbahce': 'Fenerbahçe',
+  'Besiktas': 'Beşiktaş',
+  'Istanbul Basaksehir': 'İstanbul Başakşehir',
+  'Rizespor': 'Çaykur Rizespor',
+  'Atletico Madrid': 'Atletico Madrid',
+  'Bayern Munich': 'Bayern Münih',
+  'Olympique Lyonnais': 'Olympique Lyon',
+  'Deportivo La Coruna': 'Deportivo La Coruña',
+  'Tottenham Hotspur': 'Tottenham',
+};
+
+function displayName(apiName) {
+  return CLUB_DISPLAY_MAP[apiName] || apiName;
+}
+
+// strFormerTeams alanından kulüp listesi çıkar
+function parseFormerTeams(str) {
+  if (!str) return [];
+  return str.split(',').map(s => s.trim()).filter(s => s.length > 1);
+}
+
+// Kulüp adını bizim listemizdeki isimle eşleştir
+function matchClubName(name, clubSet) {
+  if (!name) return null;
+  const n = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  for (const c of clubSet) {
+    const cn = c.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (n === cn || n.includes(cn) || cn.includes(n)) return c;
   }
-  return players; // { Q123: 'Player Name', ... }
-}
-
-// Fetch all clubs for a batch of player QIDs
-async function fetchCareersForPlayers(playerQIDs) {
-  if (playerQIDs.length === 0) return {};
-  const values = playerQIDs.map(q => `wd:${q}`).join(' ');
-
-  const q = `
-SELECT ?player ?clubLabel WHERE {
-  VALUES ?player { ${values} }
-  ?player wdt:P54 ?club .
-  ?club wdt:P31 wd:Q476028 .
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en". }
-}`;
-
-  const result = await sparqlWithRetry(q);
-  const careers = {};
-  for (const b of result.results.bindings) {
-    const pid = b.player.value.split('/').pop();
-    const club = b.clubLabel.value;
-    if (!club || club.startsWith('Q')) continue;
-    if (!careers[pid]) careers[pid] = new Set();
-    careers[pid].add(club);
-  }
-  return careers;
-}
-
-// Map club name -> league
-const CLUB_TO_LEAGUE = {};
-for (const c of TARGET_CLUBS) {
-  const n = c.name;
-  if (['Trabzonspor','Galatasaray','Fenerbahçe','Beşiktaş','İstanbul Başakşehir','Samsunspor','Çaykur Rizespor','Konyaspor','Alanyaspor','Göztepe','Sivasspor','Kayserispor','Antalyaspor','Kasımpaşa','Bursaspor','Gaziantep FK','Eyüpspor'].includes(n)) CLUB_TO_LEAGUE[n] = 'Süper Lig';
-  if (['FC Barcelona','Real Madrid','Atletico Madrid','Sevilla','Valencia','Villarreal','Athletic Bilbao','Real Betis','Deportivo La Coruña'].includes(n)) CLUB_TO_LEAGUE[n] = 'La Liga';
-  if (['Manchester United','Manchester City','Liverpool','Arsenal','Chelsea','Tottenham'].includes(n)) CLUB_TO_LEAGUE[n] = 'Premier League';
-  if (['Bayern Münih','Borussia Dortmund','Schalke 04','Bayer Leverkusen','Eintracht Frankfurt','Werder Bremen','VfB Stuttgart','Hamburger SV'].includes(n)) CLUB_TO_LEAGUE[n] = 'Bundesliga';
-  if (['Paris Saint-Germain','Olympique Marseille','Olympique Lyon','Monaco','Lille','Nice'].includes(n)) CLUB_TO_LEAGUE[n] = 'Ligue 1';
-  if (['Juventus','AC Milan','Inter Milan','Napoli','AS Roma','Fiorentina','Lazio','Atalanta','Torino','Sampdoria'].includes(n)) CLUB_TO_LEAGUE[n] = 'Serie A';
-  if (['Ajax','PSV Eindhoven','Feyenoord'].includes(n)) CLUB_TO_LEAGUE[n] = 'Eredivisie';
-  if (['Porto','Benfica','Sporting CP','Sporting Lisbon'].includes(n)) CLUB_TO_LEAGUE[n] = 'Primeira Liga';
-  if (['Celtic','Rangers'].includes(n)) CLUB_TO_LEAGUE[n] = 'Scottish Premiership';
-  if (['Zenit Saint Petersburg','CSKA Moscow'].includes(n)) CLUB_TO_LEAGUE[n] = 'Premier League Rusya';
+  return null;
 }
 
 async function main() {
-  console.log('🔍 Wikidata\'dan futbolcu verileri çekiliyor...\n');
-  console.log(`📋 ${TARGET_CLUBS.length} kulüp hedeflendi\n`);
+  console.log('🔍 TheSportsDB\'den futbolcu verileri çekiliyor...\n');
 
-  // Step 1: collect all player QIDs across all clubs
-  const allPlayers = {}; // QID -> name
-  const seen = new Set();
+  const SAVE_PATH = path.join(__dirname, 'data', 'players.json');
+  const PROGRESS_PATH = path.join(__dirname, 'data', 'fetch_progress.json');
 
-  // Deduplicate clubs by Q ID
-  const uniqueClubs = TARGET_CLUBS.filter(c => { if (seen.has(c.q)) return false; seen.add(c.q); return true; });
-
-  let clubIdx = 0;
-  for (const club of uniqueClubs) {
-    clubIdx++;
-    process.stdout.write(`[${clubIdx}/${uniqueClubs.length}] ${club.name}... `);
-    try {
-      const players = await fetchPlayersForClub(club);
-      let newCount = 0;
-      for (const [qid, name] of Object.entries(players)) {
-        if (!allPlayers[qid]) { allPlayers[qid] = name; newCount++; }
-      }
-      console.log(`${Object.keys(players).length} oyuncu (${newCount} yeni, toplam: ${Object.keys(allPlayers).length})`);
-    } catch(e) {
-      console.log(`✗ ${e.message}`);
-    }
-    await sleep(3000); // be polite
+  // Yarım kalan işlemi devam ettir
+  let progress = {};
+  if (fs.existsSync(PROGRESS_PATH)) {
+    try { progress = JSON.parse(fs.readFileSync(PROGRESS_PATH, 'utf8')); }
+    catch(e) { progress = {}; }
+    console.log(`♻️  Önceki ilerleme yüklendi: ${Object.keys(progress).length} kulüp tamamlanmış\n`);
   }
 
-  console.log(`\n📊 Toplam ${Object.keys(allPlayers).length} unique oyuncu bulundu\n`);
-  console.log('⚽ Kariyer geçmişleri çekiliyor...\n');
+  const allPlayerMap = {}; // playerId -> { name, clubs: Set, position, nationality }
+  const clubNames = Object.keys(ALL_CLUBS);
+  const ourClubSet = new Set(Object.values(CLUB_DISPLAY_MAP).concat(Object.keys(ALL_CLUBS)));
 
-  // Step 2: fetch careers in batches of 50
-  const playerQIDs = Object.keys(allPlayers);
-  const careers = {}; // QID -> Set<clubName>
-  const BATCH = 50;
-
-  for (let i = 0; i < playerQIDs.length; i += BATCH) {
-    const batch = playerQIDs.slice(i, i + BATCH);
-    const pct = Math.round((i / playerQIDs.length) * 100);
-    process.stdout.write(`  Kariyer [${pct}%] ${i+1}-${Math.min(i+BATCH, playerQIDs.length)}/${playerQIDs.length}... `);
-    try {
-      const c = await fetchCareersForPlayers(batch);
-      for (const [qid, clubs] of Object.entries(c)) {
-        careers[qid] = clubs;
-      }
-      console.log(`ok`);
-    } catch(e) {
-      console.log(`✗ ${e.message}`);
+  // Daha önce tamamlananları yükle
+  for (const [club, players] of Object.entries(progress)) {
+    for (const p of players) {
+      if (!allPlayerMap[p.id]) allPlayerMap[p.id] = { name: p.name, clubs: new Set(), position: p.position, nationality: p.nationality };
+      for (const c of p.clubs) allPlayerMap[p.id].clubs.add(c);
     }
-    await sleep(2500);
   }
 
-  // Step 3: build final player list
-  const targetClubNames = new Set(uniqueClubs.map(c => c.name));
+  // Her kulüp için oyuncu çek
+  for (let i = 0; i < clubNames.length; i++) {
+    const clubApiName = clubNames[i];
+    const clubDisplay = displayName(clubApiName);
 
-  const players = [];
-  for (const [qid, name] of Object.entries(allPlayers)) {
-    const allClubs = [...(careers[qid] || new Set())];
-    // Only keep clubs we know about (filter irrelevant lower league clubs)
-    // Actually keep all clubs — game is more interesting with full history
-    // But at minimum player must have their fetched clubs
-    const clubArr = allClubs.length > 0 ? allClubs : [];
-    if (clubArr.length === 0) {
-      // fallback: we know they played for at least the clubs they were fetched from
-      // skip if no career data
+    if (progress[clubApiName]) {
+      console.log(`[${i+1}/${clubNames.length}] ${clubDisplay} ✓ (zaten çekildi, ${progress[clubApiName].length} oyuncu)`);
       continue;
     }
-    const leagues = [...new Set(clubArr.map(c => CLUB_TO_LEAGUE[c]).filter(Boolean))];
-    players.push({ name, clubs: clubArr, leagues });
+
+    process.stdout.write(`[${i+1}/${clubNames.length}] ${clubDisplay}... `);
+
+    try {
+      // Kulüp ID'sini bul
+      const teamId = await withRetry(() => findTeamId(clubApiName), clubApiName);
+      if (!teamId) { console.log('✗ takım bulunamadı'); continue; }
+
+      // Oyuncuları al
+      const players = await withRetry(() => getTeamPlayers(teamId), teamId);
+      await sleep(1500);
+
+      const clubPlayers = [];
+      let detailCount = 0;
+
+      for (const p of players) {
+        if (p.strSport !== 'Soccer' && p.strSport !== 'Football') continue;
+
+        const entry = {
+          id: p.idPlayer,
+          name: p.strPlayer,
+          clubs: [clubDisplay],
+          position: p.strPosition || '',
+          nationality: p.strNationality || '',
+        };
+
+        // Detay çek (strFormerTeams için) — her 5 oyuncudan bir gecikme
+        try {
+          const detail = await getPlayerDetail(p.idPlayer);
+          if (detail && detail.strFormerTeams) {
+            const former = parseFormerTeams(detail.strFormerTeams);
+            for (const fc of former) {
+              const matched = matchClubName(fc, clubNames);
+              if (matched) entry.clubs.push(displayName(matched));
+            }
+          }
+          detailCount++;
+        } catch(e) { /* detay alınamazsa devam */ }
+
+        if (!allPlayerMap[p.idPlayer]) {
+          allPlayerMap[p.idPlayer] = { name: p.strPlayer, clubs: new Set(), position: entry.position, nationality: entry.nationality };
+        }
+        for (const c of entry.clubs) allPlayerMap[p.idPlayer].clubs.add(c);
+        allPlayerMap[p.idPlayer].clubs.add(clubDisplay);
+
+        clubPlayers.push(entry);
+        if (detailCount % 10 === 0) await sleep(500);
+      }
+
+      progress[clubApiName] = clubPlayers;
+      fs.mkdirSync(path.dirname(PROGRESS_PATH), { recursive: true });
+      fs.writeFileSync(PROGRESS_PATH, JSON.stringify(progress));
+
+      console.log(`${players.length} oyuncu`);
+    } catch(e) {
+      console.log(`✗ ${e.message}`);
+    }
+
+    await sleep(2000);
   }
 
-  players.sort((a, b) => b.clubs.length - a.clubs.length);
+  console.log('\n⚽ Kariyer verileri birleştiriliyor...');
 
-  const allClubList = uniqueClubs.map(c => c.name);
-  const allLeagues = [...new Set(Object.values(CLUB_TO_LEAGUE))];
+  const CLUB_TO_LEAGUE = {};
+  for (const [club, league] of Object.entries(ALL_CLUBS)) CLUB_TO_LEAGUE[displayName(club)] = league;
+
+  const players = Object.values(allPlayerMap)
+    .map(p => {
+      const clubs = [...p.clubs];
+      const leagues = [...new Set(clubs.map(c => CLUB_TO_LEAGUE[c]).filter(Boolean))];
+      return { name: p.name, clubs, leagues, position: p.position, nationality: p.nationality };
+    })
+    .filter(p => p.clubs.length >= 1)
+    .sort((a, b) => b.clubs.length - a.clubs.length);
+
+  const allClubList = [...new Set(Object.keys(ALL_CLUBS).map(displayName))];
+  const allLeagues = [...new Set(Object.values(ALL_CLUBS))];
 
   const output = {
     generated: new Date().toISOString(),
@@ -274,16 +293,19 @@ async function main() {
     players,
   };
 
-  const outPath = path.join(__dirname, 'data', 'players.json');
-  fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
+  fs.writeFileSync(SAVE_PATH, JSON.stringify(output, null, 2));
 
   console.log(`\n✅ Tamamlandı!`);
   console.log(`   Toplam oyuncu : ${players.length}`);
   console.log(`   2+ kulüp      : ${players.filter(p => p.clubs.length >= 2).length}`);
   console.log(`   3+ kulüp      : ${players.filter(p => p.clubs.length >= 3).length}`);
-  console.log(`\nİlk 10 (en çok kulüp):`);
-  players.slice(0, 10).forEach(p => console.log(`   ${p.name} → ${p.clubs.slice(0,5).join(', ')}${p.clubs.length > 5 ? '...' : ''}`));
+  console.log(`\nİlk 10:`);
+  players.slice(0, 10).forEach(p =>
+    console.log(`   ${p.name} → ${p.clubs.join(', ')}`)
+  );
+
+  // Progress dosyasını temizle
+  if (fs.existsSync(PROGRESS_PATH)) fs.unlinkSync(PROGRESS_PATH);
 }
 
 main().catch(console.error);
