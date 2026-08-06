@@ -1088,14 +1088,25 @@
         </label>`;
       }).join('');
     }
+    // Scroll pozisyonunu koru
+    const scrollY = window.scrollY;
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    modal._savedScroll = scrollY;
   }
 
   function botCloseModal() {
     const modal = document.getElementById('botModal');
+    const savedScroll = modal ? modal._savedScroll : 0;
     if (modal) modal.style.display = 'none';
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    if (savedScroll) window.scrollTo(0, savedScroll);
     _botModalIdx = null;
   }
 

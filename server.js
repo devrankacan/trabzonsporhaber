@@ -225,14 +225,6 @@ app.get('/api/all', (req, res) => {
 // =============================================
 
 const BOT_SOURCES = [
-  // Google News RSS — en geniş kapsam, son 7 günün haberleri
-  { id: 'gnews_superlig',    name: 'Google: Süper Lig',    url: 'https://news.google.com/rss/search?q=s%C3%BCper+lig+futbol&hl=tr&gl=TR&ceid=TR:tr' },
-  { id: 'gnews_trabzonspor', name: 'Google: Trabzonspor',  url: 'https://news.google.com/rss/search?q=trabzonspor&hl=tr&gl=TR&ceid=TR:tr' },
-  { id: 'gnews_galatasaray', name: 'Google: Galatasaray',  url: 'https://news.google.com/rss/search?q=galatasaray&hl=tr&gl=TR&ceid=TR:tr' },
-  { id: 'gnews_fenerbahce',  name: 'Google: Fenerbahçe',   url: 'https://news.google.com/rss/search?q=fenerbah%C3%A7e&hl=tr&gl=TR&ceid=TR:tr' },
-  { id: 'gnews_besiktas',    name: 'Google: Beşiktaş',     url: 'https://news.google.com/rss/search?q=be%C5%9Fikta%C5%9F+futbol&hl=tr&gl=TR&ceid=TR:tr' },
-  { id: 'gnews_transfer',    name: 'Google: Transfer',      url: 'https://news.google.com/rss/search?q=futbol+transfer+2025&hl=tr&gl=TR&ceid=TR:tr' },
-  { id: 'gnews_milli',       name: 'Google: Milli Takım',   url: 'https://news.google.com/rss/search?q=t%C3%BCrkiye+milli+tak%C4%B1m+futbol&hl=tr&gl=TR&ceid=TR:tr' },
   // Direkt RSS kaynakları
   { id: 'ajansspor', name: 'Ajansspor',       url: 'https://www.ajansspor.com/rss' },
   { id: 'sporx',     name: 'Sporx',            url: 'https://www.sporx.com/rss/sporx.xml' },
