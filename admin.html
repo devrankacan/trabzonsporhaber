@@ -862,29 +862,46 @@
     }
   }
 
-  // Takım grupları — sıra, etiket ve logo
+  // Takım grupları — sıra ve etiket (logo BRANCHES renklerinden SVG rozet olarak üretilir)
   const _BOT_GROUPS = [
-    { key: 'trabzonspor',    label: 'Trabzonspor',            logo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Trabzonspor_logo.svg' },
-    { key: 'galatasaray',    label: 'Galatasaray',            logo: 'https://upload.wikimedia.org/wikipedia/en/2/22/Galatasaray_logo.svg' },
-    { key: 'fenerbahce',     label: 'Fenerbahçe',             logo: 'https://upload.wikimedia.org/wikipedia/en/2/26/Fenerbah%C3%A7e_Logo.svg' },
-    { key: 'besiktas',       label: 'Beşiktaş',               logo: 'https://upload.wikimedia.org/wikipedia/en/9/90/Besiktas_JK_logo.svg' },
-    { key: 'basaksehir',     label: 'İstanbul Başakşehir',    logo: 'https://upload.wikimedia.org/wikipedia/en/c/ce/Istanbul_Basaksehir_logo.svg' },
-    { key: 'kasimpasa',      label: 'Kasımpaşa',              logo: 'https://upload.wikimedia.org/wikipedia/en/5/57/Kasimpasa_logo.svg' },
-    { key: 'samsunspor',     label: 'Samsunspor',             logo: 'https://upload.wikimedia.org/wikipedia/en/6/63/Samsunspor_logo.svg' },
-    { key: 'rizespor',       label: 'Çaykur Rizespor',        logo: 'https://upload.wikimedia.org/wikipedia/en/5/56/Caykur_Rizespor_logo.svg' },
-    { key: 'konyaspor',      label: 'Konyaspor',              logo: 'https://upload.wikimedia.org/wikipedia/en/3/37/Konyaspor_logo.svg' },
-    { key: 'alanyaspor',     label: 'Corendon Alanyaspor',    logo: 'https://upload.wikimedia.org/wikipedia/en/6/6e/Alanyaspor_logo.svg' },
-    { key: 'goztepe',        label: 'Göztepe',                logo: 'https://upload.wikimedia.org/wikipedia/en/4/4a/Goztepe_SK_logo.svg' },
-    { key: 'gaziantep',      label: 'Gaziantep FK',           logo: 'https://upload.wikimedia.org/wikipedia/en/1/10/Gaziantep_FK_logo.svg' },
-    { key: 'genclerbirligi', label: 'Gençlerbirliği',         logo: 'https://upload.wikimedia.org/wikipedia/en/8/89/Genclerbirligi_logo.svg' },
-    { key: 'eyupspor',       label: 'Eyüpspor',               logo: 'https://upload.wikimedia.org/wikipedia/en/f/f8/Eyupspor_logo.svg' },
-    { key: 'kocaelispor',    label: 'Kocaelispor',            logo: 'https://upload.wikimedia.org/wikipedia/en/c/cf/Kocaelispor_logo.svg' },
-    { key: 'corum',          label: 'Çorum FK',               logo: 'https://upload.wikimedia.org/wikipedia/en/7/72/Corum_FK_logo.svg' },
-    { key: 'erzurumspor',    label: 'Erzurumspor FK',         logo: 'https://upload.wikimedia.org/wikipedia/en/a/a2/Erzurumspor_logo.svg' },
-    { key: 'diyarbakir',     label: 'Amed Sportif',           logo: null },
-    { key: 'milli-takim',    label: 'Milli Takım',            logo: 'https://upload.wikimedia.org/wikipedia/en/1/1b/Turkey_national_football_team_logo.svg' },
-    { key: '__diger__',      label: 'Diğer / Genel',          logo: null },
+    { key: 'trabzonspor',    label: 'Trabzonspor' },
+    { key: 'galatasaray',    label: 'Galatasaray' },
+    { key: 'fenerbahce',     label: 'Fenerbahçe' },
+    { key: 'besiktas',       label: 'Beşiktaş' },
+    { key: 'basaksehir',     label: 'İstanbul Başakşehir' },
+    { key: 'kasimpasa',      label: 'Kasımpaşa' },
+    { key: 'samsunspor',     label: 'Samsunspor' },
+    { key: 'rizespor',       label: 'Çaykur Rizespor' },
+    { key: 'konyaspor',      label: 'Konyaspor' },
+    { key: 'alanyaspor',     label: 'Corendon Alanyaspor' },
+    { key: 'goztepe',        label: 'Göztepe' },
+    { key: 'gaziantep',      label: 'Gaziantep FK' },
+    { key: 'genclerbirligi', label: 'Gençlerbirliği' },
+    { key: 'eyupspor',       label: 'Eyüpspor' },
+    { key: 'kocaelispor',    label: 'Kocaelispor' },
+    { key: 'corum',          label: 'Çorum FK' },
+    { key: 'erzurumspor',    label: 'Erzurumspor FK' },
+    { key: 'diyarbakir',     label: 'Amed Sportif' },
+    { key: 'milli-takim',    label: 'Milli Takım' },
+    { key: '__diger__',      label: 'Diğer / Genel' },
   ];
+
+  function botGroupBadge(key) {
+    const br = typeof BRANCHES !== 'undefined' ? BRANCHES[key] : null;
+    const c1 = br ? br.color  : '#888';
+    const c2 = br ? (br.color2 || br.color) : '#aaa';
+    const initials = key === '__diger__' ? '📰'
+      : key === 'milli-takim' ? 'TR'
+      : (br ? br.label : key).replace(/[^A-Za-zÇĞİÖŞÜçğışöşü]/g,'').slice(0,2).toUpperCase();
+    return `<svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+      <defs><linearGradient id="bg_${key.replace(/[^a-z]/g,'')}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="${c1}"/>
+        <stop offset="100%" stop-color="${c2}"/>
+      </linearGradient></defs>
+      <circle cx="15" cy="15" r="15" fill="url(#bg_${key.replace(/[^a-z]/g,'')})"/>
+      <text x="15" y="19" text-anchor="middle" font-size="10" font-weight="bold" font-family="Arial,sans-serif" fill="#fff">${initials}</text>
+    </svg>`;
+  }
 
   function botItemGroup(item) {
     const teams = botDetectTeams(item.title + ' ' + (item.summary || ''));
@@ -931,13 +948,10 @@
     for (const grpDef of _BOT_GROUPS) {
       const list = groups[grpDef.key];
       if (!list || !list.length) continue;
-      const logoHtml = grpDef.logo
-        ? `<img src="${grpDef.logo}" alt="${grpDef.label}" style="width:28px;height:28px;object-fit:contain;flex-shrink:0" onerror="this.style.display='none'">`
-        : `<span style="width:28px;height:28px;display:inline-block"></span>`;
       html += `<div class="bot-group-header" data-group="${grpDef.key}"
         style="display:flex;align-items:center;gap:10px;margin:18px 0 8px;padding:10px 14px;background:var(--ts-card);border:1.5px solid var(--ts-border);border-radius:10px;font-weight:700;font-size:14px;cursor:pointer"
         onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none' ? '' : 'none'; this.querySelector('.grp-arrow').textContent = this.nextElementSibling.style.display==='none' ? '▶' : '▼'">
-        ${logoHtml}
+        ${botGroupBadge(grpDef.key)}
         <span>${grpDef.label}</span>
         <span style="margin-left:auto;background:var(--ts-red);color:#fff;border-radius:20px;padding:1px 10px;font-size:12px">${list.length}</span>
         <span class="grp-arrow" style="font-size:12px;color:var(--ts-muted)">▼</span>
