@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taktik Tablo - Futbolcu Bul Oyunu</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --correct-bg: #1a4a2e;
+    --wrong-bg: #4a1a1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    max-width: 900px;
+    padding: 20px 16px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .logo-link { text-decoration: none; color: var(--text); }
+  .logo-link h1 { font-size: 1.2rem; font-weight: 700; }
+  .logo-link span { color: var(--accent); }
+  .header-right { display: flex; gap: 8px; align-items: center; }
+  .btn-sm {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: border-color .2s;
+  }
+  .btn-sm:hover { border-color: var(--accent); }
+
+  .game-wrap {
+    width: 100%;
+    max-width: 900px;
+    padding: 0 16px 40px;
+  }
+
+  /* ---- Mode selector ---- */
+  #modeScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 60px 16px;
+  }
+  #modeScreen h2 { font-size: 1.8rem; font-weight: 700; }
+  #modeScreen p { color: var(--muted); text-align: center; max-width: 500px; line-height: 1.6; }
+  .mode-cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .mode-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    cursor: pointer;
+    text-align: center;
+    min-width: 180px;
+    transition: border-color .2s, transform .15s;
+  }
+  .mode-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .mode-card .icon { font-size: 2.5rem; margin-bottom: 10px; }
+  .mode-card h3 { font-size: 1rem; font-weight: 600; }
+  .mode-card p { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+
+  /* ---- Game screen ---- */
+  #gameScreen { display: none; }
+
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .game-info { display: flex; gap: 16px; align-items: center; }
+  .badge {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .badge span { color: var(--text); font-weight: 600; }
+  .timer { color: var(--yellow); font-weight: 700; font-size: 1rem; }
+  .timer.danger { color: var(--red); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  /* ---- Matrix grid ---- */
+  .matrix-wrap { overflow-x: auto; }
+  .matrix {
+    display: grid;
+    grid-template-columns: 120px repeat(3, 1fr);
+    grid-template-rows: 80px repeat(3, 1fr);
+    gap: 6px;
+    min-width: 500px;
+    width: 100%;
+  }
+
+  .corner { /* empty top-left */ }
+
+  .col-header, .row-header {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    text-align: center;
+    gap: 4px;
+  }
+  .col-header { min-height: 80px; }
+  .row-header { min-height: 90px; padding: 8px 12px; }
+  .header-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .header-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .header-type {
+    font-size: 0.65rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .cell {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    position: relative;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .cell:hover:not(.filled):not(.locked) { border-color: var(--accent); }
+  .cell.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88,166,255,.15); }
+  .cell.correct { background: var(--correct-bg); border-color: var(--green); }
+  .cell.wrong { background: var(--wrong-bg); border-color: var(--red); }
+  .cell.locked { cursor: default; }
+  .cell-x { position: absolute; top: 6px; right: 8px; font-size: 1.2rem; font-weight: 900; }
+  .cell.correct .cell-x { color: var(--green); }
+  .cell.wrong .cell-x { color: var(--red); }
+  .cell-player { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+  .cell-clubs { font-size: 0.65rem; color: var(--muted); margin-top: 3px; }
+  .cell-empty-text { font-size: 0.72rem; color: var(--muted); }
+
+  /* XOX marks */
+  .xo-mark { font-size: 2rem; font-weight: 900; opacity: .25; }
+
+  /* Win overlay on cell */
+  .cell.win-highlight { box-shadow: 0 0 0 4px var(--green); }
+
+  /* ---- Input area ---- */
+  .input-area {
+    margin-top: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .input-prompt {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .input-prompt strong { color: var(--accent); }
+  .input-row { display: flex; gap: 8px; }
+  #playerInput {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  #playerInput:focus { border-color: var(--accent); }
+  #submitBtn {
+    padding: 10px 22px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity .2s;
+  }
+  #submitBtn:hover { opacity: .85; }
+  #submitBtn:disabled { opacity: .4; cursor: default; }
+
+  /* Autocomplete */
+  .autocomplete {
+    position: relative;
+  }
+  #autocompleteList {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+  }
+  #autocompleteList.open { display: block; }
+  .ac-item {
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background .1s;
+  }
+  .ac-item:hover, .ac-item.active { background: rgba(88,166,255,.12); }
+  .ac-clubs { font-size: 0.72rem; color: var(--muted); }
+
+  /* ---- Feedback toast ---- */
+  #toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity .3s, transform .3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: var(--green); color: var(--green); }
+  #toast.error { border-color: var(--red); color: var(--red); }
+
+  /* ---- Result modal ---- */
+  #resultModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+  #resultModal.open { display: flex; }
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 40px;
+    text-align: center;
+    max-width: 380px;
+    width: 90%;
+  }
+  .result-icon { font-size: 3.5rem; margin-bottom: 12px; }
+  .result-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+  .result-sub { color: var(--muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 24px; }
+  .result-btns { display: flex; gap: 10px; justify-content: center; }
+  .btn-primary {
+    padding: 10px 24px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .btn-outline {
+    padding: 10px 24px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+
+  /* ---- Multiplayer lobby ---- */
+  #lobbyScreen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 40px 16px;
+  }
+  #lobbyScreen h2 { font-size: 1.4rem; font-weight: 700; }
+  .lobby-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .lobby-box label { font-size: 0.85rem; color: var(--muted); }
+  .lobby-box input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    width: 100%;
+  }
+  .lobby-box input:focus { border-color: var(--accent); }
+  .room-code {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: .2em;
+    color: var(--accent);
+    text-align: center;
+    padding: 12px;
+    background: rgba(88,166,255,.08);
+    border-radius: 8px;
+  }
+  .waiting { color: var(--muted); font-size: 0.9rem; text-align: center; }
+  .waiting::after { content: '...'; animation: dots 1.5s infinite; }
+  @keyframes dots {
+    0%{content:'.'} 33%{content:'..'} 66%{content:'...'} 100%{content:'.'}
+  }
+  .turn-indicator {
+    text-align: center;
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+  }
+  .turn-indicator.my-turn { background: rgba(63,185,80,.15); color: var(--green); }
+  .turn-indicator.their-turn { background: rgba(248,81,73,.1); color: var(--muted); }
+
+  @media (max-width: 600px) {
+    .matrix { grid-template-columns: 90px repeat(3, 1fr); }
+    .header-name { font-size: 0.75rem; }
+    .cell { min-height: 75px; }
+    .result-card { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo-link" href="/"><h1>Taktik <span>Tablo</span></h1></a>
+  <div class="header-right">
+    <button class="btn-sm" onclick="goMode()">← Menü</button>
+    <a class="btn-sm" href="/" style="text-decoration:none">🏠 Ana Sayfa</a>
+  </div>
+</header>
+
+<div class="game-wrap">
+
+  <!-- MODE SELECT -->
+  <div id="modeScreen">
+    <h2>⚽ Taktik Tablo</h2>
+    <p>Satır ve sütunlardaki kulüp/lig kesişiminde oynayan futbolcuyu bul. XOX mantığıyla 3'lü sıra yap ve kazan!</p>
+    <div class="mode-cards">
+      <div class="mode-card" onclick="startSingle()">
+        <div class="icon">🧠</div>
+        <h3>Tek Kişilik</h3>
+        <p>Süre yarışı. 9 kareyi doldur, kaç doğru yaptın?</p>
+      </div>
+      <div class="mode-card" onclick="startMulti()">
+        <div class="icon">⚔️</div>
+        <h3>Çok Oyunculu</h3>
+        <p>Arkadaşınla aynı anda oyna. XOX kuralı — 3'lü sıra kazan!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTIPLAYER LOBBY -->
+  <div id="lobbyScreen">
+    <h2>⚔️ Çok Oyunculu</h2>
+    <div class="lobby-box" id="lobbyCreate" style="display:none">
+      <div>Oda oluşturuldu!</div>
+      <div>Bu kodu arkadaşına gönder:</div>
+      <div class="room-code" id="roomCodeDisplay"></div>
+      <div class="waiting">Arkadaşın bekleniyor</div>
+    </div>
+    <div class="lobby-box" id="lobbyJoin">
+      <label>Adın</label>
+      <input id="playerName" placeholder="Adını gir..." maxlength="20" value="">
+      <label>Oda kodu (oluşturmak için boş bırak)</label>
+      <input id="roomCodeInput" placeholder="6 haneli kod..." maxlength="6" style="text-transform:uppercase;letter-spacing:.15em">
+      <button class="btn-primary" onclick="lobbyAction()">Başla</button>
+    </div>
+    <button class="btn-sm" onclick="goMode()">← Geri</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="gameScreen">
+    <div class="game-header">
+      <div class="game-info">
+        <div class="badge">Doğru: <span id="scoreDisplay">0</span>/9</div>
+        <div class="badge" id="attemptsBox">Hak: <span id="attemptsDisplay">9</span></div>
+        <div class="badge timer" id="timerBox">⏱ <span id="timerDisplay">120</span>s</div>
+      </div>
+      <div id="turnDisplay" class="turn-indicator" style="display:none"></div>
+      <button class="btn-sm" onclick="newGame()">Yeni Oyun</button>
+    </div>
+
+    <div class="matrix-wrap">
+      <div class="matrix" id="matrix">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <div class="input-area" id="inputArea">
+      <div class="input-prompt" id="inputPrompt">Bir kareye tıkla, ardından futbolcuyu gir.</div>
+      <div class="autocomplete">
+        <div id="autocompleteList"></div>
+        <div class="input-row">
+          <input id="playerInput" type="text" placeholder="Futbolcu adı..." autocomplete="off" disabled>
+          <button id="submitBtn" onclick="submitAnswer()" disabled>Onayla</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /game-wrap -->
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Result modal -->
+<div id="resultModal">
+  <div class="result-card">
+    <div class="result-icon" id="resultIcon"></div>
+    <div class="result-title" id="resultTitle"></div>
+    <div class="result-sub" id="resultSub"></div>
+    <div class="result-btns">
+      <button class="btn-primary" onclick="newGame()">Yeni Oyun</button>
+      <button class="btn-outline" onclick="closeResult()">Kapat</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// PLAYER DATA — loaded from JSON
+// ============================================================
+let PLAYERS = [];
+let CLUBS = [];
+let LEAGUES = [];
+
+async function loadData() {
+  try {
+    const r = await fetch('/data/players.json');
+    const d = await r.json();
+    PLAYERS = d.players;
+    CLUBS = d.clubs;
+    LEAGUES = d.leagues;
+  } catch(e) {
+    console.error('Veri yüklenemedi', e);
+  }
+}
+
+// ============================================================
+// GAME STATE
+// ============================================================
+const MODE = { SINGLE: 'single', MULTI: 'multi' };
+let mode = MODE.SINGLE;
+let rowHeaders = []; // 3 items
+let colHeaders = []; // 3 items
+let cells = [];      // 3x3 array [{row,col,answer,correct,owner}]
+let activeCell = null; // {row,col}
+let score = 0;
+let attempts = 9;
+let timerSec = 120;
+let timerInterval = null;
+let gameOver = false;
+
+// Multiplayer
+let ws = null;
+let mySymbol = null; // 'X' or 'O'
+let myTurn = false;
+let roomCode = null;
+
+// ============================================================
+// HEADER POOL — choose interesting combos
+// ============================================================
+function pickHeaders() {
+  // Mix clubs and leagues; ensure valid intersections exist
+  const allOptions = [
+    ...CLUBS.map(c => ({ type: 'club', name: c })),
+    ...LEAGUES.map(l => ({ type: 'league', name: l })),
+  ];
+
+  // Shuffle
+  for (let i = allOptions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
+  }
+
+  // Pick 6 with at least some intersections
+  let rows = [], cols = [];
+  const used = new Set();
+
+  for (const opt of allOptions) {
+    if (used.has(opt.name)) continue;
+    if (rows.length < 3) { rows.push(opt); used.add(opt.name); }
+    else if (cols.length < 3) { cols.push(opt); used.add(opt.name); }
+    if (rows.length === 3 && cols.length === 3) break;
+  }
+
+  // Validate: every cell must have at least one valid player
+  for (const r of rows) {
+    for (const c of cols) {
+      if (findPlayers(r, c).length === 0) {
+        // retry
+        return pickHeaders();
+      }
+    }
+  }
+
+  return { rows, cols };
+}
+
+function matchesHeader(player, header) {
+  if (header.type === 'club') return player.clubs.includes(header.name);
+  if (header.type === 'league') return player.leagues.includes(header.name);
+  return false;
+}
+
+function findPlayers(rowH, colH) {
+  return PLAYERS.filter(p => matchesHeader(p, rowH) && matchesHeader(p, colH));
+}
+
+// ============================================================
+// GAME INIT
+// ============================================================
+function initCells() {
+  cells = [];
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      cells.push({ row: r, col: c, answer: null, correct: false, owner: null });
+    }
+  }
+}
+
+function getCell(r, c) {
+  return cells.find(cell => cell.row === r && cell.col === c);
+}
+
+function newGame() {
+  closeResult();
+  clearInterval(timerInterval);
+  activeCell = null;
+  score = 0;
+  attempts = mode === MODE.SINGLE ? 9 : 9;
+  timerSec = 120;
+  gameOver = false;
+
+  const { rows, cols } = pickHeaders();
+  rowHeaders = rows;
+  colHeaders = cols;
+  initCells();
+  renderMatrix();
+  updateHUD();
+  resetInput();
+
+  if (mode === MODE.SINGLE) {
+    startTimer();
+  }
+
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('modeScreen').style.display = 'none';
+  document.getElementById('lobbyScreen').style.display = 'none';
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function startTimer() {
+  document.getElementById('timerBox').style.display = '';
+  document.getElementById('attemptsBox').style.display = '';
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timerSec--;
+    const el = document.getElementById('timerDisplay');
+    if (el) el.textContent = timerSec;
+    const box = document.getElementById('timerBox');
+    if (timerSec <= 20) box.classList.add('danger');
+    if (timerSec <= 0) {
+      clearInterval(timerInterval);
+      endGame('time');
+    }
+  }, 1000);
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderMatrix() {
+  const mat = document.getElementById('matrix');
+  mat.innerHTML = '';
+
+  // corner
+  const corner = document.createElement('div');
+  corner.className = 'corner';
+  mat.appendChild(corner);
+
+  // col headers
+  for (const c of colHeaders) {
+    const div = document.createElement('div');
+    div.className = 'col-header';
+    div.innerHTML = `
+      <div class="header-type">${c.type === 'club' ? 'Kulüp' : 'Lig'}</div>
+      <div class="header-name">${c.name}</div>
+    `;
+    mat.appendChild(div);
+  }
+
+  // rows
+  for (let r = 0; r < 3; r++) {
+    const rh = rowHeaders[r];
+    const rowH = document.createElement('div');
+    rowH.className = 'row-header';
+    rowH.innerHTML = `
+      <div class="header-type">${rh.type === 'club' ? 'Kulüp' : 'Lig'}</div>
+      <div class="header-name">${rh.name}</div>
+    `;
+    mat.appendChild(rowH);
+
+    for (let c = 0; c < 3; c++) {
+      const cell = getCell(r, c);
+      const div = document.createElement('div');
+      div.className = 'cell';
+      div.dataset.row = r;
+      div.dataset.col = c;
+
+      if (cell.answer) {
+        div.classList.add('filled', cell.correct ? 'correct' : 'wrong');
+        if (cell.owner) {
+          div.innerHTML = `<div class="cell-x">${cell.owner}</div>`;
+        } else {
+          div.innerHTML = `<div class="cell-x">${cell.correct ? '✓' : '✗'}</div>`;
+        }
+        div.innerHTML += `
+          <div class="cell-player">${cell.answer}</div>
+        `;
+      } else {
+        div.innerHTML = `<div class="cell-empty-text">Tıkla & gir</div>`;
+      }
+
+      if (!gameOver && !cell.answer) {
+        div.addEventListener('click', () => selectCell(r, c));
+      }
+      if (cell.answer) div.classList.add('locked');
+
+      mat.appendChild(div);
+    }
+  }
+}
+
+// ============================================================
+// CELL SELECTION
+// ============================================================
+function selectCell(r, c) {
+  // Multiplayer: only on my turn
+  if (mode === MODE.MULTI && !myTurn) {
+    showToast('Rakibinin sırası!', 'error');
+    return;
+  }
+
+  document.querySelectorAll('.cell.active').forEach(el => el.classList.remove('active'));
+  activeCell = { row: r, col: c };
+  const el = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+  if (el) el.classList.add('active');
+
+  const rh = rowHeaders[r];
+  const ch = colHeaders[c];
+  const prompt = document.getElementById('inputPrompt');
+  prompt.innerHTML = `
+    <strong>${rh.name}</strong> ve <strong>${ch.name}</strong> kesişiminde oynayan futbolcuyu gir:
+  `;
+
+  const inp = document.getElementById('playerInput');
+  inp.disabled = false;
+  inp.value = '';
+  inp.focus();
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('autocompleteList').classList.remove('open');
+}
+
+function resetInput() {
+  activeCell = null;
+  const inp = document.getElementById('playerInput');
+  inp.disabled = true;
+  inp.value = '';
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('inputPrompt').innerHTML = 'Bir kareye tıkla, ardından futbolcuyu gir.';
+  document.getElementById('autocompleteList').classList.remove('open');
+  document.querySelectorAll('.cell.active').forEach(el => el.classList.remove('active'));
+}
+
+// ============================================================
+// AUTOCOMPLETE
+// ============================================================
+let acSelected = -1;
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('playerInput');
+  inp.addEventListener('input', onInputChange);
+  inp.addEventListener('keydown', onInputKey);
+});
+
+function onInputChange() {
+  const q = document.getElementById('playerInput').value.trim().toLowerCase();
+  const list = document.getElementById('autocompleteList');
+  if (q.length < 2) { list.classList.remove('open'); return; }
+
+  // Normalize Turkish chars for search
+  const norm = s => s.toLowerCase()
+    .replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s')
+    .replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c');
+
+  const matches = PLAYERS
+    .filter(p => norm(p.name).includes(norm(q)))
+    .slice(0, 8);
+
+  if (matches.length === 0) { list.classList.remove('open'); return; }
+
+  list.innerHTML = '';
+  acSelected = -1;
+  matches.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'ac-item';
+    div.dataset.idx = i;
+    div.innerHTML = `${p.name}<div class="ac-clubs">${p.clubs.join(', ')}</div>`;
+    div.addEventListener('mousedown', e => {
+      e.preventDefault();
+      document.getElementById('playerInput').value = p.name;
+      list.classList.remove('open');
+      submitAnswer();
+    });
+    list.appendChild(div);
+  });
+  list._matches = matches;
+  list.classList.add('open');
+}
+
+function onInputKey(e) {
+  const list = document.getElementById('autocompleteList');
+  const items = list.querySelectorAll('.ac-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acSelected = Math.min(acSelected + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('active', i === acSelected));
+    if (items[acSelected]) document.getElementById('playerInput').value = list._matches[acSelected].name;
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acSelected = Math.max(acSelected - 1, -1);
+    items.forEach((el, i) => el.classList.toggle('active', i === acSelected));
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    list.classList.remove('open');
+    submitAnswer();
+  } else if (e.key === 'Escape') {
+    list.classList.remove('open');
+  }
+}
+
+// ============================================================
+// ANSWER VALIDATION
+// ============================================================
+function submitAnswer() {
+  if (!activeCell) return;
+  const inp = document.getElementById('playerInput');
+  const raw = inp.value.trim();
+  if (!raw) return;
+
+  const { row, col } = activeCell;
+  const cell = getCell(row, col);
+  if (cell.answer) return;
+
+  const rh = rowHeaders[row];
+  const ch = colHeaders[col];
+
+  // Normalize
+  const norm = s => s.toLowerCase()
+    .replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s')
+    .replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c');
+
+  const match = PLAYERS.find(p => norm(p.name) === norm(raw));
+
+  if (!match) {
+    showToast('Futbolcu bulunamadı!', 'error');
+    return;
+  }
+
+  // Check if already used
+  if (cells.some(c => c.answer && norm(c.answer) === norm(match.name))) {
+    showToast('Bu futbolcu zaten kullanıldı!', 'error');
+    return;
+  }
+
+  const correct = matchesHeader(match, rh) && matchesHeader(match, ch);
+  cell.answer = match.name;
+  cell.correct = correct;
+  cell.owner = mode === MODE.MULTI ? mySymbol : null;
+
+  if (correct) {
+    score++;
+    showToast(`✓ Doğru! ${match.name}`, 'success');
+  } else {
+    showToast(`✗ Yanlış! ${match.name} bu ikisini kesmiyor.`, 'error');
+  }
+
+  attempts--;
+  updateHUD();
+  renderMatrix();
+  resetInput();
+
+  if (mode === MODE.MULTI && ws) {
+    ws.send(JSON.stringify({
+      type: 'move',
+      row, col,
+      player: match.name,
+      correct,
+      symbol: mySymbol,
+    }));
+  }
+
+  checkGameOver();
+}
+
+function checkGameOver() {
+  const allFilled = cells.every(c => c.answer !== null);
+  const noAttempts = attempts <= 0;
+  const won = checkXOX();
+  if (won) {
+    clearInterval(timerInterval);
+    showResult('win', won);
+    return;
+  }
+  if (allFilled || noAttempts) {
+    clearInterval(timerInterval);
+    endGame('normal');
+  }
+}
+
+function checkXOX() {
+  // Returns winning cells array or null
+  const lines = [
+    [[0,0],[0,1],[0,2]],
+    [[1,0],[1,1],[1,2]],
+    [[2,0],[2,1],[2,2]],
+    [[0,0],[1,0],[2,0]],
+    [[0,1],[1,1],[2,1]],
+    [[0,2],[1,2],[2,2]],
+    [[0,0],[1,1],[2,2]],
+    [[0,2],[1,1],[2,0]],
+  ];
+
+  for (const line of lines) {
+    const cs = line.map(([r,c]) => getCell(r,c));
+    if (mode === MODE.SINGLE) {
+      if (cs.every(c => c.correct)) return line;
+    } else {
+      if (cs.every(c => c.owner === mySymbol && c.correct)) return line;
+    }
+  }
+  return null;
+}
+
+function endGame(reason) {
+  gameOver = true;
+  renderMatrix();
+  if (reason === 'time') {
+    showResult('timeout');
+  } else {
+    showResult('normal');
+  }
+}
+
+// ============================================================
+// HUD
+// ============================================================
+function updateHUD() {
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('attemptsDisplay').textContent = attempts;
+  document.getElementById('timerDisplay').textContent = timerSec;
+}
+
+// ============================================================
+// RESULT MODAL
+// ============================================================
+function showResult(type, winLine) {
+  gameOver = true;
+  const modal = document.getElementById('resultModal');
+  const icon = document.getElementById('resultIcon');
+  const title = document.getElementById('resultTitle');
+  const sub = document.getElementById('resultSub');
+
+  if (type === 'win') {
+    icon.textContent = '🏆';
+    title.textContent = 'Tebrikler!';
+    sub.textContent = `${score}/9 doğru cevap ile 3'lü sıra yaptın!`;
+    if (winLine) {
+      winLine.forEach(([r,c]) => {
+        const el = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+        if (el) el.classList.add('win-highlight');
+      });
+    }
+  } else if (type === 'timeout') {
+    icon.textContent = '⏰';
+    title.textContent = 'Süre Doldu!';
+    sub.textContent = `${score}/9 doğru cevap yaptın.`;
+  } else {
+    const total = cells.filter(c => c.answer).length;
+    if (score >= 6) {
+      icon.textContent = '⭐';
+      title.textContent = 'Harika!';
+    } else if (score >= 3) {
+      icon.textContent = '👍';
+      title.textContent = 'İyi Denemeydi!';
+    } else {
+      icon.textContent = '😅';
+      title.textContent = 'Daha İyi Olabilirdin!';
+    }
+    sub.textContent = `${total} deneme, ${score} doğru cevap.`;
+  }
+
+  modal.classList.add('open');
+}
+
+function closeResult() {
+  document.getElementById('resultModal').classList.remove('open');
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 2500);
+}
+
+// ============================================================
+// MODE NAVIGATION
+// ============================================================
+function goMode() {
+  clearInterval(timerInterval);
+  if (ws) { ws.close(); ws = null; }
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('lobbyScreen').style.display = 'none';
+  document.getElementById('modeScreen').style.display = 'flex';
+}
+
+function startSingle() {
+  mode = MODE.SINGLE;
+  document.getElementById('timerBox').style.display = '';
+  document.getElementById('attemptsBox').style.display = '';
+  document.getElementById('turnDisplay').style.display = 'none';
+  newGame();
+}
+
+function startMulti() {
+  mode = MODE.MULTI;
+  document.getElementById('modeScreen').style.display = 'none';
+  document.getElementById('lobbyScreen').style.display = 'flex';
+  document.getElementById('lobbyJoin').style.display = 'flex';
+  document.getElementById('lobbyCreate').style.display = 'none';
+}
+
+function lobbyAction() {
+  const name = (document.getElementById('playerName').value || 'Oyuncu').trim();
+  const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+
+  if (!code) {
+    // Create room
+    const newCode = Math.random().toString(36).slice(2,8).toUpperCase();
+    roomCode = newCode;
+    document.getElementById('lobbyJoin').style.display = 'none';
+    document.getElementById('lobbyCreate').style.display = 'flex';
+    document.getElementById('roomCodeDisplay').textContent = newCode;
+    connectWS(name, newCode, true);
+  } else {
+    roomCode = code;
+    connectWS(name, code, false);
+  }
+}
+
+// ============================================================
+// WEBSOCKET MULTIPLAYER
+// ============================================================
+function connectWS(playerName, code, isHost) {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const url = `${proto}//${location.host}/ws/tablo`;
+  try {
+    ws = new WebSocket(url);
+  } catch(e) {
+    showToast('Multiplayer bağlantı hatası!', 'error');
+    return;
+  }
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ type: 'join', room: code, name: playerName, host: isHost }));
+  };
+
+  ws.onmessage = ev => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch { return; }
+
+    if (msg.type === 'joined') {
+      mySymbol = msg.symbol;
+    }
+    if (msg.type === 'start') {
+      // Server sends the board config
+      rowHeaders = msg.rows;
+      colHeaders = msg.cols;
+      initCells();
+      myTurn = msg.firstTurn === mySymbol;
+      document.getElementById('timerBox').style.display = 'none';
+      document.getElementById('attemptsBox').style.display = 'none';
+      document.getElementById('turnDisplay').style.display = 'block';
+      updateTurnDisplay();
+      document.getElementById('gameScreen').style.display = 'block';
+      document.getElementById('lobbyScreen').style.display = 'none';
+      renderMatrix();
+      updateHUD();
+    }
+    if (msg.type === 'move') {
+      const cell = getCell(msg.row, msg.col);
+      cell.answer = msg.player;
+      cell.correct = msg.correct;
+      cell.owner = msg.symbol;
+      renderMatrix();
+      myTurn = msg.nextTurn === mySymbol;
+      updateTurnDisplay();
+      const won = checkXOX();
+      if (won || cells.every(c => c.answer)) {
+        endGame('normal');
+      }
+    }
+    if (msg.type === 'opponent_left') {
+      showToast('Rakibin oyundan ayrıldı!', 'error');
+    }
+  };
+
+  ws.onerror = () => showToast('Bağlantı hatası!', 'error');
+  ws.onclose = () => {
+    if (!gameOver) showToast('Bağlantı kesildi', 'error');
+  };
+}
+
+function updateTurnDisplay() {
+  const el = document.getElementById('turnDisplay');
+  if (myTurn) {
+    el.textContent = '🟢 Senin Sıran!';
+    el.className = 'turn-indicator my-turn';
+  } else {
+    el.textContent = '⏳ Rakibinin Sırası...';
+    el.className = 'turn-indicator their-turn';
+  }
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+loadData().then(() => {
+  document.getElementById('modeScreen').style.display = 'flex';
+});
+</script>
+</body>
+</html>
