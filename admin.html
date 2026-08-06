@@ -915,6 +915,39 @@
 
   let _botModalIdx = null;
 
+  // Başlık/özetten takım tespit et
+  const _BOT_TEAM_KEYWORDS = {
+    trabzonspor:   ['trabzonspor', 'trabzon', 'bordo mavi', 'fırtına', 'karadeniz fırtınası'],
+    galatasaray:   ['galatasaray', 'galata', 'cimbom', 'aslan', 'sarı kırmızı'],
+    fenerbahce:    ['fenerbahçe', 'fenerbahce', 'fener', 'kanarya', 'sarı lacivert'],
+    besiktas:      ['beşiktaş', 'besiktas', 'kartal', 'siyah beyaz', 'çarşı'],
+    basaksehir:    ['başakşehir', 'basaksehir', 'ibfk'],
+    kasimpasa:     ['kasımpaşa', 'kasimpasa'],
+    galatasaray:   ['galatasaray'],
+    samsunspor:    ['samsunspor', 'samsun'],
+    rizespor:      ['rizespor', 'rize', 'çaykur'],
+    konyaspor:     ['konyaspor', 'konya'],
+    alanyaspor:    ['alanyaspor', 'alanya'],
+    goztepe:       ['göztepe', 'goztepe'],
+    gaziantep:     ['gaziantep'],
+    genclerbirligi:['gençlerbirliği', 'genclerbirligi'],
+    eyupspor:      ['eyüpspor', 'eyupspor'],
+    kocaelispor:   ['kocaelispor', 'kocaeli'],
+    corum:         ['çorum', 'corum'],
+    erzurumspor:   ['erzurumspor', 'erzurum'],
+    diyarbakir:    ['amed', 'diyarbakır', 'diyarbakir'],
+    'milli-takim': ['milli takım', 'milli takim', 'a milli', 'milliler', 'türkiye milli'],
+  };
+
+  function botDetectTeams(text) {
+    const lower = (text || '').toLowerCase();
+    const found = [];
+    for (const [key, keywords] of Object.entries(_BOT_TEAM_KEYWORDS)) {
+      if (keywords.some(kw => lower.includes(kw)) && !found.includes(key)) found.push(key);
+    }
+    return found;
+  }
+
   function botOpenPanel(idx) {
     _botModalIdx = idx;
     const item = _botItems[idx];
@@ -924,15 +957,31 @@
     const catEl = document.getElementById('botModalCat');
     if (!modal) return;
     if (title && item) title.textContent = item.title.slice(0, 80) + (item.title.length > 80 ? '…' : '');
-    if (catEl) catEl.value = 'general';
     const sliderEl = document.getElementById('botModalSlider');
     if (sliderEl) sliderEl.checked = false;
+
+    // Takımları otomatik tespit et
+    const autoTeams = item ? botDetectTeams(item.title + ' ' + (item.summary || '')) : [];
+
+    // Kategoriyi otomatik tahmin et
+    if (catEl) {
+      const txt = ((item && item.title) || '').toLowerCase();
+      if (autoTeams.includes('milli-takim')) catEl.value = 'milli-takim';
+      else if (/transfer|imzala|bonservis|anlaşma|anlaşt/.test(txt)) catEl.value = 'transfer';
+      else if (/maç|gol|skor|yendi|berabere|kazandı|kaybetti|deplasman/.test(txt)) catEl.value = 'mac';
+      else catEl.value = 'general';
+    }
+
     if (teamsEl) {
-      teamsEl.innerHTML = Object.entries(typeof BRANCHES !== 'undefined' ? BRANCHES : {}).map(([k,v]) =>
-        `<label style="display:flex;align-items:center;gap:5px;font-size:13px;background:#f4f4f4;border:1.5px solid #ddd;border-radius:7px;padding:5px 10px;cursor:pointer;color:#111;font-weight:500">
-          <input type="checkbox" value="${k}" style="accent-color:#e63946;width:14px;height:14px"> ${v.label}
-        </label>`
-      ).join('');
+      teamsEl.innerHTML = Object.entries(typeof BRANCHES !== 'undefined' ? BRANCHES : {}).map(([k,v]) => {
+        const checked = autoTeams.includes(k) ? 'checked' : '';
+        const highlight = autoTeams.includes(k)
+          ? 'background:#fff0f0;border-color:#e63946;color:#c0392b;font-weight:700'
+          : 'background:#f4f4f4;border-color:#ddd;color:#111;font-weight:500';
+        return `<label style="display:flex;align-items:center;gap:5px;font-size:13px;${highlight};border:1.5px solid;border-radius:7px;padding:5px 10px;cursor:pointer">
+          <input type="checkbox" value="${k}" ${checked} style="accent-color:#e63946;width:14px;height:14px"> ${v.label}
+        </label>`;
+      }).join('');
     }
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
