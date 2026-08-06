@@ -915,24 +915,32 @@
     return '__diger__';
   }
 
+  let _botActiveGroup = null;
+
   function botApplyFilter() {
     const q = (document.getElementById('botFilter')?.value || '').toLowerCase();
     let visible = 0;
     document.querySelectorAll('.bot-item').forEach(el => {
       const title = (el.dataset.title || '').toLowerCase();
-      const show = !q || title.includes(q);
+      const inGroup = !_botActiveGroup || el.dataset.group === _botActiveGroup;
+      const show = inGroup && (!q || title.includes(q));
       el.style.display = show ? '' : 'none';
       if (show) visible++;
     });
-    // Grup başlıklarını gizle/göster
-    document.querySelectorAll('.bot-group-header').forEach(hdr => {
-      const grpKey = hdr.dataset.group;
-      const hasVisible = [...document.querySelectorAll(`.bot-item[data-group="${grpKey}"]`)]
-        .some(e => e.style.display !== 'none');
-      hdr.style.display = hasVisible ? '' : 'none';
-    });
     const countEl = document.getElementById('botCount');
-    if (countEl) countEl.textContent = q ? `${visible} sonuç` : `${visible} haber`;
+    if (countEl) countEl.textContent = `${visible} haber`;
+  }
+
+  function botSelectGroup(key) {
+    _botActiveGroup = key;
+    // Tab butonlarını güncelle
+    document.querySelectorAll('.bot-tab-btn').forEach(btn => {
+      const active = btn.dataset.group === key;
+      btn.style.background = active ? 'var(--ts-red)' : 'var(--ts-card)';
+      btn.style.color = active ? '#fff' : 'var(--ts-text)';
+      btn.style.borderColor = active ? 'var(--ts-red)' : 'var(--ts-border)';
+    });
+    botApplyFilter();
   }
 
   function botRenderResults() {
@@ -950,55 +958,64 @@
       groups[grp].push({ item, idx });
     });
 
-    let html = '';
-    for (const grpDef of _BOT_GROUPS) {
-      const list = groups[grpDef.key];
-      if (!list || !list.length) continue;
-      html += `<div class="bot-group-header" data-group="${grpDef.key}"
-        style="display:flex;align-items:center;gap:10px;margin:18px 0 8px;padding:10px 14px;background:var(--ts-card);border:1.5px solid var(--ts-border);border-radius:10px;font-weight:700;font-size:14px;cursor:pointer"
-        onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none' ? '' : 'none'; this.querySelector('.grp-arrow').textContent = this.nextElementSibling.style.display==='none' ? '▶' : '▼'">
-        ${botGroupBadge(grpDef.key)}
-        <span>${grpDef.label}</span>
-        <span style="margin-left:auto;background:var(--ts-red);color:#fff;border-radius:20px;padding:1px 10px;font-size:12px">${list.length}</span>
-        <span class="grp-arrow" style="font-size:12px;color:var(--ts-muted)">▼</span>
-      </div>
-      <div data-group-body="${grpDef.key}">`;
+    // Yatay kaydırılabilir takım sekmeleri
+    const tabsHtml = _BOT_GROUPS
+      .filter(g => groups[g.key] && groups[g.key].length)
+      .map(g => {
+        const logoSrc = (typeof getLogo === 'function') ? getLogo(g.key) : '';
+        const logoEl = logoSrc
+          ? `<img src="${logoSrc}" alt="" width="26" height="26" style="object-fit:contain;flex-shrink:0">`
+          : '';
+        return `<button class="bot-tab-btn" data-group="${g.key}" onclick="botSelectGroup('${g.key}')"
+          style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;padding:7px 14px;border-radius:30px;border:1.5px solid var(--ts-border);background:var(--ts-card);color:var(--ts-text);font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;transition:all .15s">
+          ${logoEl}
+          <span>${g.label}</span>
+          <span style="background:var(--ts-border);border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700">${groups[g.key].length}</span>
+        </button>`;
+      }).join('');
 
-      html += list.map(({ item, idx }) => {
+    // Haber listesi (tümü render edilir, filtre ile gösterilir)
+    const itemsHtml = _BOT_GROUPS.flatMap(g => {
+      if (!groups[g.key]) return [];
+      return groups[g.key].map(({ item, idx }) => {
         const duplicate = existingTitles.has(item.title.trim().toLowerCase());
         const added   = _botAdded.has(idx);
         const skipped = _botSkipped.has(idx);
         const statusBadge = added   ? '<span style="color:var(--ts-green,#27ae60);font-weight:700;font-size:12px">✓ Eklendi</span>'
                           : skipped ? '<span style="color:var(--ts-muted);font-size:12px">Atlandı</span>'
                           : duplicate ? '<span style="color:var(--ts-red);font-size:12px">Zaten var</span>' : '';
-        return `
-          <div class="bot-item" data-idx="${idx}" data-group="${grpDef.key}" data-title="${escHtml(item.title)}"
-            style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;overflow:hidden;${added || skipped ? 'opacity:0.45;' : ''}">
-            <div class="admin-news-item" style="border:none;border-radius:0;margin:0">
-              ${item.image ? `<div class="admin-news-thumb" style="background-image:url('${escAttr(item.image)}');background-size:cover;background-position:center"></div>` : '<div class="admin-news-thumb" style="background:var(--ts-border)"></div>'}
-              <div class="admin-news-body" style="flex:1;min-width:0">
-                <div class="admin-news-title">${escHtml(item.title)}</div>
-                <div class="admin-news-meta" style="gap:8px">
-                  <span style="color:var(--ts-red);font-weight:600;font-size:11px">${escHtml(item.source)}</span>
-                  ${item.pubDate ? `<span>${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
-                  ${statusBadge}
-                </div>
-              </div>
-              <div class="admin-news-actions" style="flex-shrink:0">
-                ${!added && !skipped ? `
-                  <button class="btn-primary btn-sm" onclick="botOpenPanel(${idx})">+ Ekle</button>
-                  <button class="btn-secondary btn-sm" onclick="botSkipItem(${idx})">Atla</button>
-                ` : ''}
+        return `<div class="bot-item" data-idx="${idx}" data-group="${g.key}" data-title="${escHtml(item.title)}"
+          style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;overflow:hidden;${added || skipped ? 'opacity:0.45;' : ''}">
+          <div class="admin-news-item" style="border:none;border-radius:0;margin:0">
+            ${item.image ? `<div class="admin-news-thumb" style="background-image:url('${escAttr(item.image)}');background-size:cover;background-position:center"></div>` : '<div class="admin-news-thumb" style="background:var(--ts-border)"></div>'}
+            <div class="admin-news-body" style="flex:1;min-width:0">
+              <div class="admin-news-title">${escHtml(item.title)}</div>
+              <div class="admin-news-meta" style="gap:8px">
+                <span style="color:var(--ts-red);font-weight:600;font-size:11px">${escHtml(item.source)}</span>
+                ${item.pubDate ? `<span>${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
+                ${statusBadge}
               </div>
             </div>
-          </div>`;
-      }).join('');
+            <div class="admin-news-actions" style="flex-shrink:0">
+              ${!added && !skipped ? `
+                <button class="btn-primary btn-sm" onclick="botOpenPanel(${idx})">+ Ekle</button>
+                <button class="btn-secondary btn-sm" onclick="botSkipItem(${idx})">Atla</button>
+              ` : ''}
+            </div>
+          </div>
+        </div>`;
+      });
+    }).join('');
 
-      html += `</div>`;
-    }
+    el.innerHTML = `
+      <div style="overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:thin">
+        <div style="display:flex;gap:8px;width:max-content">${tabsHtml}</div>
+      </div>
+      <div id="botItemList">${itemsHtml}</div>`;
 
-    el.innerHTML = html;
-    botApplyFilter();
+    // İlk grubu seç
+    const firstGroup = _BOT_GROUPS.find(g => groups[g.key] && groups[g.key].length);
+    if (firstGroup) botSelectGroup(firstGroup.key);
   }
 
   let _botModalIdx = null;
