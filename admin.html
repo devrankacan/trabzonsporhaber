@@ -986,36 +986,26 @@
           ? `<div style="width:64px;min-width:64px;height:64px;border-radius:6px;background:url('${escAttr(item.image)}') center/cover no-repeat;background-color:var(--ts-border)"></div>`
           : `<div style="width:64px;min-width:64px;height:64px;border-radius:6px;background:var(--ts-border)"></div>`;
 
-        let actionCol;
-        if (added) {
-          actionCol = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:72px">
-            <span style="color:var(--ts-green,#27ae60);font-weight:700;font-size:12px;text-align:center">✓ Eklendi</span>
-          </div>`;
-        } else if (skipped) {
-          actionCol = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:72px">
-            <span style="color:var(--ts-muted);font-size:12px">Atlandı</span>
-          </div>`;
-        } else {
-          actionCol = `<div class="admin-news-actions" style="display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:5px;min-width:72px">
-            <button onclick="botOpenPanel(${idx})" style="padding:7px 0;background:var(--ts-red,#c0392b);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap">+ Ekle</button>
-            <button onclick="botSkipItem(${idx})" style="padding:5px 0;background:transparent;color:var(--ts-muted);border:1px solid var(--ts-border);border-radius:7px;font-size:11px;cursor:pointer">Atla</button>
-          </div>`;
-        }
-
         const dupBadge = duplicate && !added ? `<span style="color:var(--ts-red);font-size:10px;font-weight:600">● zaten var</span>` : '';
 
+        let btns;
+        if (added)   btns = `<span style="color:var(--ts-green,#27ae60);font-weight:700;font-size:12px">✓ Eklendi</span>`;
+        else if (skipped) btns = `<span style="color:var(--ts-muted);font-size:12px">Atlandı</span>`;
+        else btns = `<button onclick="botOpenPanel(${idx})" style="display:block;width:80px;padding:7px 0;margin-bottom:5px;background:var(--ts-red,#c0392b);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer">+ Ekle</button>
+                     <button onclick="botSkipItem(${idx})" style="display:block;width:80px;padding:5px 0;background:transparent;color:var(--ts-muted);border:1px solid var(--ts-border);border-radius:7px;font-size:11px;cursor:pointer">Atla</button>`;
+
         return `<div class="bot-item" data-idx="${idx}" data-group="${g.key}"
-          style="display:grid;grid-template-columns:64px 1fr 88px;align-items:center;gap:10px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;padding:10px;${added || skipped ? 'opacity:0.4;' : ''}">
+          style="display:flex;align-items:center;gap:10px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;padding:10px;box-sizing:border-box;${added || skipped ? 'opacity:0.4;' : ''}">
           ${thumb}
-          <div style="min-width:0">
-            <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px">${escHtml(item.title)}</div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span style="color:var(--ts-red);font-weight:600;font-size:11px">${escHtml(item.source)}</span>
-              ${item.pubDate ? `<span style="font-size:11px;color:var(--ts-muted)">${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
+          <div style="flex:1;min-width:0;overflow:hidden">
+            <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(item.title)}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="color:var(--ts-red);font-weight:600;font-size:11px;white-space:nowrap">${escHtml(item.source)}</span>
+              ${item.pubDate ? `<span style="font-size:11px;color:var(--ts-muted);white-space:nowrap">${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
               ${dupBadge}
             </div>
           </div>
-          ${actionCol}
+          <div style="flex-shrink:0;width:80px;text-align:center">${btns}</div>
         </div>`;
       });
     }).join('');
