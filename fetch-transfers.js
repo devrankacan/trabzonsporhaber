@@ -113,21 +113,30 @@ async function main() {
           const trDate = tr.date ? new Date(tr.date) : null;
           if (!trDate || trDate < FILTER_FROM) continue;
 
+          // Hangi takım Süper Lig'de?
+          const inIsSL  = !!SUPER_LIG_TEAMS[inId];
+          const outIsSL = !!SUPER_LIG_TEAMS[outId];
+
+          // status: gelen mi gidiyor mu
+          let status = 'transfer';
+          const ttype = (tr.type || '').toLowerCase();
+          if (ttype.includes('loan')) status = 'kiralik';
+          else if (ttype.includes('free')) status = 'serbest';
+
+          // fromTeam = bizim ligdeki kulüp, toTeam = karşı taraf (veya tam tersi)
+          const fromTeamName = outIsSL ? (SUPER_LIG_TEAMS[outId]?.name || outTeam?.name) : outTeam?.name;
+          const toTeamName   = inIsSL  ? (SUPER_LIG_TEAMS[inId]?.name  || inTeam?.name)  : inTeam?.name;
+
           allTransfers.push({
             id: key,
-            player: {
-              name: player.name,
-              photo: player.photo || '',
-            },
-            from: {
-              name: outTeam?.name || '?',
-              logo: outTeam?.logo || '',
-            },
-            to: {
-              name: inTeam?.name || '?',
-              logo: inTeam?.logo || '',
-            },
-            type: tr.type || 'N/A', // "Free", "Loan", "N/A" veya ücret
+            player: player.name,
+            playerImage: player.photo || '',
+            position: '',
+            status,
+            fromTeam: fromTeamName || '?',
+            toTeam:   toTeamName   || '?',
+            foreignTeam: (!inIsSL || !outIsSL) ? (inIsSL ? outTeam?.name : inTeam?.name) : '',
+            fee: ttype === 'n/a' ? '?' : (tr.type || '?'),
             date: tr.date || '',
           });
         }
