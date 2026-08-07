@@ -319,6 +319,7 @@
       <div class="dash-section-header">
         <h2 class="dash-section-title">Transferler</h2>
         <button class="btn-primary btn-sm" id="showTransferFormBtn" onclick="toggleTransferForm(true)">+ Yeni Transfer</button>
+        <button class="btn-secondary btn-sm" onclick="if(confirm('Tüm transferler silinsin mi?')){saveTransfers([]);renderAdminTransfers();renderTransfersSidebar();}" style="margin-left:8px;color:#e74c3c;border-color:#e74c3c">🗑 Tümünü Sil</button>
       </div>
 
       <!-- Transfers Logosu -->
