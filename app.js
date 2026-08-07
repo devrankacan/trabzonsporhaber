@@ -2226,11 +2226,15 @@ function renderSliderOrder() {
       <span style="font-size:18px;color:var(--ts-muted);cursor:grab;user-select:none">⠿</span>
       <div style="width:44px;height:44px;border-radius:6px;flex-shrink:0;${buildBgStyle(n.image)}"></div>
       <div style="flex:1;font-size:13px;font-weight:600;color:var(--ts-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(n.title)}</div>
-      <div style="display:flex;flex-direction:column;gap:2px">
-        <button onclick="sliderMoveToPos(${n.id}, ${i}, ${sliders.length})" ${i === 0 ? 'disabled' : ''}
-          style="padding:2px 8px;font-size:14px;border:1px solid var(--ts-border);border-radius:4px;background:var(--ts-bg);color:var(--ts-text);cursor:pointer;line-height:1.4" title="Yukarı taşı">▲</button>
-        <button onclick="sliderMoveToPos(${n.id}, ${i + 2}, ${sliders.length})" ${i === sliders.length - 1 ? 'disabled' : ''}
-          style="padding:2px 8px;font-size:14px;border:1px solid var(--ts-border);border-radius:4px;background:var(--ts-bg);color:var(--ts-text);cursor:pointer;line-height:1.4" title="Aşağı taşı">▼</button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <button onclick="sliderMoveToPos(${n.id}, ${i}, ${sliders.length})" ${i === 0 ? 'disabled' : ''}
+            style="padding:2px 8px;font-size:14px;border:1px solid var(--ts-border);border-radius:4px;background:var(--ts-bg);color:var(--ts-text);cursor:pointer;line-height:1.4" title="Yukarı taşı">▲</button>
+          <button onclick="sliderMoveToPos(${n.id}, ${i + 2}, ${sliders.length})" ${i === sliders.length - 1 ? 'disabled' : ''}
+            style="padding:2px 8px;font-size:14px;border:1px solid var(--ts-border);border-radius:4px;background:var(--ts-bg);color:var(--ts-text);cursor:pointer;line-height:1.4" title="Aşağı taşı">▼</button>
+        </div>
+        <button onclick="toggleNewsSlider(${n.id})"
+          style="padding:4px 10px;font-size:12px;font-weight:600;border:1px solid #e74c3c;border-radius:6px;background:transparent;color:#e74c3c;cursor:pointer" title="Sliderdan çıkar">✕ Kaldır</button>
       </div>
     </div>
   `).join('');
@@ -2331,6 +2335,7 @@ function toggleNewsSlider(id) {
   list[idx] = { ...list[idx], slider: !list[idx].slider };
   saveNews(list);
   renderAdminList();
+  renderSliderOrder();
 }
 
 // ==================== HEADER SEARCH ====================
