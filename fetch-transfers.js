@@ -86,8 +86,8 @@ async function main() {
 
   for (let i = 0; i < teamIds.length; i++) {
     const teamId = teamIds[i];
-    const teamInfo = SUPER_LIG_TEAMS[teamId];
-    process.stdout.write(`[${i+1}/${teamIds.length}] ${teamInfo.name}... `);
+    const teamBranch = SUPER_LIG_TEAMS[teamId];
+    process.stdout.write(`[${i+1}/${teamIds.length}] ${teamBranch}... `);
 
     try {
       const data = await apiGet(`/transfers?team=${teamId}`);
@@ -168,7 +168,7 @@ async function main() {
 
   // İlk 5'i göster
   allTransfers.slice(0, 5).forEach(t =>
-    console.log(`   ${t.player.name}: ${t.from.name} → ${t.to.name} (${t.type}) ${t.date}`)
+    console.log(`   ${t.player}: ${t.fromTeam} → ${t.toTeam} | ${t.foreignTeam} | ${t.fee} | ${t.date}`)
   );
 }
 
