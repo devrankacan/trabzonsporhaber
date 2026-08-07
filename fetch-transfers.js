@@ -58,7 +58,7 @@ function postToServer(data) {
     const options = {
       hostname: '127.0.0.1',
       port: 3001,
-      path: '/api/ts_transfers',
+      path: '/api/ts_transfers_pending',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -161,13 +161,30 @@ async function main() {
   allTransfers.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   console.log(`\n✅ Toplam ${allTransfers.length} transfer bulundu`);
+
+  // Mevcut pending listesini çek, duplicate olmayanları ekle
+  let existing = [];
+  try {
+    const raw = await new Promise((resolve, reject) => {
+      const req = http.request({ hostname:'127.0.0.1', port:3001, path:'/api/ts_transfers_pending', method:'GET' }, res => {
+        let d = ''; res.on('data', c => d += c); res.on('end', () => resolve(d));
+      });
+      req.on('error', reject); req.end();
+    });
+    existing = JSON.parse(raw) || [];
+  } catch(e) { existing = []; }
+
+  const existingIds = new Set(existing.map(t => t.id));
+  const newOnes = allTransfers.filter(t => !existingIds.has(t.id));
+  const merged = [...newOnes, ...existing];
+
+  console.log(`📥 ${newOnes.length} yeni transfer bekleyene eklendi (toplam: ${merged.length})`);
   console.log('📤 Sunucuya kaydediliyor...');
 
-  await postToServer(allTransfers);
+  await postToServer(merged);
   console.log('✅ Tamamlandı!');
 
-  // İlk 5'i göster
-  allTransfers.slice(0, 5).forEach(t =>
+  newOnes.slice(0, 5).forEach(t =>
     console.log(`   ${t.player}: ${t.fromTeam} → ${t.toTeam} | ${t.foreignTeam} | ${t.fee} | ${t.date}`)
   );
 }

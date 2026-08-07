@@ -1531,104 +1531,105 @@
   }
   // ── TRANSFER BOTU SON ──────────────────────────────────────────
 
-  function getPendingTransfers() {
-    try { return JSON.parse(localStorage.getItem('ts_transfers_pending') || '[]'); }
-    catch(e) { return []; }
+  let _pendingCache = null;
+
+  async function getPendingTransfers() {
+    try {
+      const r = await fetch('/api/ts_transfers_pending');
+      _pendingCache = await r.json();
+    } catch(e) { _pendingCache = _pendingCache || []; }
+    return _pendingCache || [];
   }
 
-  function savePendingTransfers(list) {
-    localStorage.setItem('ts_transfers_pending', JSON.stringify(list));
-    fetch('/api/ts_transfers_pending', {
+  async function savePendingTransfers(list) {
+    _pendingCache = list;
+    await fetch('/api/ts_transfers_pending', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': 'ee098b74' },
       body: JSON.stringify(list)
     });
   }
 
-  function approvePending(id) {
-    const pending = getPendingTransfers();
+  async function approvePending(id) {
+    const pending = await getPendingTransfers();
     const item = pending.find(p => p.id === id);
     if (!item) return;
 
-    // Kaydet modalını aç
-    showTab('transfers');
-    setTimeout(() => {
-      toggleTransferForm(true);
-      document.getElementById('trPlayer').value = item.player || '';
-      document.getElementById('trFrom').value = item.fromTeam || '';
-      document.getElementById('trTo').value = item.toTeam || '';
-      document.getElementById('trForeignTeam').value = item.foreignTeam || '';
-      document.getElementById('trFee').value = item.fee || '';
-      document.getElementById('trStatus').value = item.status || 'kesinlesti';
+    // Transferler listesine ekle
+    const list = getTransfers();
+    const newId = list.length ? Math.max(...list.map(x => x.id || 0)) + 1 : 1;
+    list.unshift({
+      id: newId,
+      player: item.player || '',
+      playerImage: item.playerImage || '',
+      position: item.position || '',
+      fromTeam: item.fromTeam || 'yabanci',
+      toTeam: item.toTeam || 'yabanci',
+      foreignTeam: item.foreignTeam || '',
+      fee: item.fee || '',
+      status: item.status || 'kesinlesti',
+      date: item.date || new Date().toISOString().split('T')[0],
+    });
+    saveTransfers(list);
+    renderAdminTransfers();
 
-      // Hint göster
-      const card = document.getElementById('transferFormCard');
-      if (card) {
-        let hint = card.querySelector('.bot-transfer-hint');
-        if (!hint) { hint = document.createElement('div'); hint.className = 'bot-transfer-hint'; card.prepend(hint); }
-        hint.style.cssText = 'background:#eaf4ff;border:1px solid #b3d4ff;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#1a4a7a';
-        hint.innerHTML = `<strong>📰</strong> ${escHtml(item.newsTitle)} <a href="${escAttr(item.newsLink)}" target="_blank" style="color:#1a4a7a">→</a>`;
-      }
-
-      // Onaylandı olarak işaretle
-      item.reviewStatus = 'onaylanan';
-      savePendingTransfers(pending);
-      renderPendingTransfers();
-      card?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 200);
-  }
-
-  function rejectPending(id) {
-    const pending = getPendingTransfers();
-    const item = pending.find(p => p.id === id);
-    if (!item) return;
-    item.reviewStatus = 'reddedilen';
-    savePendingTransfers(pending);
+    // Pending'den kaldır
+    const updated = pending.filter(p => p.id !== id);
+    await savePendingTransfers(updated);
     renderPendingTransfers();
   }
 
-  function deletePending(id) {
-    const pending = getPendingTransfers().filter(p => p.id !== id);
-    savePendingTransfers(pending);
+  async function rejectPending(id) {
+    const pending = await getPendingTransfers();
+    const updated = pending.filter(p => p.id !== id);
+    await savePendingTransfers(updated);
     renderPendingTransfers();
   }
 
-  function renderPendingTransfers() {
+  async function renderPendingTransfers() {
     const el = document.getElementById('pendingSection');
     if (!el) return;
-    const all = getPendingTransfers();
-    const groups = { bekleyen: [], onaylanan: [], reddedilen: [] };
-    all.forEach(p => { if (groups[p.reviewStatus]) groups[p.reviewStatus].push(p); });
+    el.innerHTML = '<p style="font-size:13px;color:var(--ts-muted);padding:10px 0">Yükleniyor...</p>';
+    const all = await getPendingTransfers();
 
-    function groupHtml(title, color, items, showActions) {
-      return `<div style="margin-bottom:20px">
-        <div style="font-weight:700;font-size:14px;color:${color};margin-bottom:8px;display:flex;align-items:center;gap:8px">
-          ${title} <span style="font-size:12px;font-weight:400;color:var(--ts-muted)">${items.length}</span>
-        </div>
-        ${items.length === 0 ? `<p style="font-size:13px;color:var(--ts-muted);padding:10px 0">Yok</p>` :
-          items.map(p => `
-            <div style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
-              ${p.newsImage ? `<img src="${escAttr(p.newsImage)}" style="width:52px;height:52px;border-radius:6px;object-fit:cover;flex-shrink:0" />` : `<div style="width:52px;height:52px;border-radius:6px;background:var(--ts-border);flex-shrink:0"></div>`}
-              <div style="flex:1;overflow:hidden">
-                <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(p.newsTitle)}</div>
-                <div style="font-size:11px;color:var(--ts-muted);margin-top:3px">${escHtml(p.newsSource)} · ${p.newsDate ? new Date(p.newsDate).toLocaleDateString('tr-TR') : ''}</div>
-              </div>
-              <div style="display:flex;gap:6px;flex-shrink:0">
-                ${showActions ? `
-                  <button onclick="approvePending(${p.id})" style="padding:5px 12px;background:#1a6e3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">✓ Onayla</button>
-                  <button onclick="rejectPending(${p.id})" style="padding:5px 10px;background:transparent;border:1px solid #e74c3c;color:#e74c3c;border-radius:6px;font-size:12px;cursor:pointer">✗ Reddet</button>
-                ` : `
-                  <button onclick="deletePending(${p.id})" style="padding:5px 10px;background:transparent;border:1px solid #ccc;color:#888;border-radius:6px;font-size:11px;cursor:pointer">Sil</button>
-                `}
-              </div>
-            </div>`).join('')}
-      </div>`;
+    const TEAM_NAMES = {
+      trabzonspor:'Trabzonspor', galatasaray:'Galatasaray', fenerbahce:'Fenerbahçe',
+      besiktas:'Beşiktaş', basaksehir:'Başakşehir', antalyaspor:'Antalyaspor',
+      kayserispor:'Kayserispor', alanyaspor:'Alanyaspor', sivasspor:'Sivasspor',
+      konyaspor:'Konyaspor', goztepe:'Göztepe', rizespor:'Çaykur Rizespor',
+      kasimpasa:'Kasımpaşa', yabanci:'Yabancı Kulüp'
+    };
+
+    function teamLabel(key, foreign) {
+      return key === 'yabanci' ? (foreign || 'Yabancı Kulüp') : (TEAM_NAMES[key] || key);
     }
 
-    el.innerHTML =
-      groupHtml('🕐 Bekleyen', '#e67e22', groups.bekleyen, true) +
-      groupHtml('✓ Onaylanan', '#27ae60', groups.onaylanan, false) +
-      groupHtml('✗ Reddedilen', '#e74c3c', groups.reddedilen, false);
+    const rows = all.map(p => {
+      const photo = p.playerImage
+        ? `<img src="${escAttr(p.playerImage)}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--ts-border)" />`
+        : `<div style="width:52px;height:52px;border-radius:50%;background:var(--ts-border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>`;
+      const from = teamLabel(p.fromTeam, p.fromTeam === 'yabanci' ? p.foreignTeam : '');
+      const to   = teamLabel(p.toTeam,   p.toTeam   === 'yabanci' ? p.foreignTeam : '');
+      const fee  = p.fee ? `<span style="font-size:11px;background:#eaf4ff;color:#1a4a7a;padding:2px 7px;border-radius:10px">${escHtml(p.fee)}</span>` : '';
+      const statusLabel = { kesinlesti:'Kesinleşti', iddia:'İddia', kira:'Kiralık' }[p.status] || p.status;
+      return `
+        <div style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+          ${photo}
+          <div style="flex:1;overflow:hidden;min-width:0">
+            <div style="font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(p.player || '?')}</div>
+            <div style="font-size:12px;color:var(--ts-muted);margin-top:3px">${escHtml(from)} → ${escHtml(to)} &nbsp;·&nbsp; ${escHtml(statusLabel)} &nbsp;·&nbsp; ${p.date || ''}</div>
+            <div style="margin-top:5px">${fee}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button onclick="approvePending('${escAttr(String(p.id))}')" style="padding:6px 14px;background:#1a6e3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">✓ Ekle</button>
+            <button onclick="rejectPending('${escAttr(String(p.id))}')" style="padding:6px 10px;background:transparent;border:1px solid #e74c3c;color:#e74c3c;border-radius:6px;font-size:12px;cursor:pointer">✗ Sil</button>
+          </div>
+        </div>`;
+    });
+
+    el.innerHTML = all.length === 0
+      ? '<p style="font-size:13px;color:var(--ts-muted);padding:10px 0">Bekleyen transfer yok. <code>node fetch-transfers.js</code> çalıştırın.</p>'
+      : `<div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--ts-muted)">${all.length} transfer bekliyor</div>` + rows.join('');
   }
 
   // ── HABER BOTU SON ─────────────────────────────────────────────
