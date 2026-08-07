@@ -6,29 +6,25 @@ const API_FOOTBALL_KEY = 'b4e3847303d94fa1333c1dbee3785e36';
 const ADMIN_KEY = 'ee098b74';
 const SERVER_URL = 'http://127.0.0.1:3001';
 
-// Süper Lig takım ID'leri (API-Football)
+// Süper Lig takım ID'leri (API-Football - 2024 sezonu doğrulanmış)
 const SUPER_LIG_TEAMS = {
-  569:  { name: 'Trabzonspor',          logo: 'https://media.api-sports.io/football/teams/569.png' },
+  998:  { name: 'Trabzonspor',          logo: 'https://media.api-sports.io/football/teams/998.png' },
   645:  { name: 'Galatasaray',          logo: 'https://media.api-sports.io/football/teams/645.png' },
-  630:  { name: 'Fenerbahçe',           logo: 'https://media.api-sports.io/football/teams/630.png' },
-  641:  { name: 'Beşiktaş',            logo: 'https://media.api-sports.io/football/teams/641.png' },
-  7447: { name: 'İstanbul Başakşehir', logo: 'https://media.api-sports.io/football/teams/7447.png' },
-  614:  { name: 'Antalyaspor',         logo: 'https://media.api-sports.io/football/teams/614.png' },
-  617:  { name: 'Kayserispor',         logo: 'https://media.api-sports.io/football/teams/617.png' },
-  613:  { name: 'Alanyaspor',          logo: 'https://media.api-sports.io/football/teams/613.png' },
-  611:  { name: 'Sivasspor',           logo: 'https://media.api-sports.io/football/teams/611.png' },
-  7458: { name: 'Samsunspor',          logo: 'https://media.api-sports.io/football/teams/7458.png' },
-  626:  { name: 'Konyaspor',           logo: 'https://media.api-sports.io/football/teams/626.png' },
-  619:  { name: 'Göztepe',             logo: 'https://media.api-sports.io/football/teams/619.png' },
-  7473: { name: 'Çaykur Rizespor',     logo: 'https://media.api-sports.io/football/teams/7473.png' },
-  7474: { name: 'Kasımpaşa',           logo: 'https://media.api-sports.io/football/teams/7474.png' },
-  628:  { name: 'Gaziantep FK',        logo: 'https://media.api-sports.io/football/teams/628.png' },
-  631:  { name: 'Kocaelispor',         logo: 'https://media.api-sports.io/football/teams/631.png' },
-  609:  { name: 'Eyüpspor',            logo: 'https://media.api-sports.io/football/teams/609.png' },
-  7484: { name: 'Bodrum FK',           logo: 'https://media.api-sports.io/football/teams/7484.png' },
+  611:  { name: 'Fenerbahçe',           logo: 'https://media.api-sports.io/football/teams/611.png' },
+  549:  { name: 'Beşiktaş',            logo: 'https://media.api-sports.io/football/teams/549.png' },
+  564:  { name: 'İstanbul Başakşehir', logo: 'https://media.api-sports.io/football/teams/564.png' },
+  1005: { name: 'Antalyaspor',         logo: 'https://media.api-sports.io/football/teams/1005.png' },
+  1001: { name: 'Kayserispor',         logo: 'https://media.api-sports.io/football/teams/1001.png' },
+  996:  { name: 'Alanyaspor',          logo: 'https://media.api-sports.io/football/teams/996.png' },
+  1002: { name: 'Sivasspor',           logo: 'https://media.api-sports.io/football/teams/1002.png' },
+  607:  { name: 'Konyaspor',           logo: 'https://media.api-sports.io/football/teams/607.png' },
+  994:  { name: 'Göztepe',             logo: 'https://media.api-sports.io/football/teams/994.png' },
+  1007: { name: 'Çaykur Rizespor',     logo: 'https://media.api-sports.io/football/teams/1007.png' },
+  1004: { name: 'Kasımpaşa',           logo: 'https://media.api-sports.io/football/teams/1004.png' },
 };
 
-const SEASON = 2025;
+// 2026 yaz transfer dönemi başlangıcı
+const FILTER_FROM = new Date('2026-06-01');
 
 function apiGet(path) {
   return new Promise((resolve, reject) => {
@@ -94,7 +90,7 @@ async function main() {
     process.stdout.write(`[${i+1}/${teamIds.length}] ${teamInfo.name}... `);
 
     try {
-      const data = await apiGet(`/transfers?team=${teamId}&season=${SEASON}`);
+      const data = await apiGet(`/transfers?team=${teamId}`);
       const transfers = data.response || [];
 
       for (const t of transfers) {
@@ -113,9 +109,9 @@ async function main() {
           const involvesSuperLig = SUPER_LIG_TEAMS[inId] || SUPER_LIG_TEAMS[outId];
           if (!involvesSuperLig) continue;
 
-          // 2025 sezonu filtrele
-          const year = tr.date ? new Date(tr.date).getFullYear() : 0;
-          if (year < 2025) continue;
+          // 2026 yaz transfer dönemi filtrele
+          const trDate = tr.date ? new Date(tr.date) : null;
+          if (!trDate || trDate < FILTER_FROM) continue;
 
           allTransfers.push({
             id: key,
