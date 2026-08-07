@@ -991,23 +991,23 @@
         let btns;
         if (added)   btns = `<span style="color:var(--ts-green,#27ae60);font-weight:700;font-size:12px">✓ Eklendi</span>`;
         else if (skipped) btns = `<span style="color:var(--ts-muted);font-size:12px">Atlandı</span>`;
-        else btns = `<button onclick="botOpenPanel(${idx})" style="display:block;width:80px;padding:7px 0;margin-bottom:5px;background:var(--ts-red,#c0392b);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer">+ Ekle</button>
-                     <button onclick="botSkipItem(${idx})" style="display:block;width:80px;padding:5px 0;background:transparent;color:var(--ts-muted);border:1px solid var(--ts-border);border-radius:7px;font-size:11px;cursor:pointer">Atla</button>`;
+        else btns = `<button onclick="botOpenPanel(${idx})" style="width:76px;padding:7px 0;margin-bottom:5px;background:#c0392b;color:#fff;border:none;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer;display:inline-block">+ Ekle</button><br>
+                     <button onclick="botSkipItem(${idx})" style="width:76px;padding:5px 0;background:transparent;color:#888;border:1px solid #ccc;border-radius:7px;font-size:11px;cursor:pointer;display:inline-block">Atla</button>`;
 
         return `<div class="bot-item" data-idx="${idx}" data-group="${g.key}"
-          style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;${added || skipped ? 'opacity:0.4;' : ''}">
-          <div style="display:flex!important;align-items:center;gap:10px;padding:10px;box-sizing:border-box">
-            ${thumb}
-            <div style="flex:1;min-width:0;overflow:hidden">
-              <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(item.title)}</div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="color:var(--ts-red);font-weight:600;font-size:11px;white-space:nowrap">${escHtml(item.source)}</span>
-                ${item.pubDate ? `<span style="font-size:11px;color:var(--ts-muted);white-space:nowrap">${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
+          style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;overflow:hidden;${added || skipped ? 'opacity:0.4;' : ''}">
+          <table style="width:100%;border-collapse:collapse;table-layout:fixed"><tbody><tr>
+            <td style="width:74px;padding:10px 6px 10px 10px;vertical-align:middle">${thumb}</td>
+            <td style="padding:10px 6px;vertical-align:middle;overflow:hidden">
+              <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(item.title)}</div>
+              <div style="font-size:11px;color:var(--ts-muted)">
+                <span style="color:var(--ts-red);font-weight:600">${escHtml(item.source)}</span>
+                ${item.pubDate ? `&nbsp;·&nbsp;${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}` : ''}
                 ${dupBadge}
               </div>
-            </div>
-            <div style="flex-shrink:0;width:82px;display:flex;flex-direction:column;gap:4px">${btns}</div>
-          </div>
+            </td>
+            <td style="width:90px;padding:10px 10px 10px 6px;vertical-align:middle;text-align:center">${btns}</td>
+          </tr></tbody></table>
         </div>`;
       });
     }).join('');
