@@ -984,23 +984,26 @@
         const statusBadge = added   ? '<span style="color:var(--ts-green,#27ae60);font-weight:700;font-size:12px">✓ Eklendi</span>'
                           : skipped ? '<span style="color:var(--ts-muted);font-size:12px">Atlandı</span>'
                           : duplicate ? '<span style="color:var(--ts-red);font-size:12px">Zaten var</span>' : '';
+        const thumb = item.image
+          ? `<div style="width:72px;height:52px;flex-shrink:0;border-radius:7px;background:url('${escAttr(item.image)}') center/cover no-repeat;background-color:var(--ts-border)"></div>`
+          : `<div style="width:72px;height:52px;flex-shrink:0;border-radius:7px;background:var(--ts-border)"></div>`;
+        const actionBtns = !added && !skipped ? `
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button class="btn-primary btn-sm" onclick="botOpenPanel(${idx})" style="flex:1;text-align:center">+ Ekle</button>
+            <button class="btn-secondary btn-sm" onclick="botSkipItem(${idx})" style="flex:1;text-align:center">Atla</button>
+          </div>` : '';
         return `<div class="bot-item" data-idx="${idx}" data-group="${g.key}" data-title="${escHtml(item.title)}"
-          style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;overflow:hidden;${added || skipped ? 'opacity:0.45;' : ''}">
-          <div class="admin-news-item" style="border:none;border-radius:0;margin:0">
-            ${item.image ? `<div class="admin-news-thumb" style="background-image:url('${escAttr(item.image)}');background-size:cover;background-position:center"></div>` : '<div class="admin-news-thumb" style="background:var(--ts-border)"></div>'}
-            <div class="admin-news-body" style="flex:1;min-width:0">
-              <div class="admin-news-title">${escHtml(item.title)}</div>
-              <div class="admin-news-meta" style="gap:8px">
+          style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;padding:10px;${added || skipped ? 'opacity:0.45;' : ''}">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            ${thumb}
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${escHtml(item.title)}</div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                 <span style="color:var(--ts-red);font-weight:600;font-size:11px">${escHtml(item.source)}</span>
-                ${item.pubDate ? `<span>${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
+                ${item.pubDate ? `<span style="font-size:11px;color:var(--ts-muted)">${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
                 ${statusBadge}
               </div>
-            </div>
-            <div class="admin-news-actions" style="flex-shrink:0">
-              ${!added && !skipped ? `
-                <button class="btn-primary btn-sm" onclick="botOpenPanel(${idx})">+ Ekle</button>
-                <button class="btn-secondary btn-sm" onclick="botSkipItem(${idx})">Atla</button>
-              ` : ''}
+              ${actionBtns}
             </div>
           </div>
         </div>`;
@@ -1008,8 +1011,10 @@
     }).join('');
 
     el.innerHTML = `
-      <div style="overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:thin">
-        <div style="display:flex;gap:8px;width:max-content">${tabsHtml}</div>
+      <div style="position:sticky;top:0;z-index:10;background:var(--ts-bg,#f5f5f5);padding:8px 0;margin-bottom:10px">
+        <div style="overflow-x:auto;scrollbar-width:thin;padding-bottom:4px">
+          <div style="display:flex;gap:8px;width:max-content;padding:2px 2px">${tabsHtml}</div>
+        </div>
       </div>
       <div id="botItemList">${itemsHtml}</div>`;
 
