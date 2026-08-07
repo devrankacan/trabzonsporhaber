@@ -995,17 +995,19 @@
                      <button onclick="botSkipItem(${idx})" style="display:block;width:80px;padding:5px 0;background:transparent;color:var(--ts-muted);border:1px solid var(--ts-border);border-radius:7px;font-size:11px;cursor:pointer">Atla</button>`;
 
         return `<div class="bot-item" data-idx="${idx}" data-group="${g.key}"
-          style="display:flex;align-items:center;gap:10px;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;padding:10px;box-sizing:border-box;${added || skipped ? 'opacity:0.4;' : ''}">
-          ${thumb}
-          <div style="flex:1;min-width:0;overflow:hidden">
-            <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(item.title)}</div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="color:var(--ts-red);font-weight:600;font-size:11px;white-space:nowrap">${escHtml(item.source)}</span>
-              ${item.pubDate ? `<span style="font-size:11px;color:var(--ts-muted);white-space:nowrap">${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
-              ${dupBadge}
+          style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;${added || skipped ? 'opacity:0.4;' : ''}">
+          <div style="display:flex!important;align-items:center;gap:10px;padding:10px;box-sizing:border-box">
+            ${thumb}
+            <div style="flex:1;min-width:0;overflow:hidden">
+              <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(item.title)}</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="color:var(--ts-red);font-weight:600;font-size:11px;white-space:nowrap">${escHtml(item.source)}</span>
+                ${item.pubDate ? `<span style="font-size:11px;color:var(--ts-muted);white-space:nowrap">${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
+                ${dupBadge}
+              </div>
             </div>
+            <div style="flex-shrink:0;width:82px;display:flex;flex-direction:column;gap:4px">${btns}</div>
           </div>
-          <div style="flex-shrink:0;width:80px;text-align:center">${btns}</div>
         </div>`;
       });
     }).join('');
