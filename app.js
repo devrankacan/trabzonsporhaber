@@ -2122,21 +2122,8 @@ function resetForm() {
   if (cancelBtn) cancelBtn.style.display = 'none';
 }
 
-function renderAdminList() {
-  const list = getNews();
-  const el = document.getElementById('adminNewsList');
-  const countEl = document.getElementById('newsCountBadge');
-
-  if (countEl) countEl.textContent = `${list.length} haber`;
-  updateSidebarBadge();
-  if (!el) return;
-
-  if (list.length === 0) {
-    el.innerHTML = '<p class="no-news-text">Henüz haber eklenmedi.</p>';
-    return;
-  }
-
-  el.innerHTML = list.map(n => `
+function _newsItemHtml(n) {
+  return `
     <div class="admin-news-item">
       <div class="admin-news-thumb" style="${buildBgStyle(n.image)}"></div>
       <div class="admin-news-body">
@@ -2160,10 +2147,65 @@ function renderAdminList() {
         <button class="btn-icon btn-edit" onclick="editNews(${n.id})">Düzenle</button>
         <button class="btn-icon btn-delete" onclick="deleteNews(${n.id})">Sil</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+}
 
-  renderSliderOrder();
+function _newsGroupKey(dateStr) {
+  const now = new Date();
+  const d = new Date(dateStr);
+  const diffMs = now - d;
+  const diffDays = Math.floor(diffMs / 86400000);
+  const todayStr = now.toDateString();
+  const yestStr = new Date(now - 86400000).toDateString();
+  if (d.toDateString() === todayStr) return { key: 'bugun', label: 'Bugün', order: 0 };
+  if (d.toDateString() === yestStr) return { key: 'dun', label: 'Dün', order: 1 };
+  if (diffDays < 7) return { key: 'bu_hafta', label: 'Bu Hafta', order: 2 };
+  if (diffDays < 14) return { key: 'gecen_hafta', label: 'Geçen Hafta', order: 3 };
+  const monthKey = `ay_${d.getFullYear()}_${d.getMonth()}`;
+  const monthLabel = d.toLocaleString('tr-TR', { month: 'long', year: 'numeric' });
+  return { key: monthKey, label: monthLabel, order: 100 + d.getFullYear() * 12 + d.getMonth() };
+}
+
+function renderAdminList() {
+  const list = getNews();
+  const el = document.getElementById('adminNewsList');
+  const countEl = document.getElementById('newsCountBadge');
+
+  if (countEl) countEl.textContent = `${list.length} haber`;
+  updateSidebarBadge();
+  if (!el) return;
+
+  if (list.length === 0) {
+    el.innerHTML = '<p class="no-news-text">Henüz haber eklenmedi.</p>';
+    return;
+  }
+
+  // Gruplara ayır
+  const groupMap = {};
+  list.forEach(n => {
+    const g = _newsGroupKey(n.date);
+    if (!groupMap[g.key]) groupMap[g.key] = { label: g.label, order: g.order, items: [] };
+    groupMap[g.key].items.push(n);
+  });
+
+  const groups = Object.values(groupMap).sort((a, b) => a.order - b.order);
+
+  el.innerHTML = groups.map((g, gi) => {
+    const open = gi === 0; // İlk grup açık, diğerleri kapalı
+    const uid = 'ng_' + gi;
+    return `
+      <div style="margin-bottom:12px">
+        <button onclick="(function(b,c){c.style.display=c.style.display==='none'?'':'none';b.querySelector('.ng-arrow').textContent=c.style.display==='none'?'▶':'▼'})(this,document.getElementById('${uid}'))"
+          style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700;font-size:14px;color:var(--ts-text)">
+          <span class="ng-arrow">${open ? '▼' : '▶'}</span>
+          <span>${escHtml(g.label)}</span>
+          <span style="margin-left:auto;font-size:12px;font-weight:400;color:var(--ts-muted)">${g.items.length} haber</span>
+        </button>
+        <div id="${uid}" style="display:${open ? '' : 'none'};margin-top:4px">
+          ${g.items.map(n => _newsItemHtml(n)).join('')}
+        </div>
+      </div>`;
+  }).join('');
 }
 
 let _dragSrcId = null;
