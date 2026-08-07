@@ -6,21 +6,21 @@ const API_FOOTBALL_KEY = 'b4e3847303d94fa1333c1dbee3785e36';
 const ADMIN_KEY = 'ee098b74';
 const SERVER_URL = 'http://127.0.0.1:3001';
 
-// Süper Lig takım ID'leri (API-Football - 2024 sezonu doğrulanmış)
+// API-Football ID → branch key (app.js BRANCHES ile eşleşmeli)
 const SUPER_LIG_TEAMS = {
-  998:  { name: 'Trabzonspor',          logo: 'https://media.api-sports.io/football/teams/998.png' },
-  645:  { name: 'Galatasaray',          logo: 'https://media.api-sports.io/football/teams/645.png' },
-  611:  { name: 'Fenerbahçe',           logo: 'https://media.api-sports.io/football/teams/611.png' },
-  549:  { name: 'Beşiktaş',            logo: 'https://media.api-sports.io/football/teams/549.png' },
-  564:  { name: 'İstanbul Başakşehir', logo: 'https://media.api-sports.io/football/teams/564.png' },
-  1005: { name: 'Antalyaspor',         logo: 'https://media.api-sports.io/football/teams/1005.png' },
-  1001: { name: 'Kayserispor',         logo: 'https://media.api-sports.io/football/teams/1001.png' },
-  996:  { name: 'Alanyaspor',          logo: 'https://media.api-sports.io/football/teams/996.png' },
-  1002: { name: 'Sivasspor',           logo: 'https://media.api-sports.io/football/teams/1002.png' },
-  607:  { name: 'Konyaspor',           logo: 'https://media.api-sports.io/football/teams/607.png' },
-  994:  { name: 'Göztepe',             logo: 'https://media.api-sports.io/football/teams/994.png' },
-  1007: { name: 'Çaykur Rizespor',     logo: 'https://media.api-sports.io/football/teams/1007.png' },
-  1004: { name: 'Kasımpaşa',           logo: 'https://media.api-sports.io/football/teams/1004.png' },
+  998:  'trabzonspor',
+  645:  'galatasaray',
+  611:  'fenerbahce',
+  549:  'besiktas',
+  564:  'basaksehir',
+  1005: 'antalyaspor',
+  1001: 'kayserispor',
+  996:  'alanyaspor',
+  1002: 'sivasspor',
+  607:  'konyaspor',
+  994:  'goztepe',
+  1007: 'rizespor',
+  1004: 'kasimpasa',
 };
 
 // 2026 yaz transfer dönemi başlangıcı
@@ -113,19 +113,26 @@ async function main() {
           const trDate = tr.date ? new Date(tr.date) : null;
           if (!trDate || trDate < FILTER_FROM) continue;
 
-          // Hangi takım Süper Lig'de?
-          const inIsSL  = !!SUPER_LIG_TEAMS[inId];
-          const outIsSL = !!SUPER_LIG_TEAMS[outId];
+          const inBranch  = SUPER_LIG_TEAMS[inId];   // branch key veya undefined
+          const outBranch = SUPER_LIG_TEAMS[outId];  // branch key veya undefined
 
-          // status: gelen mi gidiyor mu
-          let status = 'transfer';
+          // fromTeam / toTeam: Süper Lig takımı → branch key, yabancı → 'yabanci'
+          const fromTeam    = outBranch || 'yabanci';
+          const toTeam      = inBranch  || 'yabanci';
+          const foreignTeam = !outBranch ? (outTeam?.name || '') : (!inBranch ? (inTeam?.name || '') : '');
+
+          // status
           const ttype = (tr.type || '').toLowerCase();
-          if (ttype.includes('loan')) status = 'kiralik';
-          else if (ttype.includes('free')) status = 'serbest';
+          let status = 'kesinlesti';
+          if (ttype.includes('loan')) status = 'kira';
 
-          // fromTeam = bizim ligdeki kulüp, toTeam = karşı taraf (veya tam tersi)
-          const fromTeamName = outIsSL ? (SUPER_LIG_TEAMS[outId]?.name || outTeam?.name) : outTeam?.name;
-          const toTeamName   = inIsSL  ? (SUPER_LIG_TEAMS[inId]?.name  || inTeam?.name)  : inTeam?.name;
+          // fee: API "Transfer", "Free", "Loan", "N/A" veya "€5.5M" gibi değerler verir
+          let fee = '';
+          if (tr.type && !['transfer','loan','free','n/a','null'].includes(ttype)) {
+            fee = tr.type; // ücret değeri
+          } else if (ttype === 'free') {
+            fee = 'Bedelsiz';
+          }
 
           allTransfers.push({
             id: key,
@@ -133,10 +140,10 @@ async function main() {
             playerImage: player.photo || '',
             position: '',
             status,
-            fromTeam: fromTeamName || '?',
-            toTeam:   toTeamName   || '?',
-            foreignTeam: (!inIsSL || !outIsSL) ? (inIsSL ? outTeam?.name : inTeam?.name) : '',
-            fee: ttype === 'n/a' ? '?' : (tr.type || '?'),
+            fromTeam,
+            toTeam,
+            foreignTeam,
+            fee,
             date: tr.date || '',
           });
         }
