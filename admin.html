@@ -51,7 +51,7 @@
 </div>
 
 <!-- ===== DASHBOARD ===== -->
-<div id="adminContent" style="display:none;max-width:100vw;overflow-x:hidden" class="dashboard">
+<div id="adminContent" style="display:none" class="dashboard">
 
   <!-- SIDEBAR -->
   <aside class="dash-sidebar" id="dashSidebar">
@@ -119,7 +119,7 @@
   </aside>
 
   <!-- MAIN AREA -->
-  <div class="dash-main" style="overflow-x:hidden;min-width:0">
+  <div class="dash-main" style="min-width:0;width:0;flex:1">
 
     <!-- TOP BAR -->
     <header class="dash-topbar">
@@ -280,7 +280,7 @@
     </section>
 
     <!-- TAB: HABER BOTU -->
-    <section class="dash-tab" id="tabBot" style="overflow-x:hidden;max-width:100%;box-sizing:border-box;width:0;min-width:100%">
+    <section class="dash-tab" id="tabBot">
       <div class="dash-section-header">
         <h2 class="dash-section-title">Haber Botu</h2>
         <span style="font-size:12px;color:var(--ts-muted)">RSS kaynaklarından haber çek, beğendiklerini ekle</span>
@@ -305,7 +305,7 @@
       </div>
 
       <!-- Haber listesi -->
-      <div id="botResults" style="overflow-x:hidden"></div>
+      <div id="botResults"></div>
     </section>
 
     <!-- TAB: TRANSFERLER -->
@@ -983,8 +983,8 @@
         const added   = _botAdded.has(idx);
         const skipped = _botSkipped.has(idx);
         const thumb = item.image
-          ? `<div style="width:64px;min-width:64px;height:64px;border-radius:6px;background:url('${escAttr(item.image)}') center/cover no-repeat;background-color:var(--ts-border)"></div>`
-          : `<div style="width:64px;min-width:64px;height:64px;border-radius:6px;background:var(--ts-border)"></div>`;
+          ? `<img src="${escAttr(item.image)}" style="width:56px;height:56px;border-radius:6px;object-fit:cover;display:block;flex-shrink:0" loading="lazy" />`
+          : `<div style="width:56px;height:56px;border-radius:6px;background:var(--ts-border);flex-shrink:0"></div>`;
 
         const dupBadge = duplicate && !added ? `<span style="color:var(--ts-red);font-size:10px"> · zaten var</span>` : '';
 
@@ -996,7 +996,7 @@
         return `<div class="bot-item" data-idx="${idx}" data-group="${g.key}"
           style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;overflow:hidden;${added || skipped ? 'opacity:0.4;' : ''}">
           <table style="width:100%;border-collapse:collapse;table-layout:fixed"><tbody><tr>
-            <td style="width:60px;padding:8px 8px 8px 10px;vertical-align:middle">${thumb}</td>
+            <td style="width:56px;padding:8px 8px 8px 10px;vertical-align:middle;overflow:visible">${thumb}</td>
             <td style="padding:8px 10px;vertical-align:middle;overflow:hidden">
               <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(item.title)}</div>
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
