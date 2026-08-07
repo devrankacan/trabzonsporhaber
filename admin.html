@@ -996,16 +996,16 @@
         return `<div class="bot-item" data-idx="${idx}" data-group="${g.key}"
           style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;margin-bottom:6px;overflow:hidden;${added || skipped ? 'opacity:0.4;' : ''}">
           <table style="width:100%;border-collapse:collapse;table-layout:fixed"><tbody><tr>
-            <td style="width:64px;padding:10px 6px 10px 10px;vertical-align:middle">${thumb}</td>
-            <td style="padding:10px 6px;vertical-align:middle;overflow:hidden">
-              <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(item.title)}</div>
+            <td style="width:60px;padding:8px 8px 8px 10px;vertical-align:middle">${thumb}</td>
+            <td style="padding:8px 10px;vertical-align:middle;overflow:hidden">
+              <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(item.title)}</div>
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                 <span style="color:var(--ts-red);font-weight:600;font-size:11px">${escHtml(item.source)}</span>
                 ${item.pubDate ? `<span style="font-size:11px;color:var(--ts-muted)">${new Date(item.pubDate).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : ''}
                 ${dupBadge}
               </div>
             </td>
-            <td style="width:96px;padding:10px 10px 10px 6px;vertical-align:middle;text-align:center;white-space:nowrap">${actionBtns}</td>
+            <td style="width:88px;padding:8px 16px 8px 6px;vertical-align:middle;text-align:center;white-space:nowrap">${actionBtns}</td>
           </tr></tbody></table>
         </div>`;
       });
