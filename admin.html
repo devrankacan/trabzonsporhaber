@@ -467,13 +467,6 @@
         <div class="form-message" id="trFormMessage" style="display:none"></div>
       </div>
 
-      <!-- Bot'tan Gelen Transferler -->
-      <div class="dash-section-header" style="margin-top:8px;margin-bottom:12px">
-        <h3 class="dash-section-title" style="font-size:15px">Bot Transferleri</h3>
-        <span style="font-size:12px;color:var(--ts-muted)">Haber botundan gelen transfer haberleri</span>
-      </div>
-      <div id="pendingSection" style="margin-bottom:32px"></div>
-
       <!-- Transfer List -->
       <div class="dash-section-header" style="margin-bottom:12px">
         <h3 class="dash-section-title" style="font-size:15px">Tüm Transferler</h3>
@@ -1264,44 +1257,11 @@
   function botOpenTransfer(idx) {
     const item = _botItems[idx];
     if (!item) return;
-
-    // Pending listesine ekle
-    const pending = JSON.parse(localStorage.getItem('ts_transfers_pending') || '[]');
-    const alreadyExists = pending.some(p => p.newsTitle === item.title);
-    if (!alreadyExists) {
-      pending.unshift({
-        id: Date.now(),
-        newsTitle: item.title,
-        newsLink: item.link || '',
-        newsImage: item.image || '',
-        newsSource: item.source || '',
-        newsDate: item.pubDate || new Date().toISOString(),
-        player: '',
-        fromTeam: '',
-        toTeam: '',
-        foreignTeam: '',
-        fee: '',
-        status: 'iddia',
-        reviewStatus: 'bekleyen', // bekleyen | onaylanan | reddedilen
-        addedAt: new Date().toISOString(),
-      });
-      localStorage.setItem('ts_transfers_pending', JSON.stringify(pending));
-      // Sunucuya da kaydet
-      fetch('/api/ts_transfers_pending', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': 'ee098b74' },
-        body: JSON.stringify(pending)
-      });
-    }
-
-    // Transferler sekmesine geç ve bekleyenleri göster
     showTab('transfers');
     setTimeout(() => {
-      renderPendingTransfers();
-      document.getElementById('pendingSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 300);
-
-    // Botu işaretle
+      toggleTransferForm(true);
+      document.getElementById('trPlayer').value = '';
+    }, 200);
     _botSkipped.add(idx);
     const row = document.querySelector(`.bot-item[data-idx="${idx}"]`);
     if (row) row.style.opacity = '0.5';
@@ -1529,109 +1489,6 @@
     renderTrBotResults();
     document.getElementById('trBotStatus').textContent = `${_trBotItems.length} transfer haberi kaldı`;
   }
-  // ── TRANSFER BOTU SON ──────────────────────────────────────────
-
-  let _pendingCache = null;
-
-  async function getPendingTransfers() {
-    try {
-      const r = await fetch('/api/ts_transfers_pending');
-      _pendingCache = await r.json();
-    } catch(e) { _pendingCache = _pendingCache || []; }
-    return _pendingCache || [];
-  }
-
-  async function savePendingTransfers(list) {
-    _pendingCache = list;
-    await fetch('/api/ts_transfers_pending', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': 'ee098b74' },
-      body: JSON.stringify(list)
-    });
-  }
-
-  async function approvePending(id) {
-    const pending = await getPendingTransfers();
-    const item = pending.find(p => p.id === id);
-    if (!item) return;
-
-    // Transferler listesine ekle
-    const list = getTransfers();
-    const newId = list.length ? Math.max(...list.map(x => x.id || 0)) + 1 : 1;
-    list.unshift({
-      id: newId,
-      player: item.player || '',
-      playerImage: item.playerImage || '',
-      position: item.position || '',
-      fromTeam: item.fromTeam || 'yabanci',
-      toTeam: item.toTeam || 'yabanci',
-      foreignTeam: item.foreignTeam || '',
-      fee: item.fee || '',
-      status: item.status || 'kesinlesti',
-      date: item.date || new Date().toISOString().split('T')[0],
-    });
-    saveTransfers(list);
-    renderAdminTransfers();
-
-    // Pending'den kaldır
-    const updated = pending.filter(p => p.id !== id);
-    await savePendingTransfers(updated);
-    renderPendingTransfers();
-  }
-
-  async function rejectPending(id) {
-    const pending = await getPendingTransfers();
-    const updated = pending.filter(p => p.id !== id);
-    await savePendingTransfers(updated);
-    renderPendingTransfers();
-  }
-
-  async function renderPendingTransfers() {
-    const el = document.getElementById('pendingSection');
-    if (!el) return;
-    el.innerHTML = '<p style="font-size:13px;color:var(--ts-muted);padding:10px 0">Yükleniyor...</p>';
-    const all = await getPendingTransfers();
-
-    const TEAM_NAMES = {
-      trabzonspor:'Trabzonspor', galatasaray:'Galatasaray', fenerbahce:'Fenerbahçe',
-      besiktas:'Beşiktaş', basaksehir:'Başakşehir', antalyaspor:'Antalyaspor',
-      kayserispor:'Kayserispor', alanyaspor:'Alanyaspor', sivasspor:'Sivasspor',
-      konyaspor:'Konyaspor', goztepe:'Göztepe', rizespor:'Çaykur Rizespor',
-      kasimpasa:'Kasımpaşa', yabanci:'Yabancı Kulüp'
-    };
-
-    function teamLabel(key, foreign) {
-      return key === 'yabanci' ? (foreign || 'Yabancı Kulüp') : (TEAM_NAMES[key] || key);
-    }
-
-    const rows = all.map(p => {
-      const photo = p.playerImage
-        ? `<img src="${escAttr(p.playerImage)}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--ts-border)" />`
-        : `<div style="width:52px;height:52px;border-radius:50%;background:var(--ts-border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>`;
-      const from = teamLabel(p.fromTeam, p.fromTeam === 'yabanci' ? p.foreignTeam : '');
-      const to   = teamLabel(p.toTeam,   p.toTeam   === 'yabanci' ? p.foreignTeam : '');
-      const fee  = p.fee ? `<span style="font-size:11px;background:#eaf4ff;color:#1a4a7a;padding:2px 7px;border-radius:10px">${escHtml(p.fee)}</span>` : '';
-      const statusLabel = { kesinlesti:'Kesinleşti', iddia:'İddia', kira:'Kiralık' }[p.status] || p.status;
-      return `
-        <div style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
-          ${photo}
-          <div style="flex:1;overflow:hidden;min-width:0">
-            <div style="font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(p.player || '?')}</div>
-            <div style="font-size:12px;color:var(--ts-muted);margin-top:3px">${escHtml(from)} → ${escHtml(to)} &nbsp;·&nbsp; ${escHtml(statusLabel)} &nbsp;·&nbsp; ${p.date || ''}</div>
-            <div style="margin-top:5px">${fee}</div>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0">
-            <button onclick="approvePending('${escAttr(String(p.id))}')" style="padding:6px 14px;background:#1a6e3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">✓ Ekle</button>
-            <button onclick="rejectPending('${escAttr(String(p.id))}')" style="padding:6px 10px;background:transparent;border:1px solid #e74c3c;color:#e74c3c;border-radius:6px;font-size:12px;cursor:pointer">✗ Sil</button>
-          </div>
-        </div>`;
-    });
-
-    el.innerHTML = all.length === 0
-      ? '<p style="font-size:13px;color:var(--ts-muted);padding:10px 0">Bekleyen transfer yok. <code>node fetch-transfers.js</code> çalıştırın.</p>'
-      : `<div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--ts-muted)">${all.length} transfer bekliyor</div>` + rows.join('');
-  }
-
   // ── HABER BOTU SON ─────────────────────────────────────────────
 
   async function syncToServer() {
@@ -1666,7 +1523,7 @@
     if (navEl) navEl.classList.add('active');
     document.getElementById('dashTopbarTitle').textContent = TAB_TITLES[name] || '';
     if (name === 'standings') { initStandingsLogoPreview(); }
-    if (name === 'transfers') { initTransfersLogoPreview(); renderPendingTransfers(); }
+    if (name === 'transfers') { initTransfersLogoPreview(); }
     if (name === 'list') { renderAdminList(); }
     if (name === 'bot') { botInit(); }
     if (name === 'slider') { renderSliderOrder(); }

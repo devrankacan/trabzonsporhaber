@@ -20,7 +20,7 @@ if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 const API_KEY = 'ee098b74';
 
 const ALLOWED_KEYS = [
-  'ts_haberler', 'ts_transfers', 'ts_transfers_pending', 'ts_standings', 'ts_standings_logo', 'ts_transfers_logo', 'ts_logos',
+  'ts_haberler', 'ts_transfers', 'ts_standings', 'ts_standings_logo', 'ts_transfers_logo', 'ts_logos',
   'ts_users', 'ts_foreign_logos', 'ts_site_logo', 'ts_team_banners',
   'ts_comments', 'ts_views', 'ts_favicon', 'ts_og_image'
 ];
