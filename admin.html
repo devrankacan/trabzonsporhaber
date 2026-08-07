@@ -454,7 +454,17 @@
         <div class="form-message" id="trFormMessage" style="display:none"></div>
       </div>
 
+      <!-- Bot'tan Gelen Transferler -->
+      <div class="dash-section-header" style="margin-top:8px;margin-bottom:12px">
+        <h3 class="dash-section-title" style="font-size:15px">Bot Transferleri</h3>
+        <span style="font-size:12px;color:var(--ts-muted)">Haber botundan gelen transfer haberleri</span>
+      </div>
+      <div id="pendingSection" style="margin-bottom:32px"></div>
+
       <!-- Transfer List -->
+      <div class="dash-section-header" style="margin-bottom:12px">
+        <h3 class="dash-section-title" style="font-size:15px">Tüm Transferler</h3>
+      </div>
       <div id="adminTransferList" class="admin-news-list">
         <p class="no-news-text">Henüz transfer eklenmedi.</p>
       </div>
@@ -1242,39 +1252,146 @@
     const item = _botItems[idx];
     if (!item) return;
 
-    // Transfer sekmesine geç
+    // Pending listesine ekle
+    const pending = JSON.parse(localStorage.getItem('ts_transfers_pending') || '[]');
+    const alreadyExists = pending.some(p => p.newsTitle === item.title);
+    if (!alreadyExists) {
+      pending.unshift({
+        id: Date.now(),
+        newsTitle: item.title,
+        newsLink: item.link || '',
+        newsImage: item.image || '',
+        newsSource: item.source || '',
+        newsDate: item.pubDate || new Date().toISOString(),
+        player: '',
+        fromTeam: '',
+        toTeam: '',
+        foreignTeam: '',
+        fee: '',
+        status: 'iddia',
+        reviewStatus: 'bekleyen', // bekleyen | onaylanan | reddedilen
+        addedAt: new Date().toISOString(),
+      });
+      localStorage.setItem('ts_transfers_pending', JSON.stringify(pending));
+      // Sunucuya da kaydet
+      fetch('/api/ts_transfers_pending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': 'ee098b74' },
+        body: JSON.stringify(pending)
+      });
+    }
+
+    // Transferler sekmesine geç ve bekleyenleri göster
     showTab('transfers');
-
-    // Kısa gecikmeyle formu doldur (sekme geçişi animasyonu için)
     setTimeout(() => {
-      // Formu sıfırla
-      const playerInput = document.getElementById('trPlayer');
-      const fromInput   = document.getElementById('trFrom');
-      const toInput     = document.getElementById('trTo');
-      const feeInput    = document.getElementById('trFee');
+      renderPendingTransfers();
+      document.getElementById('pendingSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
 
-      if (playerInput) { playerInput.value = ''; playerInput.focus(); }
-      if (fromInput)   fromInput.value = '';
-      if (toInput)     toInput.value   = '';
-      if (feeInput)    feeInput.value  = '';
+    // Botu işaretle
+    _botSkipped.add(idx);
+    const row = document.querySelector(`.bot-item[data-idx="${idx}"]`);
+    if (row) row.style.opacity = '0.5';
+  }
 
-      // Haber başlığını not olarak göster
+  function getPendingTransfers() {
+    try { return JSON.parse(localStorage.getItem('ts_transfers_pending') || '[]'); }
+    catch(e) { return []; }
+  }
+
+  function savePendingTransfers(list) {
+    localStorage.setItem('ts_transfers_pending', JSON.stringify(list));
+    fetch('/api/ts_transfers_pending', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': 'ee098b74' },
+      body: JSON.stringify(list)
+    });
+  }
+
+  function approvePending(id) {
+    const pending = getPendingTransfers();
+    const item = pending.find(p => p.id === id);
+    if (!item) return;
+
+    // Kaydet modalını aç
+    showTab('transfers');
+    setTimeout(() => {
+      toggleTransferForm(true);
+      document.getElementById('trPlayer').value = item.player || '';
+      document.getElementById('trFrom').value = item.fromTeam || '';
+      document.getElementById('trTo').value = item.toTeam || '';
+      document.getElementById('trForeignTeam').value = item.foreignTeam || '';
+      document.getElementById('trFee').value = item.fee || '';
+      document.getElementById('trStatus').value = item.status || 'kesinlesti';
+
+      // Hint göster
       const card = document.getElementById('transferFormCard');
       if (card) {
-        // Haber kaynağı bilgisini geçici olarak göster
         let hint = card.querySelector('.bot-transfer-hint');
-        if (!hint) {
-          hint = document.createElement('div');
-          hint.className = 'bot-transfer-hint';
-          hint.style.cssText = 'background:#eaf4ff;border:1px solid #b3d4ff;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#1a4a7a';
-          card.prepend(hint);
-        }
-        hint.innerHTML = `<strong>📰 Haber:</strong> ${item.title}<br><a href="${item.link||'#'}" target="_blank" style="color:#1a4a7a">Haberi aç →</a>`;
+        if (!hint) { hint = document.createElement('div'); hint.className = 'bot-transfer-hint'; card.prepend(hint); }
+        hint.style.cssText = 'background:#eaf4ff;border:1px solid #b3d4ff;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#1a4a7a';
+        hint.innerHTML = `<strong>📰</strong> ${escHtml(item.newsTitle)} <a href="${escAttr(item.newsLink)}" target="_blank" style="color:#1a4a7a">→</a>`;
       }
 
-      // Formu ekrana kaydır
-      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 300);
+      // Onaylandı olarak işaretle
+      item.reviewStatus = 'onaylanan';
+      savePendingTransfers(pending);
+      renderPendingTransfers();
+      card?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+  }
+
+  function rejectPending(id) {
+    const pending = getPendingTransfers();
+    const item = pending.find(p => p.id === id);
+    if (!item) return;
+    item.reviewStatus = 'reddedilen';
+    savePendingTransfers(pending);
+    renderPendingTransfers();
+  }
+
+  function deletePending(id) {
+    const pending = getPendingTransfers().filter(p => p.id !== id);
+    savePendingTransfers(pending);
+    renderPendingTransfers();
+  }
+
+  function renderPendingTransfers() {
+    const el = document.getElementById('pendingSection');
+    if (!el) return;
+    const all = getPendingTransfers();
+    const groups = { bekleyen: [], onaylanan: [], reddedilen: [] };
+    all.forEach(p => { if (groups[p.reviewStatus]) groups[p.reviewStatus].push(p); });
+
+    function groupHtml(title, color, items, showActions) {
+      return `<div style="margin-bottom:20px">
+        <div style="font-weight:700;font-size:14px;color:${color};margin-bottom:8px;display:flex;align-items:center;gap:8px">
+          ${title} <span style="font-size:12px;font-weight:400;color:var(--ts-muted)">${items.length}</span>
+        </div>
+        ${items.length === 0 ? `<p style="font-size:13px;color:var(--ts-muted);padding:10px 0">Yok</p>` :
+          items.map(p => `
+            <div style="background:var(--ts-card);border:1px solid var(--ts-border);border-radius:10px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
+              ${p.newsImage ? `<img src="${escAttr(p.newsImage)}" style="width:52px;height:52px;border-radius:6px;object-fit:cover;flex-shrink:0" />` : `<div style="width:52px;height:52px;border-radius:6px;background:var(--ts-border);flex-shrink:0"></div>`}
+              <div style="flex:1;overflow:hidden">
+                <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(p.newsTitle)}</div>
+                <div style="font-size:11px;color:var(--ts-muted);margin-top:3px">${escHtml(p.newsSource)} · ${p.newsDate ? new Date(p.newsDate).toLocaleDateString('tr-TR') : ''}</div>
+              </div>
+              <div style="display:flex;gap:6px;flex-shrink:0">
+                ${showActions ? `
+                  <button onclick="approvePending(${p.id})" style="padding:5px 12px;background:#1a6e3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">✓ Onayla</button>
+                  <button onclick="rejectPending(${p.id})" style="padding:5px 10px;background:transparent;border:1px solid #e74c3c;color:#e74c3c;border-radius:6px;font-size:12px;cursor:pointer">✗ Reddet</button>
+                ` : `
+                  <button onclick="deletePending(${p.id})" style="padding:5px 10px;background:transparent;border:1px solid #ccc;color:#888;border-radius:6px;font-size:11px;cursor:pointer">Sil</button>
+                `}
+              </div>
+            </div>`).join('')}
+      </div>`;
+    }
+
+    el.innerHTML =
+      groupHtml('🕐 Bekleyen', '#e67e22', groups.bekleyen, true) +
+      groupHtml('✓ Onaylanan', '#27ae60', groups.onaylanan, false) +
+      groupHtml('✗ Reddedilen', '#e74c3c', groups.reddedilen, false);
   }
 
   // ── HABER BOTU SON ─────────────────────────────────────────────
@@ -1311,7 +1428,7 @@
     if (navEl) navEl.classList.add('active');
     document.getElementById('dashTopbarTitle').textContent = TAB_TITLES[name] || '';
     if (name === 'standings') { initStandingsLogoPreview(); }
-    if (name === 'transfers') { initTransfersLogoPreview(); }
+    if (name === 'transfers') { initTransfersLogoPreview(); renderPendingTransfers(); }
     if (name === 'list') { renderAdminList(); }
     if (name === 'bot') { botInit(); }
     if (name === 'slider') { renderSliderOrder(); }
